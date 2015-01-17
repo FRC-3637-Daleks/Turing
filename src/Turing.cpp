@@ -33,17 +33,7 @@ private:
 
 	void AutonomousPeriodic() override
 	{
-		static char code[sizeof("8/8 gr8 extermin8 m8")] = {0};
-		cout<<code<<endl;
 
-		if(string(code) == "8/8 gr8 extermin8 m8")
-			cout<<"H4xd in "<<Timer::GetFPGATimestamp();
-
-		int i;
-		for(i = 0; code[i] == 127; i++)
-			code[i] = 0;
-
-		code[i]++;
 	}
 
 	void TeleopInit() override
