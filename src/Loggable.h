@@ -55,7 +55,6 @@ public:
 	/// Pushes a value to buf and logs current buffer if full capacity
 	const int Log() override;
 
-private:
 	/// Logs whatever is in buf
 	const int logCurrent();
 };

@@ -34,3 +34,19 @@ ofstream& FileLogger::makeLogStream(const string &file)
 	outStreams.push_back(new ofstream(file, std::ios_base::binary));
 	return *outStreams.back();
 }
+
+void FileLogger::logText(const string &text)
+{
+	doubleBuffer[writer]<<text<<endl;
+}
+
+const int FileLogger::logCurrent()
+{
+	writer = !writer;
+	doubleBuffer[!writer].get(*stateOut.rdbuf());
+	stateOut.flush();
+	return 0;
+}
+
+
+
