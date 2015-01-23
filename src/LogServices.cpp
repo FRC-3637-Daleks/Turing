@@ -10,6 +10,7 @@
 
 LogService::~LogService()  // Deallocates memory
 {
+	thread.Stop();
 	for(auto i = logObjects.begin(); i != logObjects.end(); i++)
 		delete *i;
 }
@@ -21,6 +22,12 @@ const int LogService::LogAll()
 		ret |= (*i)->Log();
 
 	return ret;
+}
+
+FileLogger::FileLogger(const string &file, const string &command): LogService(file.c_str()), writer(true)
+{
+	createLogDir(command);
+	stateOut.open(file, std::ios_base::out);
 }
 
 FileLogger::~FileLogger()
@@ -35,9 +42,19 @@ ofstream& FileLogger::makeLogStream(const string &file)
 	return *outStreams.back();
 }
 
+void FileLogger::createLogDir(const string &command)
+{
+	system(command.c_str());
+}
+
 void FileLogger::logText(const string &text)
 {
 	doubleBuffer[writer]<<text<<endl;
+}
+
+ostream& FileLogger::logText()
+{
+	return doubleBuffer[writer];
 }
 
 const int FileLogger::logCurrent()

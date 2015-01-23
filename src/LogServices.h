@@ -11,6 +11,7 @@
 #include <sstream>
 
 #include "Loggable.h"
+#include "Task.h"
 
 using std::vector;
 
@@ -23,9 +24,11 @@ class LogService
 private:
 	vector<Loggable *> logObjects;
 	int framesUntilWrite;
+	Task thread;
 
 public:
-	LogService(const int frames=20): framesUntilWrite(frames) {};
+	LogService(const char * threadName, const int frames=20):
+		framesUntilWrite(frames), thread(threadName, FUNCPTR(&LogService::LogAll)) {thread.Start(uint32_t(this));};
 	virtual ~LogService();
 
 protected:
@@ -33,27 +36,44 @@ protected:
 	virtual const int logCurrent()=0;
 
 public:
+	virtual void createLogDir(const string &command)=0;
+
 	template<class SUBSYSTEM_CLASS>
 	void addNumericLog(SUBSYSTEM_CLASS * const obj, double (SUBSYSTEM_CLASS::*func)(), const string &file);
+
+	void addNumericLog(std::function<double(void)> func, const string &file);
 
 	template<class SUBSYSTEM_CLASS>
 	void addBooleanLog(SUBSYSTEM_CLASS * const obj, bool (SUBSYSTEM_CLASS::*func)(), const string &file);
 
+	void addBooleanLog(std::function<bool(void)> func, const string &file);
+
 	virtual void logText(const string &text)=0;
+	virtual ostream& logText()=0;
 
 	virtual const int LogAll();
 };
 
+inline void LogService::addNumericLog(std::function<double(void)> func, const string &file)
+{
+	logObjects.push_back(new NumericLog(makeLogStream(file), func, framesUntilWrite*sizeof(double)));
+}
+
 template<class SUBSYSTEM_CLASS>
 void LogService::addNumericLog(SUBSYSTEM_CLASS * const obj, double (SUBSYSTEM_CLASS::*func)(), const string &file)
 {
-	logObjects.push_back(new NumericLog(makeLogStream(file), std::bind(func, obj), framesUntilWrite*sizeof(double)));
+	addNumericLog(std::bind(func, obj), file);
+}
+
+inline void LogService::addBooleanLog(std::function<bool(void)> func, const string &file)
+{
+	logObjects.push_back(new BooleanLog(makeLogStream(file), func, framesUntilWrite/8));
 }
 
 template<class SUBSYSTEM_CLASS>
 void LogService::addBooleanLog(SUBSYSTEM_CLASS * const obj, bool (SUBSYSTEM_CLASS::*func)(), const string &file)
 {
-	logObjects.push_back(new BooleanLog(makeLogStream(file), std::bind(func, obj), framesUntilWrite/8));
+	addBooleanLog(std::bind(func, obj), file);
 }
 
 using std::ofstream;
@@ -69,11 +89,13 @@ private:
 	bool writer;
 
 public:
-	FileLogger(const string file): stateOut(file, std::ios_base::out), writer(true) {};
+	FileLogger(const string &file, const string &command);
 	virtual ~FileLogger();
 
 public:
+	void createLogDir(const string &command) override;
 	virtual void logText(const string &text) override;
+	virtual ostream& logText() override;
 
 protected:
 	virtual ofstream& makeLogStream(const string &file) override;
