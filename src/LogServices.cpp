@@ -29,6 +29,7 @@ const int LogService::LogAll()
 	for(auto i = logObjects.begin(); i != logObjects.end(); i++)
 		ret |= (*i)->Log();
 
+	frames++;
 	return ret;
 }
 
@@ -40,29 +41,40 @@ FileLogger::FileLogger(const string &file, const string &command): LogService(fi
 
 FileLogger::~FileLogger()
 {
+	logCurrent();
+	logText()<<"[INFO] Closing file output streams"<<endl;
 	for(auto i = outStreams.begin(); i != outStreams.end(); i++)
+	{
 		delete *i;
+	}
+	logText()<<"[INFO] Deleting LogService"<<endl;
 }
 
 ofstream& FileLogger::makeLogStream(const string &file)
 {
 	outStreams.push_back(new ofstream(file, std::ios_base::binary));
+	logText()<<"[INFO] New log stream opened at "<<file<<endl;
 	return *outStreams.back();
 }
 
 void FileLogger::createLogDir(const string &command)
 {
-	system(command.c_str());
+	if(system(command.c_str()) >= 0)
+		logText()<<"[INFO] `"<<command<<"` Directory made successfully"<<endl;
 }
 
 void FileLogger::logText(const string &text)
 {
-	doubleBuffer[writer]<<text<<endl;
+	doubleBuffer[writer].fill('0');
+	doubleBuffer[writer].width(FRAME_TEXT_WIDTH);
+	doubleBuffer[writer]<<currentFrame()<<": "<<text<<endl;
 }
 
 ostream& FileLogger::logText()
 {
-	return doubleBuffer[writer];
+	doubleBuffer[writer].fill('0');
+	doubleBuffer[writer].width(FRAME_TEXT_WIDTH);
+	return doubleBuffer[writer]<<currentFrame()<<": ";
 }
 
 const int FileLogger::logCurrent()

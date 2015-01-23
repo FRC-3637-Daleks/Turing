@@ -11,8 +11,8 @@
 #include <sstream>
 #include <thread>
 
+#include "Config.h"
 #include "Loggable.h"
-#include "Task.h"
 
 using std::vector;
 using std::thread;
@@ -28,13 +28,14 @@ private:
 
 private:
 	vector<Loggable *> logObjects;
-	int framesUntilWrite;
+	unsigned int framesUntilWrite;
+	unsigned int frames;
 	thread logThread;
 	bool running;
 
 public:
-	LogService(const char * threadName, const int frames=20):
-		framesUntilWrite(frames), logThread(&LogService::LoggingThread, this), running(true) {logThread.detach();};
+	LogService(const char * threadName, const unsigned int frames=DEFAULT_BUFFER_FRAMES):
+		framesUntilWrite(frames), frames(0), logThread(&LogService::LoggingThread, this), running(true) {logThread.detach();};
 	virtual ~LogService();
 
 protected:
@@ -43,6 +44,8 @@ protected:
 
 public:
 	const bool isRunning() const {return running;};
+
+	const unsigned int currentFrame() const {return frames;};
 
 	virtual void createLogDir(const string &command)=0;
 

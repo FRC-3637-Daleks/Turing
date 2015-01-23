@@ -4,12 +4,14 @@
 #define LOGGER_H_
 
 #include <stdlib.h>
-#include "LogServices.h"
 #include <cctype>
 #include <time.h>
 #include <algorithm>
 #include <cstdlib>
 #include <memory>
+
+#include "Config.h"
+#include "LogServices.h"
 
 using std::shared_ptr;
 
@@ -21,27 +23,12 @@ public:
 };
 */
 
-class LEVEL_t {
-public:
-	enum {EMER=0, ALERT, CRIT, ERR, WARN, NOTICE, INFO, DEBUG};
-	static const char* text[];
-};
-
-class SUBSYSTEM {
-public:
-	enum {TEST = 0};
-	static const char* text[];
-};
 
 class Logger {
 private:
 	static shared_ptr<LogService> service;
 	static std::function<LogService * ()> factory;
 	static string path;
-	static unsigned int frame;
-
-public:
-//	static const int LogFrame();
 
 public:
 	static const string GetLogPath();
