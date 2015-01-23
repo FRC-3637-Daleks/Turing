@@ -7,4 +7,6 @@
 
 #include "Hardware.h"
 
+#include "Logger.h"
+
 #endif

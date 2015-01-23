@@ -4,22 +4,26 @@ using namespace std;
 
 class Turing: public IterativeRobot
 {
+private:
+	PowerDistributionPanel PDP;
+
 public:
 	Turing()
 	{
-		cout<<"Turing object constructed"<<endl;
+		Logger::MakeLogValue(COMPONENT::TEST, &PDP, &PowerDistributionPanel::GetVoltage);
+		Logger::LogState("GENERAL", LEVEL_t::DEBUG, "Turing object constructed");
 		cout<<"Built: "<<__DATE__<<' '<<__TIME__<<endl;
 	}
 
 private:
 	void RobotInit() override
 	{
-		cout<<"Robot Init Complete"<<endl;
+		Logger::LogState("GENERAL", LEVEL_t::DEBUG, "Robot init complete");
 	}
 
 	void DisabledInit() override
 	{
-		cout<<"Disabled Init Complete"<<endl;
+		Logger::LogState("GENERAL", LEVEL_t::DEBUG, "Disabled Init Complete");
 	}
 
 	void DisabledPeriodic() override
@@ -28,7 +32,7 @@ private:
 
 	void AutonomousInit() override
 	{
-		cout<<"Autonomous Init Complete, ready to crack enigma."<<endl;
+		Logger::LogState("GENERAL", LEVEL_t::DEBUG, "Autonomous Init Complete, ready to crack enigma.");
 	}
 
 	void AutonomousPeriodic() override
@@ -38,7 +42,7 @@ private:
 
 	void TeleopInit() override
 	{
-		cout<<"Teleop Init Complete"<<endl;
+		Logger::LogState("GENERAL", LEVEL_t::DEBUG, "Teleop Init Complete");
 	}
 
 	void TeleopPeriodic() override
@@ -48,7 +52,7 @@ private:
 
 	void TestInit() override
 	{
-		cout<<"Test Init Complete"<<endl;
+		Logger::LogState("GENERAL", LEVEL_t::DEBUG, "Test Init Complete");
 	}
 
 	void TestPeriodic() override
