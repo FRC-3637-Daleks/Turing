@@ -9,11 +9,13 @@
 #define SRC_LOGSERVICES_H_
 
 #include <sstream>
+#include <thread>
 
 #include "Loggable.h"
 #include "Task.h"
 
 using std::vector;
+using std::thread;
 
 /** Pure virtual base class for managing logging
  * Holds a vector of log objects. Derived classes should maintain data streams
@@ -22,13 +24,17 @@ using std::vector;
 class LogService
 {
 private:
+	static void LoggingThread(LogService * const ls);
+
+private:
 	vector<Loggable *> logObjects;
 	int framesUntilWrite;
-	Task thread;
+	thread logThread;
+	bool running;
 
 public:
 	LogService(const char * threadName, const int frames=20):
-		framesUntilWrite(frames), thread(threadName, FUNCPTR(&LogService::LogAll)) {thread.Start(uint32_t(this));};
+		framesUntilWrite(frames), logThread(&LogService::LoggingThread, this), running(true) {logThread.detach();};
 	virtual ~LogService();
 
 protected:
@@ -36,6 +42,8 @@ protected:
 	virtual const int logCurrent()=0;
 
 public:
+	const bool isRunning() const {return running;};
+
 	virtual void createLogDir(const string &command)=0;
 
 	template<class SUBSYSTEM_CLASS>

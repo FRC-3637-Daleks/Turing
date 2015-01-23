@@ -7,10 +7,18 @@
 
 #include "LogServices.h"
 
+void LogService::LoggingThread(LogService * const ls)
+{
+	if(ls == nullptr)
+		return;
+	int failed = 0;
+	while(ls->isRunning() && failed >= 0) failed = ls->LogAll();
+}
 
 LogService::~LogService()  // Deallocates memory
 {
-	thread.Stop();
+	running = false;
+	if(logThread.joinable()) logThread.join();
 	for(auto i = logObjects.begin(); i != logObjects.end(); i++)
 		delete *i;
 }
