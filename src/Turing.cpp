@@ -10,6 +10,7 @@ private:
 public:
 	Turing()
 	{
+		cout<<"Starting Robot Program"<<endl;
 		Logger::MakeLogValue("TIME", "BOOT_TICKS", &GetTime);
 		Logger::MakeLogValue("VOLTAGE", &PDP, &PowerDistributionPanel::GetVoltage);
 		Logger::LogState("GENERAL", LEVEL_t::DEBUG, "Turing object constructed");

@@ -3,7 +3,7 @@
 
 
 #define STATE_OUT_FILE_NAME "states.txt"
-#define LOG_HOME "/home/lvuser/log"
+#define LOG_HOME "/home/lvuser/log/"
 
 #define DEFAULT_BUFFER_FRAMES 20
 

@@ -37,8 +37,8 @@ private:
 	bool running;
 
 public:
-	LogService(const char * threadName, const unsigned int frames=DEFAULT_BUFFER_FRAMES):
-		framesUntilWrite(frames), frames(0), logThread(&LogService::LoggingThread, this), running(true) {logThread.detach();};
+	LogService(const char * threadName, const unsigned int f=DEFAULT_BUFFER_FRAMES):
+		framesUntilWrite(f), frames(0), logThread(&LogService::LoggingThread, this), running(true) {logThread.detach();};
 	virtual ~LogService();
 
 protected:

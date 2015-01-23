@@ -71,7 +71,7 @@ public:
 	 * Should be invoked as such
 	 * BooleanLog myLogObj(std::ofstream("filename", std::ios_base::binary), std::bind(ObjectType::functionName,&myObject), 4)
 	 */
-	BooleanLog(ostream &o, auto f, const int flushVal=4):
+	BooleanLog(ostream &o, auto f, const int flushVal=30):
 		Loggable(o), fn(f), flushFrames(flushVal) {buf.reserve(flushFrames);};
 	virtual ~BooleanLog() {logCurrent();};
 

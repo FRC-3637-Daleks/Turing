@@ -10,8 +10,12 @@
 void LogService::LoggingThread(LogService * const ls)
 {
 	if(ls == nullptr)
+	{
+		std::cout<<"Logging thread passed with null LogService"<<std::endl;
 		return;
+	}
 	int failed = 0;
+	std::cout<<"Logging thread created successfully, entering infinite loop"<<std::endl;
 	while(ls->isRunning() && failed >= 0) failed = ls->LogAll();
 }
 
