@@ -40,7 +40,7 @@ class NumericLog: public Loggable
 private:
 	std::function<double(void)> fn;		///< Function called by Log which returns the double being logged.
 	vector<double> buf;					///< Buffer of values returned by fn
-	unsigned int flushValue;			///< Size at which buf is emptied and sent to be logged to file
+	unsigned int flushFrames;			///< Size at which buf is emptied and sent to be logged to file
 
 public:
 	/** Constructs from an output stream, function object, and flush value
@@ -48,7 +48,7 @@ public:
 	 * NumericLog myLogObj(std::ofstream("filename", std::ios_base::binary), std::bind(ObjectType::functionName, &myObject), 10)
 	 */
 	NumericLog(ostream &o, auto f, const int flushVal=30):
-		Loggable(o), fn(f), flushValue(flushVal) {buf.reserve(flushValue);};
+		Loggable(o), fn(f), flushFrames(flushVal) {buf.reserve(flushFrames);};
 	virtual ~NumericLog() {logCurrent();};
 
 public:
@@ -63,9 +63,8 @@ class BooleanLog: public Loggable
 {
 private:
 	std::function<bool(void)> fn;		///< Function called by Log which returns the bool being logged.
-	vector<char> buf;					///< Buffer of groups of 8 values returned by fn
-	unsigned int flushBytes;			///< Size at which buf is emptied and sent to be logged to file
-	uint8_t curPos;						///< Position current bit is set in the buf
+	vector<bool> buf;					///< Buffer of groups of 8 values returned by fn
+	unsigned int flushFrames;			///< Size at which buf is emptied and sent to be logged to file
 
 public:
 	/** Constructs from an output stream, function object, and flush value
@@ -73,7 +72,7 @@ public:
 	 * BooleanLog myLogObj(std::ofstream("filename", std::ios_base::binary), std::bind(ObjectType::functionName,&myObject), 4)
 	 */
 	BooleanLog(ostream &o, auto f, const int flushVal=4):
-		Loggable(o), fn(f), flushBytes(flushVal), curPos(0) {buf.reserve(flushBytes);};
+		Loggable(o), fn(f), flushFrames(flushVal) {buf.reserve(flushFrames);};
 	virtual ~BooleanLog() {logCurrent();};
 
 public:

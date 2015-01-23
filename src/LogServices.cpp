@@ -53,7 +53,6 @@ FileLogger::~FileLogger()
 ofstream& FileLogger::makeLogStream(const string &file)
 {
 	outStreams.push_back(new ofstream(file, std::ios_base::binary));
-	logText()<<"[INFO] New log stream opened at "<<file<<endl;
 	return *outStreams.back();
 }
 

@@ -9,6 +9,8 @@
 
 #define FRAME_TEXT_WIDTH 5
 
+#define DEBUG_MODE
+
 
 class LEVEL_t {
 public:

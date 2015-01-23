@@ -16,6 +16,9 @@
 
 using std::vector;
 using std::thread;
+using std::ofstream;
+using std::stringstream;
+using std::endl;
 
 /** Pure virtual base class for managing logging
  * Holds a vector of log objects. Derived classes should maintain data streams
@@ -68,6 +71,7 @@ public:
 inline void LogService::addNumericLog(std::function<double(void)> func, const string &file)
 {
 	logObjects.push_back(new NumericLog(makeLogStream(file), func, framesUntilWrite*sizeof(double)));
+	logText()<<"[INFO] New Numeric Log stream opened at "<<file<<endl;
 }
 
 template<class SUBSYSTEM_CLASS>
@@ -79,6 +83,7 @@ void LogService::addNumericLog(SUBSYSTEM_CLASS * const obj, double (SUBSYSTEM_CL
 inline void LogService::addBooleanLog(std::function<bool(void)> func, const string &file)
 {
 	logObjects.push_back(new BooleanLog(makeLogStream(file), func, framesUntilWrite/8));
+	logText()<<"[INFO] New Boolean Log stream opened at "<<file<<endl;
 }
 
 template<class SUBSYSTEM_CLASS>
@@ -86,10 +91,6 @@ void LogService::addBooleanLog(SUBSYSTEM_CLASS * const obj, bool (SUBSYSTEM_CLAS
 {
 	addBooleanLog(std::bind(func, obj), file);
 }
-
-using std::ofstream;
-using std::stringstream;
-using std::endl;
 
 class FileLogger: public LogService
 {
@@ -108,12 +109,24 @@ public:
 	virtual void logText(const string &text) override;
 	virtual ostream& logText() override;
 
-protected:
+public:
 	virtual const int LogAll() override;
+
+protected:
 	virtual ofstream& makeLogStream(const string &file) override;
 	virtual const int logCurrent() override;
 };
 
+/*
+class BinaryFileLogger: public FileLogger
+{
+public:
+	BinaryFileLogger(const string &file, const string &command): FileLogger(file, command) {};
+	virtual ~BinaryFileLogger() {};
 
+protected:
+	virtual ostream& makeLogStream(const string &file) override;
+};
+*/
 
 #endif /* SRC_LOGSERVICES_H_ */
