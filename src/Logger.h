@@ -30,12 +30,6 @@ public:
 	static const char* text[];
 };
 
-class COMPONENT {
-public:
-	enum {TEST = 0};
-	static const char* text[];
-};
-
 class Logger {
 private:
 	static LogService *service;
@@ -56,6 +50,7 @@ public:
 private:
 	static LogService &GetInstance();
 
+public:
 	static const int MakeLogValue(const char * const SUBS, const char * const COMP, std::function<double(void)> fn) {
 		GetInstance().addNumericLog(fn, MakeLogFileName(string(SUBS), string(COMP), string("double")));
 		return 0;
@@ -85,43 +80,57 @@ public:
 public:
 	static const int LogState(const char * const SERV, const int LEV, const char * const text);
 
-	static const int MakeLogValue(const int SUBS, const int COMP, std::function<double(void)> fn)
+	static const int MakeLogValue(const int SUBS, const char * const COMP, std::function<double(void)> fn)
 	{
-		return MakeLogValue(SUBSYSTEM::text[SUBS], COMPONENT::text[COMP], fn);
+		return MakeLogValue(SUBSYSTEM::text[SUBS], COMP, fn);
 	}
 
 	template<class SUB_TYPE>
-	static const int MakeLogValue(const int SUBS, const int COMP, SUB_TYPE *obj, double (SUB_TYPE::* fn)())
+	static const int MakeLogValue(const int SUBS, const char * const COMP, SUB_TYPE *obj, double (SUB_TYPE::* fn)())
 	{
-		return MakeLogValue<SUB_TYPE>(SUBSYSTEM::text[SUBS], COMPONENT::text[COMP], obj, fn);
+		return MakeLogValue<SUB_TYPE>(SUBSYSTEM::text[SUBS], COMP, obj, fn);
 	}
 
+	template<class SUB_TYPE>
+	static const int MakeLogValue(const char * const COMP, SUB_TYPE *obj, double (SUB_TYPE::* fn)())
+	{
+		string str(typeid(SUB_TYPE).name());
+		for(auto i = str.begin(); i != str.end(); i++) *i = toupper(*i);   // Makes name upper case
+		return MakeLogValue(str.c_str(), COMP, obj, fn);
+	}
+
+	/// The subsystem used must have a static function GetComponenentName which returns a c-string based on a id
 	template<class SUB_TYPE>
 	static const int MakeLogValue(const int COMP, SUB_TYPE *obj, double (SUB_TYPE::* fn)())
 	{
-		string str(typeid(SUB_TYPE).name());
-		for(auto i = str.begin(); i != str.end(); i++) *i = toupper(*i);   // Makes name upper case
-		return MakeLogValue(str.c_str(), COMPONENT::text[COMP], obj, fn);
+		return MakeLogValue(SUB_TYPE::GetComponentName(COMP), obj, fn);
 	}
 
-	static const int MakeLogBoolean(const int SUBS, const int COMP, std::function<double(void)> fn)
+	static const int MakeLogBoolean(const int SUBS, const char * const COMP, std::function<double(void)> fn)
 	{
-		return MakeLogBoolean(SUBSYSTEM::text[SUBS], COMPONENT::text[COMP], fn);
+		return MakeLogBoolean(SUBSYSTEM::text[SUBS], COMP, fn);
 	}
 
 	template<class SUB_TYPE>
-	static const int MakeLogBoolean(const int SUBS, const int COMP, SUB_TYPE *obj, double (SUB_TYPE::*fn)())
+	static const int MakeLogBoolean(const int SUBS, const char * const COMP, SUB_TYPE *obj, double (SUB_TYPE::*fn)())
 	{
-		return MakeLogBoolean<SUB_TYPE>(SUBSYSTEM::text[SUBS], COMPONENT::text[COMP], obj, fn);
+		return MakeLogBoolean<SUB_TYPE>(SUBSYSTEM::text[SUBS], COMP, obj, fn);
 	}
 
 	template<class SUB_TYPE>
-	static const int MakeLogBoolean(const int COMP, SUB_TYPE *obj, double (SUB_TYPE::* fn)())
+	static const int MakeLogBoolean(const char * const COMP, SUB_TYPE *obj, double (SUB_TYPE::* fn)())
 	{
 		string str(typeid(SUB_TYPE).name());
 		for(auto i = str.begin(); i != str.end(); i++) *i = toupper(*i);   // Makes name upper case
-		return MakeLogBoolean(str, COMPONENT::text[COMP], obj, fn);
+		return MakeLogBoolean(str, COMP, obj, fn);
 	}
+
+	template<class SUB_TYPE>
+	static const int MakeLogBoolean(const int COMP, SUB_TYPE *obj, double (SUB_TYPE::*fn)())
+	{
+		return MakeLogBoolean(SUB_TYPE::GetComponenentName(COMP), obj, fn);
+	}
+
 };
 
 #endif /* LOGGER_H_ */

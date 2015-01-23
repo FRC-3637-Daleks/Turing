@@ -27,9 +27,6 @@ const char* SUBSYSTEM::text[] = {
 		"TEST"
 };
 
-const char* COMPONENT::text[] = {
-		"TEST"
-};
 
 /*
 const int Logger::LogFrame()

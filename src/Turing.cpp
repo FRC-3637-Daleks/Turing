@@ -10,7 +10,7 @@ private:
 public:
 	Turing()
 	{
-		Logger::MakeLogValue(COMPONENT::TEST, &PDP, &PowerDistributionPanel::GetVoltage);
+		Logger::MakeLogValue("VOLTAGE", &PDP, &PowerDistributionPanel::GetVoltage);
 		Logger::LogState("GENERAL", LEVEL_t::DEBUG, "Turing object constructed");
 		cout<<"Built: "<<__DATE__<<' '<<__TIME__<<endl;
 	}
