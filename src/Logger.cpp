@@ -3,7 +3,7 @@
 
 /********* STATIC LOGGER DATA MEMBERS *************/
 
-LogService *Logger::service = nullptr;
+shared_ptr<LogService> Logger::service = nullptr;
 string Logger::path;
 unsigned int Logger::frame = 0;
 
@@ -70,7 +70,7 @@ const string Logger::MakeLogFileName(const string SUBS, const string COMP, const
 LogService &Logger::GetInstance()
 {
 	if(service == nullptr)
-		service = factory();
+		service = shared_ptr<LogService>(factory());
 	return *service;
 }
 

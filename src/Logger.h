@@ -9,6 +9,9 @@
 #include <time.h>
 #include <algorithm>
 #include <cstdlib>
+#include <memory>
+
+using std::shared_ptr;
 
 /*
 class SERVICE_t {
@@ -32,7 +35,7 @@ public:
 
 class Logger {
 private:
-	static LogService *service;
+	static shared_ptr<LogService> service;
 	static std::function<LogService * ()> factory;
 	static string path;
 	static unsigned int frame;
