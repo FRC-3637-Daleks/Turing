@@ -85,5 +85,8 @@ const int FileLogger::logCurrent()
 	return 0;
 }
 
-
-
+const int FileLogger::LogAll()
+{
+	logCurrent();
+	return LogService::LogAll();
+}

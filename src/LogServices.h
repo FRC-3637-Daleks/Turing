@@ -109,6 +109,7 @@ public:
 	virtual ostream& logText() override;
 
 protected:
+	virtual const int LogAll() override;
 	virtual ofstream& makeLogStream(const string &file) override;
 	virtual const int logCurrent() override;
 };
