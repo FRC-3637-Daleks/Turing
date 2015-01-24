@@ -2,7 +2,7 @@
 #define _CONFIG_H_
 
 
-#define STATE_OUT_FILE_NAME "states.txt"
+#define LOG_STATE_OUT_FILE_NAME "states.txt"
 #define LOG_HOME "/home/lvuser/log/"
 
 #define DEFAULT_BUFFER_FRAMES 20

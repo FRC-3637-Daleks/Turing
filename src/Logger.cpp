@@ -7,7 +7,7 @@ string Logger::path;
 
 std::function<LogService *()> Logger::factory = []()
 {
-	return new FileLogger(Logger::GetFullPath()+STATE_OUT_FILE_NAME, Logger::GetMakeDirCommand());
+	return new FileLogger(Logger::GetFullPath()+LOG_STATE_OUT_FILE_NAME, Logger::GetMakeDirCommand());
 };
 
 /********** STATIC LOGGER CONSTANTS *****************/
