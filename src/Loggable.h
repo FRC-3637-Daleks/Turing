@@ -12,7 +12,6 @@
 #include <string>
 #include <vector>
 #include <fstream>
-#include "WPILib.h"
 
 using std::string;
 using std::ostream;
@@ -33,7 +32,13 @@ public:
 public:
 	/// Overriden function should record data in buffer or log it
 	virtual const int Log()=0;
+    virtual const int logCurrent()=0;
 };
+
+inline const int Loggable::logCurrent()
+{
+    return Log();
+}
 
 class NumericLog: public Loggable
 {
@@ -47,7 +52,7 @@ public:
 	 * Should be invoked as such
 	 * NumericLog myLogObj(std::ofstream("filename", std::ios_base::binary), std::bind(ObjectType::functionName, &myObject), 10)
 	 */
-	NumericLog(ostream &o, auto f, const int flushVal=30):
+	NumericLog(ostream &o, std::function<double(void)> f, const int flushVal=30):
 		Loggable(o), fn(f), flushFrames(flushVal) {buf.reserve(flushFrames);};
 	virtual ~NumericLog() {logCurrent();};
 
@@ -56,7 +61,7 @@ public:
 	const int Log() override;
 
 	/// Logs whatever is in buf
-	const int logCurrent();
+	const int logCurrent() override;
 };
 
 class BooleanLog: public Loggable
@@ -71,7 +76,7 @@ public:
 	 * Should be invoked as such
 	 * BooleanLog myLogObj(std::ofstream("filename", std::ios_base::binary), std::bind(ObjectType::functionName,&myObject), 4)
 	 */
-	BooleanLog(ostream &o, auto f, const int flushVal=30):
+	BooleanLog(ostream &o, std::function<bool(void)> f, const int flushVal=30):
 		Loggable(o), fn(f), flushFrames(flushVal) {buf.reserve(flushFrames);};
 	virtual ~BooleanLog() {logCurrent();};
 
@@ -81,7 +86,7 @@ public:
 
 private:
 	/// Logs whatever is in buf
-	const int logCurrent();
+	const int logCurrent() override;
 };
 
 #endif /* SRC_LOGGABLE_H_ */

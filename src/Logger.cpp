@@ -1,5 +1,4 @@
 #include "Logger.h"
-#include "stdio.h"
 
 /********* STATIC LOGGER DATA MEMBERS *************/
 
@@ -47,7 +46,7 @@ const string Logger::GetTimeDirectory()
 	auto t = time(0);
 	string date(ctime(&t));
 	std::for_each(date.begin(), date.end(), [](char &c) {if(c == ' ') c = '-';});
-	return date.substr(4);
+	return date.substr(4, date.size()-5);
 }
 
 const string Logger::GetFullPath()

@@ -26,6 +26,9 @@ using std::endl;
 
 class LogService
 {
+protected:
+    enum {THREAD_STATE_INIT, THREAD_STATE_RUNNING, THREAD_STATE_TERMINATE};
+    
 private:
 	static void LoggingThread(LogService * const ls);
 
@@ -34,21 +37,26 @@ private:
 	unsigned int framesUntilWrite;
 	unsigned int frames;
 	thread logThread;
-	bool running;
+	char threadState;
 
 public:
-	LogService(const char * threadName, const unsigned int f=DEFAULT_BUFFER_FRAMES):
-		framesUntilWrite(f), frames(0), logThread(&LogService::LoggingThread, this), running(true) {logThread.detach();};
+	LogService(const bool start=false, const unsigned int f=DEFAULT_BUFFER_FRAMES):
+		framesUntilWrite(f), frames(0), logThread(&LogService::LoggingThread, this), threadState(start? THREAD_STATE_RUNNING:THREAD_STATE_INIT) {};
 	virtual ~LogService();
 
 protected:
 	virtual ostream& makeLogStream(const string &file)=0;
 	virtual const int logCurrent()=0;
 
-public:
-	const bool isRunning() const {return running;};
+	const char getThreadState() const {return threadState;};
+    void setThreadState(const char state) {threadState = state;};
+    void runThread() {setThreadState(THREAD_STATE_RUNNING);};
+    void stopThread() {setThreadState(THREAD_STATE_TERMINATE);};
+    void joinThread() {stopThread(); if(logThread.joinable()) logThread.join();};
 
+public:
 	const unsigned int currentFrame() const {return frames;};
+    const unsigned int getFramesUntilWrite() const {return framesUntilWrite;};
 
 	virtual void createLogDir(const string &command)=0;
 
@@ -66,12 +74,13 @@ public:
 	virtual ostream& logText()=0;
 
 	virtual const int LogAll();
+    virtual const int LogAllCurrent();
 };
 
 inline void LogService::addNumericLog(std::function<double(void)> func, const string &file)
 {
-	logObjects.push_back(new NumericLog(makeLogStream(file), func, framesUntilWrite*sizeof(double)));
-	logText()<<"[INFO] New Numeric Log stream opened at "<<file<<endl;
+	logObjects.push_back(new NumericLog(makeLogStream(file), func, framesUntilWrite));
+	logText()<<"[LOGSERVICE][INFO] New Numeric Log stream opened at "<<file<<endl;
 }
 
 template<class SUBSYSTEM_CLASS>
@@ -82,8 +91,8 @@ void LogService::addNumericLog(SUBSYSTEM_CLASS * const obj, double (SUBSYSTEM_CL
 
 inline void LogService::addBooleanLog(std::function<bool(void)> func, const string &file)
 {
-	logObjects.push_back(new BooleanLog(makeLogStream(file), func, framesUntilWrite/8));
-	logText()<<"[INFO] New Boolean Log stream opened at "<<file<<endl;
+	logObjects.push_back(new BooleanLog(makeLogStream(file), func, framesUntilWrite));
+	logText()<<"[LOGSERVICE][INFO] New Boolean Log stream opened at "<<file<<endl;
 }
 
 template<class SUBSYSTEM_CLASS>
@@ -98,7 +107,7 @@ private:
 	vector<ofstream*> outStreams;
 	ofstream stateOut;
 	stringstream doubleBuffer[2];
-	bool writer;
+	char writer;
 
 public:
 	FileLogger(const string &file, const string &command);

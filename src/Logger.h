@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <cstdlib>
 #include <memory>
+#include <iostream>
 
 #include "Config.h"
 #include "LogServices.h"

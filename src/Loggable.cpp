@@ -17,6 +17,8 @@ const int NumericLog::Log()
 
 const int NumericLog::logCurrent()
 {
+    if(buf.size() == 0)
+        return 0;
 	for(auto i = buf.begin(); i != buf.end(); i++) out<<*i<<std::endl;
 	//out.write((char *)buf.data(), sizeof(double)*buf.size());
 	buf.clear();
@@ -34,6 +36,8 @@ const int BooleanLog::Log()
 
 const int BooleanLog::logCurrent()
 {
+    if(buf.size() == 0)
+        return 0;
 	for(auto i = buf.begin(); i != buf.end(); i++) out<<int(*i)<<std::endl;
 //	out.write(buf.data(), buf.size());
 	buf.clear();
