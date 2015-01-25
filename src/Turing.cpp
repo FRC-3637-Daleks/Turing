@@ -2,6 +2,14 @@
 
 using namespace std;
 
+Loggable::FAIL_COMMAND currentTooHigh(double cur)
+{
+	stringstream curString;
+	curString<<cur;
+	Logger::LogState("POWERDISTRIBUTIONPANEL", LEVEL_t::ALERT, string("Current level too high: ")+curString.str()+" amps");
+	return Loggable::KILL;
+}
+
 class Turing: public IterativeRobot
 {
 private:
@@ -13,6 +21,8 @@ public:
 		cout<<"Starting Robot Program"<<endl;
 		Logger::MakeLogValue("TIME", "BOOT_TICKS", &GetTime);
 		Logger::MakeLogValue("VOLTAGE", &PDP, &PowerDistributionPanel::GetVoltage);
+		Logger::MakeLogValue("TOTALCURRENT", &PDP, &PowerDistributionPanel::GetTotalCurrent,
+				WatchLog<double>(currentTooHigh, [](double cur) {return cur > 100.0;}));
 		Logger::LogState("GENERAL", LEVEL_t::INFO, "Turing object constructed");
 		Logger::LogState("GENERAL", LEVEL_t::NOTICE, string("Built: ")+__DATE__+' '+__TIME__);
 	}
