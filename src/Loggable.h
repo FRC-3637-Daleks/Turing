@@ -26,7 +26,7 @@ protected:
 	ostream &out;
 
 public:
-	Loggable(ostream& o): out(o) {};
+	Loggable(ostream& o): out(o) {out.precision(10);};
 	virtual ~Loggable() {};
 
 public:
