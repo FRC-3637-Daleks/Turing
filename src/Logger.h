@@ -43,19 +43,19 @@ private:
 
 public:
 	template<class DATA_TYPE>
-	static const int MakeLogValue(const char * SUBS, const char * COMP, DATA_TYPE (*fn)()) {
-		return MakeLogValue(SUBS, COMP, std::function<DATA_TYPE(void)>(fn));
+	static const int MakeLogValue(const char * SUBS, const char * COMP, DATA_TYPE (*fn)(), const typename ValueLog<DATA_TYPE>::LOG_EXTENSION_t ext=ValueLog<DATA_TYPE>::continueAnyway) {
+		return MakeLogValue(SUBS, COMP, std::function<DATA_TYPE(void)>(fn), ext);
 	}
 
 	template<class DATA_TYPE>
-	static const int MakeLogValue(const char * const SUBS, const char * const COMP, std::function<DATA_TYPE(void)> fn) {
-		GetInstance().addLog(fn, MakeLogFileName(string(SUBS), string(COMP), string(typeid(DATA_TYPE).name())));
+	static const int MakeLogValue(const char * const SUBS, const char * const COMP, std::function<DATA_TYPE(void)> fn, const typename ValueLog<DATA_TYPE>::LOG_EXTENSION_t ext=ValueLog<DATA_TYPE>::continueAnyway) {
+		GetInstance().addLog(fn, MakeLogFileName(string(SUBS), string(COMP), string(typeid(DATA_TYPE).name())), ext);
 		return 0;
 	}
 
 	template<typename DATA_TYPE, class SUB_TYPE>
-	static const int MakeLogValue(const char * const SUBS, const char * const COMP, SUB_TYPE *obj, DATA_TYPE (SUB_TYPE::*fn)()) {
-		GetInstance().addLog(obj, fn, MakeLogFileName(string(SUBS), string(COMP), string(typeid(DATA_TYPE).name())));
+	static const int MakeLogValue(const char * const SUBS, const char * const COMP, SUB_TYPE *obj, DATA_TYPE (SUB_TYPE::*fn)(), const typename ValueLog<DATA_TYPE>::LOG_EXTENSION_t ext=ValueLog<DATA_TYPE>::continueAnyway) {
+		GetInstance().addLog(obj, fn, MakeLogFileName(string(SUBS), string(COMP), string(typeid(DATA_TYPE).name())), ext);
 		return 0;
 	}
 
@@ -68,30 +68,30 @@ public:
 	static const int LogState(const char * const SERV, const int LEV, const char * const text);
 
 	template<typename DATA_TYPE>
-	static const int MakeLogValue(const int SUBS, const char * const COMP, std::function<DATA_TYPE(void)> fn)
+	static const int MakeLogValue(const int SUBS, const char * const COMP, std::function<DATA_TYPE(void)> fn, const typename ValueLog<DATA_TYPE>::LOG_EXTENSION_t ext=ValueLog<DATA_TYPE>::continueAnyway)
 	{
-		return MakeLogValue(SUBSYSTEM::text[SUBS], COMP, fn);
+		return MakeLogValue(SUBSYSTEM::text[SUBS], COMP, fn, ext);
 	}
 
 	template<typename DATA_TYPE, class SUB_TYPE>
-	static const int MakeLogValue(const int SUBS, const char * const COMP, SUB_TYPE *obj, DATA_TYPE (SUB_TYPE::* fn)())
+	static const int MakeLogValue(const int SUBS, const char * const COMP, SUB_TYPE *obj, DATA_TYPE (SUB_TYPE::* fn)(), const typename ValueLog<DATA_TYPE>::LOG_EXTENSION_t ext=ValueLog<DATA_TYPE>::continueAnyway)
 	{
-		return MakeLogValue<DATA_TYPE, SUB_TYPE>(SUBSYSTEM::text[SUBS], COMP, obj, fn);
+		return MakeLogValue<DATA_TYPE, SUB_TYPE>(SUBSYSTEM::text[SUBS], COMP, obj, fn, ext);
 	}
 
 	template<typename DATA_TYPE, class SUB_TYPE>
-	static const int MakeLogValue(const char * const COMP, SUB_TYPE *obj, DATA_TYPE (SUB_TYPE::* fn)())
+	static const int MakeLogValue(const char * const COMP, SUB_TYPE *obj, DATA_TYPE (SUB_TYPE::* fn)(), const typename ValueLog<DATA_TYPE>::LOG_EXTENSION_t ext=ValueLog<DATA_TYPE>::continueAnyway)
 	{
 		string str(typeid(SUB_TYPE).name());
 		for(auto i = str.begin(); i != str.end(); i++) *i = toupper(*i);   // Makes name upper case
-		return MakeLogValue(str.c_str(), COMP, obj, fn);
+		return MakeLogValue(str.c_str(), COMP, obj, fn, ext);
 	}
 
 	/// The subsystem used must have a static function GetComponenentName which returns a c-string based on a id
 	template<typename DATA_TYPE, class SUB_TYPE>
-	static const int MakeLogValue(const int COMP, SUB_TYPE *obj, DATA_TYPE (SUB_TYPE::* fn)())
+	static const int MakeLogValue(const int COMP, SUB_TYPE *obj, DATA_TYPE (SUB_TYPE::* fn)(), const typename ValueLog<DATA_TYPE>::LOG_EXTENSION_t ext=ValueLog<DATA_TYPE>::continueAnyway)
 	{
-		return MakeLogValue(SUB_TYPE::GetComponentName(COMP), obj, fn);
+		return MakeLogValue(SUB_TYPE::GetComponentName(COMP), obj, fn, ext);
 	}
 
 };

@@ -13,6 +13,7 @@
 
 #include "Config.h"
 #include "Loggable.h"
+#include "Watch_Logs.h"
 
 using std::vector;
 using std::thread;
@@ -61,10 +62,10 @@ public:
 	virtual void createLogDir(const string &command)=0;
 
 	template<typename DATA_TYPE, class SUBSYSTEM_CLASS>
-	void addLog(SUBSYSTEM_CLASS * const obj, DATA_TYPE (SUBSYSTEM_CLASS::*func)(), const string &file);
+	void addLog(SUBSYSTEM_CLASS * const obj, DATA_TYPE (SUBSYSTEM_CLASS::*func)(), const string &file, const typename ValueLog<DATA_TYPE>::LOG_EXTENSION_t ext=ValueLog<DATA_TYPE>::continueAnyway);
 
 	template<typename DATA_TYPE>
-	void addLog(std::function<DATA_TYPE(void)> func, const string &file);
+	void addLog(std::function<DATA_TYPE(void)> func, const string &file, const typename ValueLog<DATA_TYPE>::LOG_EXTENSION_t ext=ValueLog<DATA_TYPE>::continueAnyway);
 
 	virtual void logText(const string &text)=0;
 	virtual ostream& logText()=0;
@@ -74,15 +75,15 @@ public:
 };
 
 template<typename DATA_TYPE, class SUBSYSTEM_CLASS>
-inline void LogService::addLog(SUBSYSTEM_CLASS * const obj, DATA_TYPE (SUBSYSTEM_CLASS::*func)(), const string &file)
+inline void LogService::addLog(SUBSYSTEM_CLASS * const obj, DATA_TYPE (SUBSYSTEM_CLASS::*func)(), const string &file, const typename ValueLog<DATA_TYPE>::LOG_EXTENSION_t ext)
 {
-	addLog<DATA_TYPE>(std::bind(func, obj), file);
+	addLog<DATA_TYPE>(std::bind(func, obj), file, ext);
 }
 
 template<typename DATA_TYPE>
-inline void LogService::addLog(std::function<DATA_TYPE(void)> func, const string &file)
+inline void LogService::addLog(std::function<DATA_TYPE(void)> func, const string &file, const typename ValueLog<DATA_TYPE>::LOG_EXTENSION_t ext)
 {
-	logObjects.push_back(new ValueLog<DATA_TYPE>(makeLogStream(file), func, framesUntilWrite));
+	logObjects.push_back(new ValueLog<DATA_TYPE>(makeLogStream(file), func, framesUntilWrite, ext));
 }
 
 class FileLogger: public LogService
