@@ -9,7 +9,43 @@
 #ifndef SRC_WATCH_LOGS_H_
 #define SRC_WATCH_LOGS_H_
 
+#include "WPILib.h"
 #include "Loggable.h"
+
+template<typename DATA_TYPE>
+typename ValueLog<DATA_TYPE>::LOG_EXTENSION_t AddSmartDashExtension(const string key, typename ValueLog<DATA_TYPE>::LOG_EXTENSION_t ext=ValueLog<DATA_TYPE>::continueAnyway)
+{
+	return [key, ext](DATA_TYPE val) {
+		std::stringstream toString;
+		toString<<val;
+		SmartDashboard::PutString(key, toString.str());
+		return ext(val);
+	};
+}
+
+template<>
+inline typename ValueLog<double>::LOG_EXTENSION_t AddSmartDashExtension<double>(const string key, typename ValueLog<double>::LOG_EXTENSION_t ext)
+{
+	return [key, ext](double val) {
+		SmartDashboard::PutNumber(key, val);
+		return ext(val);
+	};
+}
+
+template<>
+inline typename ValueLog<long>::LOG_EXTENSION_t AddSmartDashExtension<long>(const string key, typename ValueLog<long>::LOG_EXTENSION_t ext)
+{
+	return AddSmartDashExtension<double>(key, ext);
+}
+
+template<>
+inline typename ValueLog<bool>::LOG_EXTENSION_t AddSmartDashExtension<bool>(const string key, typename ValueLog<bool>::LOG_EXTENSION_t ext)
+{
+	return [key, ext](bool val) {
+		SmartDashboard::PutBoolean(key, val);
+		return ext(val);
+	};
+}
 
 template<typename DATA_TYPE>
 class WatchLog

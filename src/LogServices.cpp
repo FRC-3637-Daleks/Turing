@@ -17,6 +17,8 @@ void LogService::LoggingThread(LogService * const ls)
 	int failed = 0;
 	while(ls->getThreadState() == THREAD_STATE_RUNNING && failed >= 0) failed = ls->LogAll();
     ls->LogAllCurrent();
+    if(ls->getThreadState() == THREAD_STATE_RUNNING)
+    	; // In which the logger quit due to a callback function returning KILL
 }
 
 LogService::~LogService()  // Deallocates memory
