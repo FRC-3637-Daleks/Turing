@@ -33,7 +33,7 @@ const int LogService::LogAll()
 {
 	int ret = 0;
     // Iterators become invalidated across threads
-	for(unsigned int i = 0; i < logObjects.size(); i++)
+	for(unsigned int i = 0; i < logObjects.size() && ret >= 0; i++)
 		ret |= logObjects[i]->Log();
 
 	frames++;
@@ -43,7 +43,7 @@ const int LogService::LogAll()
 const int LogService::LogAllCurrent()
 {
     int ret = 0;
-    for(unsigned int i = 0; i < logObjects.size(); i++)
+    for(unsigned int i = 0; i < logObjects.size() && ret >= 0; i++)
         ret |= logObjects[i]->logCurrent();
     
     return ret;
