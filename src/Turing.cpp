@@ -13,19 +13,19 @@ public:
 		cout<<"Starting Robot Program"<<endl;
 		Logger::MakeLogValue("TIME", "BOOT_TICKS", &GetTime);
 		Logger::MakeLogValue("VOLTAGE", &PDP, &PowerDistributionPanel::GetVoltage);
-		Logger::LogState("GENERAL", LEVEL_t::DEBUG, "Turing object constructed");
-		cout<<"Built: "<<__DATE__<<' '<<__TIME__<<endl;
+		Logger::LogState("GENERAL", LEVEL_t::INFO, "Turing object constructed");
+		Logger::LogState("GENERAL", LEVEL_t::NOTICE, string("Built: ")+__DATE__+' '+__TIME__);
 	}
 
 private:
 	void RobotInit() override
 	{
-		Logger::LogState("GENERAL", LEVEL_t::DEBUG, "Robot init complete");
+		Logger::LogState("GENERAL", LEVEL_t::INFO, "Robot init complete");
 	}
 
 	void DisabledInit() override
 	{
-		Logger::LogState("GENERAL", LEVEL_t::DEBUG, "Disabled Init Complete");
+		Logger::LogState("GENERAL", LEVEL_t::INFO, "Disabled Init Complete");
 	}
 
 	void DisabledPeriodic() override
@@ -34,7 +34,7 @@ private:
 
 	void AutonomousInit() override
 	{
-		Logger::LogState("GENERAL", LEVEL_t::DEBUG, "Autonomous Init Complete, ready to crack enigma.");
+		Logger::LogState("GENERAL", LEVEL_t::INFO, "Autonomous Init Complete, ready to crack enigma.");
 	}
 
 	void AutonomousPeriodic() override
@@ -44,7 +44,7 @@ private:
 
 	void TeleopInit() override
 	{
-		Logger::LogState("GENERAL", LEVEL_t::DEBUG, "Teleop Init Complete");
+		Logger::LogState("GENERAL", LEVEL_t::INFO, "Teleop Init Complete");
 	}
 
 	void TeleopPeriodic() override
@@ -54,7 +54,7 @@ private:
 
 	void TestInit() override
 	{
-		Logger::LogState("GENERAL", LEVEL_t::DEBUG, "Test Init Complete");
+		Logger::LogState("GENERAL", LEVEL_t::INFO, "Test Init Complete");
 	}
 
 	void TestPeriodic() override

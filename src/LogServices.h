@@ -60,15 +60,11 @@ public:
 
 	virtual void createLogDir(const string &command)=0;
 
-	template<class SUBSYSTEM_CLASS>
-	void addNumericLog(SUBSYSTEM_CLASS * const obj, double (SUBSYSTEM_CLASS::*func)(), const string &file);
+	template<typename DATA_TYPE, class SUBSYSTEM_CLASS>
+	void addLog(SUBSYSTEM_CLASS * const obj, DATA_TYPE (SUBSYSTEM_CLASS::*func)(), const string &file);
 
-	void addNumericLog(std::function<double(void)> func, const string &file);
-
-	template<class SUBSYSTEM_CLASS>
-	void addBooleanLog(SUBSYSTEM_CLASS * const obj, bool (SUBSYSTEM_CLASS::*func)(), const string &file);
-
-	void addBooleanLog(std::function<bool(void)> func, const string &file);
+	template<typename DATA_TYPE>
+	void addLog(std::function<DATA_TYPE(void)> func, const string &file);
 
 	virtual void logText(const string &text)=0;
 	virtual ostream& logText()=0;
@@ -77,28 +73,16 @@ public:
     virtual const int LogAllCurrent();
 };
 
-inline void LogService::addNumericLog(std::function<double(void)> func, const string &file)
+template<typename DATA_TYPE, class SUBSYSTEM_CLASS>
+inline void LogService::addLog(SUBSYSTEM_CLASS * const obj, DATA_TYPE (SUBSYSTEM_CLASS::*func)(), const string &file)
 {
-	logObjects.push_back(new NumericLog(makeLogStream(file), func, framesUntilWrite));
-	logText()<<"[LOGSERVICE][INFO] New Numeric Log stream opened at "<<file<<endl;
+	addLog<DATA_TYPE>(std::bind(func, obj), file);
 }
 
-template<class SUBSYSTEM_CLASS>
-void LogService::addNumericLog(SUBSYSTEM_CLASS * const obj, double (SUBSYSTEM_CLASS::*func)(), const string &file)
+template<typename DATA_TYPE>
+inline void LogService::addLog(std::function<DATA_TYPE(void)> func, const string &file)
 {
-	addNumericLog(std::bind(func, obj), file);
-}
-
-inline void LogService::addBooleanLog(std::function<bool(void)> func, const string &file)
-{
-	logObjects.push_back(new BooleanLog(makeLogStream(file), func, framesUntilWrite));
-	logText()<<"[LOGSERVICE][INFO] New Boolean Log stream opened at "<<file<<endl;
-}
-
-template<class SUBSYSTEM_CLASS>
-void LogService::addBooleanLog(SUBSYSTEM_CLASS * const obj, bool (SUBSYSTEM_CLASS::*func)(), const string &file)
-{
-	addBooleanLog(std::bind(func, obj), file);
+	logObjects.push_back(new ValueLog<DATA_TYPE>(makeLogStream(file), func, framesUntilWrite));
 }
 
 class FileLogger: public LogService
@@ -107,7 +91,7 @@ private:
 	vector<ofstream*> outStreams;
 	ofstream stateOut;
 	stringstream doubleBuffer[2];
-	char writer;
+	short writer;
 
 public:
 	FileLogger(const string &file, const string &command);

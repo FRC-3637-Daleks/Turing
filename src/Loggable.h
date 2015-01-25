@@ -40,53 +40,47 @@ inline const int Loggable::logCurrent()
     return Log();
 }
 
-class NumericLog: public Loggable
+template<typename DATA_TYPE>
+class ValueLog: public Loggable
 {
+public:
+	typedef std::function<DATA_TYPE(void)> FUNC_t;
 private:
-	std::function<double(void)> fn;		///< Function called by Log which returns the double being logged.
-	vector<double> buf;					///< Buffer of values returned by fn
-	unsigned int flushFrames;			///< Size at which buf is emptied and sent to be logged to file
+	FUNC_t fn;		///< Function called by Log which returns the value being logged.
+	vector<DATA_TYPE> buf;					///< Buffer of values returned by fn
+	unsigned int flushFrames;				///< Number of values buffered before it flushes to output
 
 public:
 	/** Constructs from an output stream, function object, and flush value
-	 * Should be invoked as such
-	 * NumericLog myLogObj(std::ofstream("filename", std::ios_base::binary), std::bind(ObjectType::functionName, &myObject), 10)
 	 */
-	NumericLog(ostream &o, std::function<double(void)> f, const int flushVal=30):
+	ValueLog(ostream &o, const FUNC_t &f, const unsigned int flushVal):
 		Loggable(o), fn(f), flushFrames(flushVal) {buf.reserve(flushFrames);};
-	virtual ~NumericLog() {logCurrent();};
+	virtual ~ValueLog() {logCurrent();};
 
 public:
 	/// Pushes a value to buf and logs current buffer if full capacity
-	const int Log() override;
+	const int Log() override
+	{
+		buf.push_back(fn());
+		if(buf.size() == flushFrames)
+			return logCurrent();
+		return 0;
+	}
 
-	/// Logs whatever is in buf
-	const int logCurrent() override;
+	/// Logs the current buffer immediately
+	const int logCurrent() override
+	{
+		if(buf.size() == 0)
+		        return 0;
+		for(auto i = buf.begin(); i != buf.end(); i++) out<<*i<<std::endl;
+		buf.clear();
+		out.flush();  // Ensures output stream is writing to file
+		return 0;
+	}
+
 };
 
-class BooleanLog: public Loggable
-{
-private:
-	std::function<bool(void)> fn;		///< Function called by Log which returns the bool being logged.
-	vector<bool> buf;					///< Buffer of groups of 8 values returned by fn
-	unsigned int flushFrames;			///< Size at which buf is emptied and sent to be logged to file
-
-public:
-	/** Constructs from an output stream, function object, and flush value
-	 * Should be invoked as such
-	 * BooleanLog myLogObj(std::ofstream("filename", std::ios_base::binary), std::bind(ObjectType::functionName,&myObject), 4)
-	 */
-	BooleanLog(ostream &o, std::function<bool(void)> f, const int flushVal=30):
-		Loggable(o), fn(f), flushFrames(flushVal) {buf.reserve(flushFrames);};
-	virtual ~BooleanLog() {logCurrent();};
-
-public:
-	/// Pushes a value to buf and logs current buffer if full capacity
-	const int Log() override;
-
-private:
-	/// Logs whatever is in buf
-	const int logCurrent() override;
-};
+using NumericLog = ValueLog<double>;
+using BooleanLog = ValueLog<bool>;
 
 #endif /* SRC_LOGGABLE_H_ */

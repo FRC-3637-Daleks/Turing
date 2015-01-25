@@ -97,7 +97,7 @@ ostream& FileLogger::logText()
 
 const int FileLogger::logCurrent()
 {
-    const char prev = writer;
+    const short prev = writer;
 	if(writer == 0) writer = 1;
     else if(writer == 1) writer = 0;
     if(doubleBuffer[prev].rdbuf()->in_avail() > 0)
