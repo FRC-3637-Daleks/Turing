@@ -13,6 +13,8 @@
 #include <vector>
 #include <fstream>
 
+#include "Config.h"
+
 using std::string;
 using std::ostream;
 using std::vector;
@@ -29,7 +31,7 @@ protected:
 	ostream &out;
 
 public:
-	Loggable(ostream& o): out(o) {out.precision(10);};
+	Loggable(ostream& o): out(o) {out.precision(FLOATING_POINT_SIG_FIGS);};
 	virtual ~Loggable() {};
 
 public:

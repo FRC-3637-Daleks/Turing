@@ -1,13 +1,13 @@
 #ifndef _CONFIG_H_
 #define _CONFIG_H_
 
-
 #define LOG_STATE_OUT_FILE_NAME "states.txt"
 #define LOG_HOME "/home/lvuser/log/"
 
 #define DEFAULT_BUFFER_FRAMES 20
 
 #define FRAME_TEXT_WIDTH 7
+#define FLOATING_POINT_SIG_FIGS 6
 
 #define DEBUG_MODE
 
