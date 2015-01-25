@@ -36,9 +36,27 @@ public:
 };
 
 template<typename DATA_TYPE>
-inline typename ValueLog<DATA_TYPE>::LOG_EXTENSION_t MakeWatchLog(const typename WatchLog<DATA_TYPE>::CALL_BACK_t &cb, const typename WatchLog<DATA_TYPE>::THRESHOLD_CHECK_t &tc)
+typename ValueLog<DATA_TYPE>::LOG_EXTENSION_t MakeWatchLog(const typename WatchLog<DATA_TYPE>::CALL_BACK_t &cb, const typename WatchLog<DATA_TYPE>::THRESHOLD_CHECK_t &tc)
 {
 	return WatchLog<DATA_TYPE>::Make(cb, tc);
+}
+
+template<typename DATA_TYPE>
+typename ValueLog<DATA_TYPE>::LOG_EXTENSION_t MakeUpperLimit(const typename WatchLog<DATA_TYPE>::CALL_BACK_t &cb, const DATA_TYPE dt)
+{
+	return MakeWatchLog(cb, [dt](DATA_TYPE val) {return val > dt;});
+}
+
+template<typename DATA_TYPE>
+typename ValueLog<DATA_TYPE>::LOG_EXTENSION_t MakeLowerLimit(const typename WatchLog<DATA_TYPE>::CALL_BACK_t &cb, const DATA_TYPE dt)
+{
+	return MakeWatchLog(cb, [dt](DATA_TYPE val) {return val < dt;});
+}
+
+template<typename DATA_TYPE>
+typename ValueLog<DATA_TYPE>::LOG_EXTENSION_t MakeValidRange(const typename WatchLog<DATA_TYPE>::CALL_BACK_t &cb, const DATA_TYPE upper, const DATA_TYPE lower)
+{
+	return MakeWatchLog(cb, [upper, lower](DATA_TYPE val) {return val > upper || val < lower;});
 }
 
 #endif /* SRC_WATCH_LOGS_H_ */
