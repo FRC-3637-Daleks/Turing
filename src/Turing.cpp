@@ -22,7 +22,7 @@ public:
 		Logger::MakeLogValue("TIME", "BOOT_TICKS", &GetTime);
 		Logger::MakeLogValue("VOLTAGE", &PDP, &PowerDistributionPanel::GetVoltage);
 		Logger::MakeLogValue("TOTALCURRENT", &PDP, &PowerDistributionPanel::GetTotalCurrent,
-				WatchLog<double>(currentTooHigh, [](double cur) {return cur > 100.0;}));
+				MakeWatchLog<double>(currentTooHigh, [](double cur) {return cur > 100.0;}));
 		Logger::LogState("GENERAL", LEVEL_t::INFO, "Turing object constructed");
 		Logger::LogState("GENERAL", LEVEL_t::NOTICE, string("Built: ")+__DATE__+' '+__TIME__);
 	}

@@ -18,16 +18,8 @@ public:
 	typedef std::function<Loggable::FAIL_COMMAND(DATA_TYPE)> CALL_BACK_t;
 	typedef std::function<bool(DATA_TYPE)> THRESHOLD_CHECK_t;
 
-private:
-	CALL_BACK_t callback;
-	THRESHOLD_CHECK_t threshold;
-
 public:
-	WatchLog(const CALL_BACK_t &cb, const THRESHOLD_CHECK_t &tc): callback(cb), threshold(tc) {};
-	WatchLog(const WatchLog& other): callback(other.callback), threshold(other.threshold) {};
-
-public:
-	Loggable::FAIL_COMMAND operator() (const DATA_TYPE val)
+	static Loggable::FAIL_COMMAND checkThreshold (const CALL_BACK_t &callback, const THRESHOLD_CHECK_t &threshold, const DATA_TYPE val)
 	{
 		if(threshold(val))
 			return callback(val);
@@ -36,10 +28,17 @@ public:
 	};
 
 	/// Converts to a std::function
-	operator typename ValueLog<DATA_TYPE>::LOG_EXTENSION_t () {return std::bind(&WatchLog::operator(), this, std::placeholders::_1);};
+	static typename ValueLog<DATA_TYPE>::LOG_EXTENSION_t Make(const CALL_BACK_t &cb, const THRESHOLD_CHECK_t &tc)
+	{
+		return std::bind(&WatchLog<DATA_TYPE>::checkThreshold, cb, tc, std::placeholders::_1);
+	};
 
 };
 
-
+template<typename DATA_TYPE>
+inline typename ValueLog<DATA_TYPE>::LOG_EXTENSION_t MakeWatchLog(const typename WatchLog<DATA_TYPE>::CALL_BACK_t &cb, const typename WatchLog<DATA_TYPE>::THRESHOLD_CHECK_t &tc)
+{
+	return WatchLog<DATA_TYPE>::Make(cb, tc);
+}
 
 #endif /* SRC_WATCH_LOGS_H_ */
