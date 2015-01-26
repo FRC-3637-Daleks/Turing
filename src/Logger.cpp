@@ -44,9 +44,10 @@ const string Logger::GetLogPath()
 const string Logger::GetTimeDirectory()
 {
 	auto t = time(0);
-	string date(ctime(&t));
-	std::for_each(date.begin(), date.end(), [](char &c) {if(c == ' ') c = '-';});
-	return date.substr(4, date.size()-5);
+	auto tm = localtime(&t);
+	char buf[32] = "";
+	strftime(buf, 32, "%F_%X", tm);
+	return string(buf);
 }
 
 const string Logger::GetFullPath()
