@@ -157,7 +157,16 @@ ofstream& FileLogger::makeLogStream(const string &file)
 void FileLogger::createLogDir(const string &command)
 {
 	if(system(command.c_str()) >= 0)
+	{
 		logText()<<"[FILELOGGER][INFO] `"<<command<<"` Directory made successfully"<<endl;
+	}
+}
+
+const unsigned int FileLogger::makeInfo(const string &file)
+{
+	ofstream info(file, std::ios_base::out);
+	info<<"BUILT:"<<__DATE__<<' '<<__TIME__<<endl;
+	return 0;
 }
 
 void FileLogger::logText(const string &text)

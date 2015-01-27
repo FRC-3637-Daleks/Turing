@@ -91,6 +91,7 @@ public:
     const unsigned int getFramesUntilWrite() const {return framesUntilWrite;};
 
 	virtual void createLogDir(const string &command)=0;
+	virtual const unsigned int makeInfo(const string &file)=0;
 
 	template<typename DATA_TYPE, class SUBSYSTEM_CLASS>
 	void addLog(SUBSYSTEM_CLASS * const obj, DATA_TYPE (SUBSYSTEM_CLASS::*func)(), const string &file, const typename ValueLog<DATA_TYPE>::LOG_EXTENSION_t ext=ValueLog<DATA_TYPE>::continueAnyway);
@@ -133,6 +134,7 @@ public:
 
 public:
 	void createLogDir(const string &command) override;
+	const unsigned int makeInfo(const string &file) override;
 	virtual void logText(const string &text) override;
 	virtual ostream& logText() override;
 
