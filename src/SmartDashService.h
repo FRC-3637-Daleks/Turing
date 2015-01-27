@@ -23,7 +23,10 @@ public:
 	static SmartDashService& GetInstance();
 
 public:
-	SmartDashService(): DataService(true, 100) {};
+	SmartDashService(): DataService(true, 100)
+	{
+		SmartDashboard::init();
+	};
 
 public:
 	template<typename DATA_TYPE, class SUBSYSTEM_CLASS>
