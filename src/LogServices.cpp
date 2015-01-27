@@ -7,7 +7,7 @@
 
 #include "LogServices.h"
 
-void LogService::LoggingThread(LogService * const ls)
+void DataService::LoggingThread(DataService * const ls)
 {
 	if(ls == nullptr)
 	{
@@ -18,7 +18,7 @@ void LogService::LoggingThread(LogService * const ls)
 	clock_t c = 0;
 	while(ls->getThreadState() == THREAD_STATE_RUNNING && failed >= 0)
 	{
-		if(clock() - c > ls->getLogPeriod()*CLOCKS_PER_SEC/1000)
+		if(clock() - c >= (int)ls->getLogPeriod()*CLOCKS_PER_SEC/1000)
 		{
 			failed = ls->LogAll();
 			c = clock();
@@ -29,7 +29,7 @@ void LogService::LoggingThread(LogService * const ls)
     	; // In which the logger quit due to a callback function returning KILL
 }
 
-LogService::~LogService()  // Deallocates memory
+DataService::~DataService()
 {
 	joinThread();
 	for(auto i = logObjects.begin(); i != logObjects.end(); i++)
@@ -39,27 +39,35 @@ LogService::~LogService()  // Deallocates memory
     logObjects.clear();
 }
 
-const int LogService::LogAll()
+const int DataService::LogAll()
 {
 	int ret = 0;
-    // Iterators become invalidated across threads
-	for(unsigned int i = 0; i < logObjects.size() && ret >= 0; i++)
+	for(unsigned int i = 0; i < logObjects.size() && ret >=0; i++)
 		ret |= logObjects[i]->Log();
 
-	frames++;
 	return ret;
 }
 
-const int LogService::LogAllCurrent()
+const int DataService::LogAllCurrent()
 {
-    int ret = 0;
-    for(unsigned int i = 0; i < logObjects.size() && ret >= 0; i++)
-        ret |= logObjects[i]->logCurrent();
-    
-    return ret;
+	int ret = 0;
+	for(unsigned int i = 0; i < logObjects.size() && ret >= 0; i++)
+		ret |= logObjects[i]->logCurrent();
+
+	return ret;
 }
 
-FileLogger::FileLogger(const string &file, const string &command): LogService(), writer(0)
+LogService::~LogService()  // Deallocates memory
+{
+}
+
+const int LogService::LogAll()
+{
+	frames++;
+	return DataService::LogAll();
+}
+
+FileLogger::FileLogger(const string &file, const string &command): LogService(false, FILE_LOGGING_PERIOD), writer(0)
 {
 	createLogDir(command);
 	stateOut.open(file, std::ios_base::out);

@@ -27,11 +27,8 @@ class Loggable
 public:
 	typedef enum {CONTINUE, KILL} FAIL_COMMAND;
 
-protected:
-	ostream &out;
-
 public:
-	Loggable(ostream& o): out(o) {out.precision(FLOATING_POINT_SIG_FIGS);};
+	Loggable() {};
 	virtual ~Loggable() {};
 
 public:
@@ -55,26 +52,54 @@ public:
 	typedef std::function<DATA_TYPE(void)> FUNC_t;
 	typedef std::function<Loggable::FAIL_COMMAND(DATA_TYPE)> LOG_EXTENSION_t;
 
-private:
+protected:
 	FUNC_t fn;		///< Function called by Log which returns the value being logged.
 	LOG_EXTENSION_t check;					///< Is called at every Log, defined by client
-	vector<DATA_TYPE> buf;					///< Buffer of values returned by fn
-	unsigned int flushFrames;				///< Number of values buffered before it flushes to output
 
 public:
 	/** Constructs from an output stream, function object, and flush value
 	 */
-	ValueLog(ostream &o, const FUNC_t &f, const unsigned int flushVal, LOG_EXTENSION_t c=continueAnyway):
-		Loggable(o), fn(f), check(c), flushFrames(flushVal) {buf.reserve(flushFrames);};
-	virtual ~ValueLog() {logCurrent();};
+	ValueLog(const FUNC_t &f, LOG_EXTENSION_t c=continueAnyway):
+		fn(f), check(c) {};
+	virtual ~ValueLog() {};
 
 public:
 	/// Pushes a value to buf and logs current buffer if full capacity
 	const int Log() override
 	{
 		DATA_TYPE val = fn();
-		buf.push_back(val);
 		if(check(val) == KILL)
+			return -1;
+		return 0;
+	}
+
+	const int logCurrent() override {return Loggable::logCurrent();};
+};
+
+template<typename DATA_TYPE>
+class StreamLog: public ValueLog<DATA_TYPE>
+{
+private:
+	ostream &out;
+	vector<DATA_TYPE> buf;					///< Buffer of values returned by fn
+	unsigned int flushFrames;				///< Number of values buffered before it flushes to output
+
+public:
+	StreamLog(ostream &o, const typename ValueLog<DATA_TYPE>::FUNC_t &f, const unsigned int flushVal,
+			typename ValueLog<DATA_TYPE>::LOG_EXTENSION_t c=ValueLog<DATA_TYPE>::continueAnyway):
+			ValueLog<DATA_TYPE>(f, c), out(o), flushFrames(flushVal)
+	{
+		buf.reserve(flushFrames);
+		out.precision(FLOATING_POINT_SIG_FIGS);
+	};
+	virtual ~StreamLog() {logCurrent();};
+
+public:
+	const int Log() override
+	{
+		DATA_TYPE val = ValueLog<DATA_TYPE>::fn();
+		buf.push_back(val);
+		if(ValueLog<DATA_TYPE>::check(val) == Loggable::KILL)
 			return -1;
 		if(buf.size() == flushFrames)
 			return logCurrent();
@@ -92,7 +117,6 @@ public:
 		out.flush();  // Ensures output stream is writing to file
 		return 0;
 	}
-
 };
 
 using NumericLog = ValueLog<double>;

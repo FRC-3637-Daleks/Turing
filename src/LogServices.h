@@ -22,52 +22,70 @@ using std::ofstream;
 using std::stringstream;
 using std::endl;
 
+
 /** Pure virtual base class for managing logging
  * Holds a vector of log objects. Derived classes should maintain data streams
  */
 
-
-class LogService
+class DataService
 {
 protected:
     enum {THREAD_STATE_INIT, THREAD_STATE_RUNNING, THREAD_STATE_TERMINATE};
     
 private:
-	static void LoggingThread(LogService * const ls);
+	static void LoggingThread(DataService * const ls);
 
 private:
 	vector<Loggable *> logObjects;
-	unsigned int framesUntilWrite;
-	unsigned int frames;
 	thread logThread;
-	char threadState;
+	short threadState;
 	unsigned int logPeriodMils;
 
 public:
+	DataService(const bool start=false, const unsigned int period=0):
+		logThread(&DataService::LoggingThread, this), threadState(start? THREAD_STATE_RUNNING:THREAD_STATE_INIT), logPeriodMils(period) {};
+	virtual ~DataService();
+
+protected:
+	virtual const int LogAll();
+    virtual const int LogAllCurrent();
+
+protected:
+    void appendLog(Loggable * const l) {if(l != nullptr) logObjects.push_back(l);};
+
+protected:
+    const char getThreadState() const {return threadState;};
+    void setThreadState(const char state) {threadState = state;};
+    void runThread() {setThreadState(THREAD_STATE_RUNNING);};
+    void stopThread() {setThreadState(THREAD_STATE_TERMINATE);};
+    void joinThread() {stopThread(); if(logThread.joinable()) logThread.join();};
+
+public:
+    const unsigned int getLogPeriod() const {return logPeriodMils;};
+};
+
+class LogService: public DataService
+{
+private:
+	unsigned int framesUntilWrite;
+	unsigned int frames;
+
+public:
 	LogService(const bool start=false, const unsigned int period=0, const unsigned int f=DEFAULT_BUFFER_FRAMES):
-		framesUntilWrite(f), frames(0), logThread(&LogService::LoggingThread, this),
-		threadState(start? THREAD_STATE_RUNNING:THREAD_STATE_INIT), logPeriodMils(period) {};
+		DataService(start, period), framesUntilWrite(f), frames(0) {};
 	virtual ~LogService();
 
 protected:
 	virtual ostream& makeLogStream(const string &file)=0;
 	virtual const int logCurrent()=0;
 
-	virtual const int LogAll();
-    virtual const int LogAllCurrent();
-
-	const char getThreadState() const {return threadState;};
-    void setThreadState(const char state) {threadState = state;};
-    void runThread() {setThreadState(THREAD_STATE_RUNNING);};
-    void stopThread() {setThreadState(THREAD_STATE_TERMINATE);};
-    void joinThread() {stopThread(); if(logThread.joinable()) logThread.join();};
+	virtual const int LogAll() override;
 
     const unsigned int currentFrame() const {return frames;};
 
 public:
-	const unsigned int currentFrameTime() const {return frames*logPeriodMils;};
+	const unsigned int currentFrameTime() const {return frames*getLogPeriod();};
     const unsigned int getFramesUntilWrite() const {return framesUntilWrite;};
-    const unsigned int getLogPeriod() const {return logPeriodMils;};
 
 	virtual void createLogDir(const string &command)=0;
 
@@ -90,7 +108,7 @@ inline void LogService::addLog(SUBSYSTEM_CLASS * const obj, DATA_TYPE (SUBSYSTEM
 template<typename DATA_TYPE>
 inline void LogService::addLog(std::function<DATA_TYPE(void)> func, const string &file, const typename ValueLog<DATA_TYPE>::LOG_EXTENSION_t ext)
 {
-	logObjects.push_back(new ValueLog<DATA_TYPE>(makeLogStream(file), func, framesUntilWrite, ext));
+	appendLog(new StreamLog<DATA_TYPE>(makeLogStream(file), func, framesUntilWrite, ext));
 	logText()<<"[LOGSERVICE][INFO] Created new log: "<<file<<endl;
 }
 

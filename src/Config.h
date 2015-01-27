@@ -8,6 +8,7 @@
 
 #define FRAME_TEXT_WIDTH 7
 #define FLOATING_POINT_SIG_FIGS 8
+#define FILE_LOGGING_PERIOD 50 //milliseconds
 
 #define DEBUG_MODE
 

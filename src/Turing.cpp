@@ -20,6 +20,7 @@ public:
 	{
 		cout<<"Starting Robot Program"<<endl;
 		Logger::MakeLogValue("CLOCK", "BOOT_SECONDS", &GetClock);
+		Logger::MakeLogValue("CLOCK", "STD_CLOCK", clock);
 		Logger::MakeLogValue("VOLTAGE", &PDP, &PowerDistributionPanel::GetVoltage);//, AddSmartDashExtension<double>("VOLTAGE"));
 		Logger::MakeLogValue("TOTALCURRENT", &PDP, &PowerDistributionPanel::GetTotalCurrent,
 				MakeWatchLog<double>(currentTooHigh, [](double cur) {return cur > 100.0;}));
