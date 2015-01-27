@@ -23,6 +23,9 @@ public:
 	static SmartDashService& GetInstance();
 
 public:
+	SmartDashService(): DataService(true, 100) {};
+
+public:
 	template<typename DATA_TYPE, class SUBSYSTEM_CLASS>
 	void addLog(SUBSYSTEM_CLASS * const obj, DATA_TYPE (SUBSYSTEM_CLASS::*func)(), const string &name)
 	{
