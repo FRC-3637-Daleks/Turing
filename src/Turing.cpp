@@ -19,8 +19,8 @@ public:
 	Turing()
 	{
 		cout<<"Starting Robot Program"<<endl;
-		Logger::MakeLogValue("TIME", "BOOT_TICKS", &GetTime);
-		Logger::MakeLogValue("VOLTAGE", &PDP, &PowerDistributionPanel::GetVoltage, AddSmartDashExtension<double>("VOLTAGE"));
+		Logger::MakeLogValue("CLOCK", "BOOT_SECONDS", &GetClock);
+		Logger::MakeLogValue("VOLTAGE", &PDP, &PowerDistributionPanel::GetVoltage);//, AddSmartDashExtension<double>("VOLTAGE"));
 		Logger::MakeLogValue("TOTALCURRENT", &PDP, &PowerDistributionPanel::GetTotalCurrent,
 				MakeWatchLog<double>(currentTooHigh, [](double cur) {return cur > 100.0;}));
 		Logger::LogState("GENERAL", LEVEL_t::INFO, "Turing object constructed");
