@@ -83,7 +83,7 @@ public:
 	static const int MakeLogValue(const char * const COMP, SUB_TYPE *obj, DATA_TYPE (SUB_TYPE::* fn)(), const typename ValueLog<DATA_TYPE>::LOG_EXTENSION_t ext=ValueLog<DATA_TYPE>::continueAnyway)
 	{
 		string str(typeid(SUB_TYPE).name());
-		for(auto i = str.begin(); i != str.end(); i++) *i = toupper(*i);   // Makes name upper case
+		//for(auto i = str.begin(); i != str.end(); i++) *i = toupper(*i);   // Makes name upper case
 		return MakeLogValue(str.c_str(), COMP, obj, fn, ext);
 	}
 
