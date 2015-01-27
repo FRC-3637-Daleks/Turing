@@ -67,12 +67,15 @@ public:
 class LogService: public DataService
 {
 private:
+	ostream oldCout;
+	ostream oldCerr;
+	stringstream coutRedirect;
+	stringstream cerrRedirect;
 	unsigned int framesUntilWrite;
 	unsigned int frames;
 
 public:
-	LogService(const bool start=false, const unsigned int period=0, const unsigned int f=DEFAULT_BUFFER_FRAMES):
-		DataService(start, period), framesUntilWrite(f), frames(0) {};
+	LogService(const bool start=false, const unsigned int period=0, const unsigned int f=DEFAULT_BUFFER_FRAMES);
 	virtual ~LogService();
 
 protected:
@@ -97,6 +100,10 @@ public:
 
 	virtual void logText(const string &text)=0;
 	virtual ostream& logText()=0;
+	void logStdout(const string &text);
+	ostream& logStdout();
+	void logStderr(const string &text);
+	ostream& logStderr();
 };
 
 template<typename DATA_TYPE, class SUBSYSTEM_CLASS>

@@ -82,7 +82,7 @@ const int Logger::LogState(const char * const SERV, const int LEV, const char * 
 #ifndef DEBUG_MODE
 	if(LEV != LEVEL_t::INFO)
 #endif
-		std::cout<<GetInstance().currentFrameTime()<<"["<<SERV<<"] "<<text<<std::endl;
+		GetInstance().logStdout()<<GetInstance().currentFrameTime()<<"["<<SERV<<"] "<<text<<std::endl;
 	return 0;
 }
 
