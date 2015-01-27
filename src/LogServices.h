@@ -10,6 +10,7 @@
 
 #include <sstream>
 #include <thread>
+#include <ctime>
 
 #include "Config.h"
 #include "Loggable.h"
@@ -25,6 +26,7 @@ using std::endl;
  * Holds a vector of log objects. Derived classes should maintain data streams
  */
 
+
 class LogService
 {
 protected:
@@ -39,15 +41,20 @@ private:
 	unsigned int frames;
 	thread logThread;
 	char threadState;
+	unsigned int logPeriodMils;
 
 public:
-	LogService(const bool start=false, const unsigned int f=DEFAULT_BUFFER_FRAMES):
-		framesUntilWrite(f), frames(0), logThread(&LogService::LoggingThread, this), threadState(start? THREAD_STATE_RUNNING:THREAD_STATE_INIT) {};
+	LogService(const bool start=false, const unsigned int period=0, const unsigned int f=DEFAULT_BUFFER_FRAMES):
+		framesUntilWrite(f), frames(0), logThread(&LogService::LoggingThread, this),
+		threadState(start? THREAD_STATE_RUNNING:THREAD_STATE_INIT), logPeriodMils(period) {};
 	virtual ~LogService();
 
 protected:
 	virtual ostream& makeLogStream(const string &file)=0;
 	virtual const int logCurrent()=0;
+
+	virtual const int LogAll();
+    virtual const int LogAllCurrent();
 
 	const char getThreadState() const {return threadState;};
     void setThreadState(const char state) {threadState = state;};
@@ -55,9 +62,12 @@ protected:
     void stopThread() {setThreadState(THREAD_STATE_TERMINATE);};
     void joinThread() {stopThread(); if(logThread.joinable()) logThread.join();};
 
+    const unsigned int currentFrame() const {return frames;};
+
 public:
-	const unsigned int currentFrame() const {return frames;};
+	const unsigned int currentFrameTime() const {return frames*logPeriodMils;};
     const unsigned int getFramesUntilWrite() const {return framesUntilWrite;};
+    const unsigned int getLogPeriod() const {return logPeriodMils;};
 
 	virtual void createLogDir(const string &command)=0;
 
@@ -69,9 +79,6 @@ public:
 
 	virtual void logText(const string &text)=0;
 	virtual ostream& logText()=0;
-
-	virtual const int LogAll();
-    virtual const int LogAllCurrent();
 };
 
 template<typename DATA_TYPE, class SUBSYSTEM_CLASS>

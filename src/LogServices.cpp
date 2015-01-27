@@ -15,7 +15,15 @@ void LogService::LoggingThread(LogService * const ls)
 	}
 	while(ls->getThreadState() == LogService::THREAD_STATE_INIT);
 	int failed = 0;
-	while(ls->getThreadState() == THREAD_STATE_RUNNING && failed >= 0) failed = ls->LogAll();
+	clock_t c = 0;
+	while(ls->getThreadState() == THREAD_STATE_RUNNING && failed >= 0)
+	{
+		if(clock() - c > ls->getLogPeriod()*CLOCKS_PER_SEC/1000)
+		{
+			failed = ls->LogAll();
+			c = clock();
+		}
+	}
     ls->LogAllCurrent();
     if(ls->getThreadState() == THREAD_STATE_RUNNING)
     	; // In which the logger quit due to a callback function returning KILL
@@ -94,7 +102,7 @@ ostream& FileLogger::logText()
         doubleBuffer[writer].clear();
 	doubleBuffer[writer].fill('0');
 	doubleBuffer[writer].width(FRAME_TEXT_WIDTH);
-	return doubleBuffer[writer]<<currentFrame()<<": ";
+	return doubleBuffer[writer]<<currentFrameTime()<<": ";
 }
 
 const int FileLogger::logCurrent()
