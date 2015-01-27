@@ -8,5 +8,6 @@
 #include "Hardware.h"
 
 #include "Logger.h"
+#include "SmartDashService.h"
 
 #endif

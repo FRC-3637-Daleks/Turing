@@ -19,6 +19,13 @@ public:
 	Turing()
 	{
 		cout<<"Starting Robot Program"<<endl;
+
+		for(int i = 0; i < 15; i++)
+		{
+			stringstream name;
+			name<<"pdp_current_"<<i;
+			SmartDashService::GetInstance().addLog<double>(std::bind(&PowerDistributionPanel::GetCurrent, &PDP, i), name.str());
+		}
 		Logger::MakeLogValue("CLOCK", "BOOT_SECONDS", &GetClock);
 		Logger::MakeLogValue("CLOCK", "STD_CLOCK", clock);
 		Logger::MakeLogValue("VOLTAGE", &PDP, &PowerDistributionPanel::GetVoltage);//, AddSmartDashExtension<double>("VOLTAGE"));
