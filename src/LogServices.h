@@ -84,6 +84,7 @@ template<typename DATA_TYPE>
 inline void LogService::addLog(std::function<DATA_TYPE(void)> func, const string &file, const typename ValueLog<DATA_TYPE>::LOG_EXTENSION_t ext)
 {
 	logObjects.push_back(new ValueLog<DATA_TYPE>(makeLogStream(file), func, framesUntilWrite, ext));
+	logText()<<"[LOGSERVICE][INFO] Created new log: "<<file<<endl;
 }
 
 class FileLogger: public LogService
