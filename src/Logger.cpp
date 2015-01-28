@@ -41,27 +41,46 @@ const string Logger::GetLogPath()
 	return string(LOG_HOME);
 }
 
-const string Logger::GetTimeDirectory()
+const string Logger::GetRunTimeDirectory()
 {
-	auto t = time(0);
+	/*auto t = time(0);
 	auto tm = localtime(&t);
 	char buf[32] = "";
 	strftime(buf, 32, "%F_%X", tm);
 	return string(buf);
+	*/
+	using std::ios_base;
+	static string runTimeID;
+	if(runTimeID.empty())
+	{
+		unsigned int nRunTimeID = 0;
+		std::fstream rtFile(GetLogPath()+"runtimeID", ios_base::in);
+		rtFile>>nRunTimeID;
+		nRunTimeID++;
+
+		rtFile.close();
+		rtFile.open(GetLogPath()+"runtimeID", ios_base::out | ios_base::trunc);
+		rtFile<<nRunTimeID;
+
+		stringstream ss;
+		ss<<nRunTimeID;
+		runTimeID = ss.str();
+	}
+	return runTimeID;
 }
 
 const string Logger::GetFullPath()
 {
 	if(path.empty())
 	{
-		path = GetLogPath()+GetTimeDirectory()+"/";
+		path = GetLogPath()+GetRunTimeDirectory()+"/";
 	}
 	return path;
 }
 
 const string Logger::GetMakeDirCommand()
 {
-	return string("mkdir ")+(GetFullPath());
+	return string("mkdir ") + GetFullPath();
 }
 
 const string Logger::MakeLogFileName(const string SUBS, const string COMP, const string TYPE)
@@ -82,7 +101,7 @@ const int Logger::LogState(const char * const SERV, const int LEV, const char * 
 #ifndef DEBUG_MODE
 	if(LEV != LEVEL_t::INFO)
 #endif
-		GetInstance().logStdout()<<GetInstance().currentFrameTime()<<"["<<SERV<<"] "<<text<<std::endl;
+		GetInstance().logStdout()<<"["<<SERV<<"] "<<text<<std::endl;
 	return 0;
 }
 

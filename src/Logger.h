@@ -33,7 +33,7 @@ private:
 
 public:
 	static const string GetLogPath();
-	static const string GetTimeDirectory();
+	static const string GetRunTimeDirectory();
 	static const string GetMakeDirCommand();
 	static const string GetFullPath();
 	static const string MakeLogFileName(const string SUBS, const string COMP, const string TYPE);
