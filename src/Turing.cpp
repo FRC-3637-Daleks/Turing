@@ -18,19 +18,26 @@ private:
 public:
 	Turing()
 	{
-		cout<<"Starting Robot Program"<<endl;
-
-		for(int i = 0; i < 15; i++)
+		/*TODO: Have Dash Thread poll Log thread for most recent data
+		 * Write function in ValueLog which returns most previous val
+		 */
+		for(int i = 0; i <= 15; i++)
 		{
 			stringstream name;
 			name<<"pdp_current_"<<i;
 			SmartDashService::GetInstance().addLog<double>(std::bind(&PowerDistributionPanel::GetCurrent, &PDP, i), name.str());
+			Logger::MakeLogValue<double>("PowerDistributionPanel", name.str().c_str(), std::bind(&PowerDistributionPanel::GetCurrent, &PDP, i));
 		}
-		Logger::MakeLogValue("CLOCK", "BOOT_SECONDS", &GetClock);
-		Logger::MakeLogValue("CLOCK", "STD_CLOCK", clock);
+
+		SmartDashService::GetInstance().addLog<double>(std::bind(&PowerDistributionPanel::GetTemperature, &PDP), "pdp_temperature");
+		SmartDashService::GetInstance().addLog<double>(std::bind(&PowerDistributionPanel::GetVoltage, &PDP), "pdp_voltage");
+
 		Logger::MakeLogValue("VOLTAGE", &PDP, &PowerDistributionPanel::GetVoltage);//, AddSmartDashExtension<double>("VOLTAGE"));
 		Logger::MakeLogValue("TOTALCURRENT", &PDP, &PowerDistributionPanel::GetTotalCurrent,
 				MakeWatchLog<double>(currentTooHigh, [](double cur) {return cur > 100.0;}));
+
+
+
 		Logger::LogState("GENERAL", LEVEL_t::INFO, "Turing object constructed");
 		Logger::LogState("GENERAL", LEVEL_t::NOTICE, string("Built: ")+__DATE__+' '+__TIME__);
 	}

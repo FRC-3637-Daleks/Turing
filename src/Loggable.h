@@ -60,6 +60,7 @@ private:
 protected:
 	const DATA_TYPE getPrev() const {return prev;};
 
+
 public:
 	/** Constructs from an output stream, function object, and flush value
 	 */
