@@ -52,9 +52,13 @@ public:
 	typedef std::function<DATA_TYPE(void)> FUNC_t;
 	typedef std::function<Loggable::FAIL_COMMAND(DATA_TYPE)> LOG_EXTENSION_t;
 
-protected:
+private:
 	FUNC_t fn;		///< Function called by Log which returns the value being logged.
 	LOG_EXTENSION_t check;					///< Is called at every Log, defined by client
+	DATA_TYPE prev;		///< Previous value called in Log
+
+protected:
+	const DATA_TYPE getPrev() const {return prev;};
 
 public:
 	/** Constructs from an output stream, function object, and flush value
@@ -67,13 +71,19 @@ public:
 	/// Pushes a value to buf and logs current buffer if full capacity
 	const int Log() override
 	{
-		DATA_TYPE val = fn();
-		if(check(val) == KILL)
+		prev = fn();
+		if(check(prev) == KILL)
 			return -1;
 		return 0;
 	}
 
 	const int logCurrent() override {return Loggable::logCurrent();};
+
+public:
+	FUNC_t makeExtension() const
+	{
+		return std::bind(&ValueLog<DATA_TYPE>::getPrev, this);
+	}
 };
 
 template<typename DATA_TYPE>
@@ -97,14 +107,13 @@ public:
 public:
 	const int Log() override
 	{
-		DATA_TYPE val = ValueLog<DATA_TYPE>::fn();
-		buf.push_back(val);
-		if(ValueLog<DATA_TYPE>::check(val) == Loggable::KILL)
-			return -1;
+		const int ret = ValueLog<DATA_TYPE>::Log();
+
+		buf.push_back(ValueLog<DATA_TYPE>::getPrev());
 		if(buf.size() == flushFrames)
 			return logCurrent();
 
-		return 0;
+		return ret;
 	}
 
 	/// Logs the current buffer immediately
