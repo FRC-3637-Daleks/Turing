@@ -56,6 +56,7 @@ protected:
 	FUNC_t fn;		///< Function called by Log which returns the value being logged.
 	LOG_EXTENSION_t check;					///< Is called at every Log, defined by client
 
+
 public:
 	/** Constructs from an output stream, function object, and flush value
 	 */

@@ -80,12 +80,13 @@ const int LogService::logCurrent()
 	if(coutRedirect.rdbuf()->in_avail() > 0)
 	{
 		oldCout<<coutRedirect.str();
-		char buf[255];
+		/*char buf[255];
 		while(!coutRedirect.eof())
 		{
 			coutRedirect.getline(buf, 255);
 			logText()<<"[STDOUT][INFO] "<<buf<<std::endl;
-		}
+		}*/
+		logText()<<"[STDOUT][INFO]"<<coutRedirect.rdbuf()<<std::endl;
 		coutRedirect.clear();
 	}
 
