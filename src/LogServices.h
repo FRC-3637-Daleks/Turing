@@ -75,7 +75,7 @@ private:
 	unsigned int frames;
 
 public:
-	LogService(const bool start=false, const unsigned int period=0, const unsigned int f=DEFAULT_BUFFER_FRAMES);
+	LogService(const bool start=false, const unsigned int period=0, const bool hijackSTDOUT=true, const unsigned int f=DEFAULT_BUFFER_FRAMES);
 	virtual ~LogService();
 
 protected:
@@ -94,10 +94,10 @@ public:
 	virtual const unsigned int makeInfo(const string &file)=0;
 
 	template<typename DATA_TYPE, class SUBSYSTEM_CLASS>
-	void addLog(SUBSYSTEM_CLASS * const obj, DATA_TYPE (SUBSYSTEM_CLASS::*func)(), const string &file, const typename ValueLog<DATA_TYPE>::LOG_EXTENSION_t ext=ValueLog<DATA_TYPE>::continueAnyway);
+	typename ValueLog<DATA_TYPE>::FUNC_t addLog(SUBSYSTEM_CLASS * const obj, DATA_TYPE (SUBSYSTEM_CLASS::*func)(), const string &file, const typename ValueLog<DATA_TYPE>::LOG_EXTENSION_t ext=ValueLog<DATA_TYPE>::continueAnyway);
 
 	template<typename DATA_TYPE>
-	void addLog(std::function<DATA_TYPE(void)> func, const string &file, const typename ValueLog<DATA_TYPE>::LOG_EXTENSION_t ext=ValueLog<DATA_TYPE>::continueAnyway);
+	typename ValueLog<DATA_TYPE>::FUNC_t addLog(std::function<DATA_TYPE(void)> func, const string &file, const typename ValueLog<DATA_TYPE>::LOG_EXTENSION_t ext=ValueLog<DATA_TYPE>::continueAnyway);
 
 	virtual void logText(const string &text)=0;
 	virtual ostream& logText()=0;
@@ -108,16 +108,18 @@ public:
 };
 
 template<typename DATA_TYPE, class SUBSYSTEM_CLASS>
-inline void LogService::addLog(SUBSYSTEM_CLASS * const obj, DATA_TYPE (SUBSYSTEM_CLASS::*func)(), const string &file, const typename ValueLog<DATA_TYPE>::LOG_EXTENSION_t ext)
+inline typename ValueLog<DATA_TYPE>::FUNC_t LogService::addLog(SUBSYSTEM_CLASS * const obj, DATA_TYPE (SUBSYSTEM_CLASS::*func)(), const string &file, const typename ValueLog<DATA_TYPE>::LOG_EXTENSION_t ext)
 {
-	addLog<DATA_TYPE>(std::bind(func, obj), file, ext);
+	return addLog<DATA_TYPE>(std::bind(func, obj), file, ext);
 }
 
 template<typename DATA_TYPE>
-inline void LogService::addLog(std::function<DATA_TYPE(void)> func, const string &file, const typename ValueLog<DATA_TYPE>::LOG_EXTENSION_t ext)
+inline typename ValueLog<DATA_TYPE>::FUNC_t LogService::addLog(std::function<DATA_TYPE(void)> func, const string &file, const typename ValueLog<DATA_TYPE>::LOG_EXTENSION_t ext)
 {
-	appendLog(new StreamLog<DATA_TYPE>(makeLogStream(file), func, framesUntilWrite, ext));
+	ValueLog<DATA_TYPE> *l;
+	appendLog(l = new StreamLog<DATA_TYPE>(makeLogStream(file), func, framesUntilWrite, ext));
 	logText()<<"[LOGSERVICE][INFO] Created new log: "<<file<<endl;
+	return l->makeExtension();
 }
 
 class FileLogger: public LogService

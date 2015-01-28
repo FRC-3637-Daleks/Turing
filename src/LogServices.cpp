@@ -57,11 +57,15 @@ const int DataService::LogAllCurrent()
 	return ret;
 }
 
-LogService::LogService(const bool start, const unsigned int period, const unsigned int f):
+LogService::LogService(const bool start, const unsigned int period, const bool hijackSTD, const unsigned int f):
 				DataService(start, period), oldCout(std::cout.rdbuf()), oldCerr(std::cerr.rdbuf()), framesUntilWrite(f), frames(0)
 {
-	std::cout.rdbuf(coutRedirect.rdbuf());
-	std::cerr.rdbuf(cerrRedirect.rdbuf());
+	if(hijackSTD)
+	{
+		std::ios_base::sync_with_stdio(true);
+		std::cout.rdbuf(coutRedirect.rdbuf());
+		std::cerr.rdbuf(cerrRedirect.rdbuf());
+	}
 };
 
 LogService::~LogService()  // Deallocates memory
