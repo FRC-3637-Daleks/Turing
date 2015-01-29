@@ -34,14 +34,18 @@ public:
 public:
 	/// Overriden function should record data in buffer or log it
 	virtual const int Log()=0;
+
+	/// If the Logger buffers, should be called at the end to flush buffered values
     virtual const int logCurrent()=0;
 };
 
+/// Default implementation
 inline const int Loggable::logCurrent()
 {
     return Log();
 }
 
+///
 template<typename DATA_TYPE>
 class ValueLog: public Loggable
 {
@@ -62,7 +66,7 @@ protected:
 
 
 public:
-	/** Constructs from an output stream, function object, and flush value
+	/** Constructs from a function object, and extension function object
 	 */
 	ValueLog(const FUNC_t &f, LOG_EXTENSION_t c=continueAnyway):
 		fn(f), check(c) {};
