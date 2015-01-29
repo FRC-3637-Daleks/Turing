@@ -122,7 +122,12 @@ public:
 	{
 		if(buf.size() == 0)
 		    return 0;
-		for(auto i = buf.begin(); i != buf.end(); i++) out<<*i<<std::endl;
+		for(auto i = buf.begin(); i != buf.end(); i++)
+		{
+			out.width(10);
+			out.fill('0');
+			out<<*i<<std::endl;
+		}
 		buf.clear();
 		out.flush();  // Ensures output stream is writing to file
 		return 0;
