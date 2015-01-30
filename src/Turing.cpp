@@ -23,17 +23,12 @@ public:
 		 */
 		for(int i = 0; i <= 15; i++)
 		{
-			stringstream name;
-			name<<"current_"<<i;
-			auto f = Logger::MakeLogValue<double>("PowerDistributionPanel", name.str().c_str(), std::bind(&PowerDistributionPanel::GetCurrent, &PDP, i));
-			SmartDashService::GetInstance().addLog<double>(f, name.str());
+			auto f = Logger::MakeLogValue<double>("PowerDistributionPanel", Logger::MakeComponentName("current", i).c_str(), std::bind(&PowerDistributionPanel::GetCurrent, &PDP, i));
+			SmartDashService::GetInstance().addLog<double>(f, Logger::MakeComponentName("pdp_current", i));
 		}
 
 
 		auto volt = Logger::MakeLogValue("VOLTAGE", &PDP, &PowerDistributionPanel::GetVoltage);
-		/*auto cur = Logger::MakeLogValue("TOTALCURRENT", &PDP, &PowerDistributionPanel::GetTotalCurrent,
-				MakeWatchLog<double>(currentTooHigh, [](double cur) {return cur > 100.0;}));
-		*/
 		SmartDashService::GetInstance().addLog<double>(volt, "pdp_voltage");
 
 

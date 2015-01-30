@@ -36,7 +36,12 @@ public:
 	static const string GetRunTimeDirectory();
 	static const string GetMakeDirCommand();
 	static const string GetFullPath();
-	static const string MakeLogFileName(const string SUBS, const string COMP, const string TYPE);
+
+	/// Generates string of form COMP_ID
+	static const string MakeComponentName(const string &COMP, const int ID=-1);
+
+	/// Generates string of form SUBS.COMP.TYPE
+	static const string MakeLogFileName(const string &SUBS, const string &COMP, const string &TYPE);
 
 private:
 	static LogService &GetInstance();

@@ -85,7 +85,21 @@ const string Logger::GetMakeDirCommand()
 	return string("mkdir ") + GetFullPath();
 }
 
-const string Logger::MakeLogFileName(const string SUBS, const string COMP, const string TYPE)
+const string Logger::MakeComponentName(const string &COMP, const int ID)
+{
+	static stringstream ss;
+	if(ID < 0)
+		return COMP;
+	ss.str("");
+	ss<<COMP;
+	ss<<'_';
+	ss.width(2);
+	ss.fill('0');
+	ss<<ID;
+	return ss.str();
+}
+
+const string Logger::MakeLogFileName(const string &SUBS, const string &COMP, const string &TYPE)
 {
 	return GetFullPath()+SUBS+'.'+COMP+'.'+TYPE;
 }
