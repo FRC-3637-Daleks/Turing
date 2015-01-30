@@ -82,7 +82,7 @@ public:
 	{
 		string str(typeid(SUB_TYPE).name());
 		//for(auto i = str.begin(); i != str.end(); i++) *i = toupper(*i);   // Makes name upper case
-		return MakeLogValue(str.c_str(), COMP, obj, fn, ext);
+		return MakeLogValue(str.substr(2).c_str(), COMP, obj, fn, ext);
 	}
 
 	/// The subsystem used must have a static function GetComponenentName which returns a c-string based on a id

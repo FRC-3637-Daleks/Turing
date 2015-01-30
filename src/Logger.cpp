@@ -63,6 +63,8 @@ const string Logger::GetRunTimeDirectory()
 		rtFile<<nRunTimeID;
 
 		stringstream ss;
+		ss.width(5);
+		ss.fill('0');
 		ss<<nRunTimeID;
 		runTimeID = ss.str();
 	}
