@@ -24,7 +24,7 @@ public:
 		for(int i = 0; i <= 15; i++)
 		{
 			stringstream name;
-			name<<"pdp_current_"<<i;
+			name<<"current_"<<i;
 			auto f = Logger::MakeLogValue<double>("PowerDistributionPanel", name.str().c_str(), std::bind(&PowerDistributionPanel::GetCurrent, &PDP, i));
 			SmartDashService::GetInstance().addLog<double>(f, name.str());
 		}
