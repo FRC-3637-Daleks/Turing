@@ -124,8 +124,6 @@ public:
 		    return 0;
 		for(auto i = buf.begin(); i != buf.end(); i++)
 		{
-			out.width(10);
-			out.fill('0');
 			out<<*i<<std::endl;
 		}
 		buf.clear();
