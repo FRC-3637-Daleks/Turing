@@ -21,11 +21,11 @@ public:
 		/*TODO: Have Dash Thread poll Log thread for most recent data
 		 * Write function in ValueLog which returns most previous val
 		 */
-		for(int i = 0; i <= 15; i++)
+		/*for(int i = 0; i <= 15; i++)
 		{
 			auto f = Logger::MakeLogValue<double>("PowerDistributionPanel", Logger::MakeComponentName("current", i).c_str(), std::bind(&PowerDistributionPanel::GetCurrent, &PDP, i));
 			SmartDashService::GetInstance().addLog<double>(f, Logger::MakeComponentName("pdp_current", i));
-		}
+		}*/
 
 
 		auto volt = Logger::MakeLogValue("VOLTAGE", &PDP, &PowerDistributionPanel::GetVoltage);
