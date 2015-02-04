@@ -10,4 +10,6 @@
 #include "Logger.h"
 #include "SmartDashService.h"
 
+#include "DalekDrive.h"
+
 #endif

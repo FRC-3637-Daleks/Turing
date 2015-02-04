@@ -14,10 +14,14 @@ class Turing: public IterativeRobot
 {
 private:
 	PowerDistributionPanel PDP;
+	DalekDrive drive;
+	Joystick left, right;
 
 public:
-	Turing()
+	Turing(): drive(DalekDrive::Wheel_t::MECANUM_WHEELS, 2, 1, 4, 3), left(0), right(1)
 	{
+		drive[DalekDrive::LEFT_FRONT].SetFlip(true);
+		drive[DalekDrive::LEFT_REAR].SetFlip(true);
 		/*TODO: Have Dash Thread poll Log thread for most recent data
 		 * Write function in ValueLog which returns most previous val
 		 */
@@ -68,7 +72,7 @@ private:
 
 	void TeleopPeriodic() override
 	{
-
+		drive.Drive(right.GetX(), right.GetY(), left.GetX());
 	}
 
 	void TestInit() override
