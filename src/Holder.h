@@ -16,16 +16,20 @@
 #include "Logger.h"
 #include "SmartDashService.h"
 
-class Holder {
-	public:
-		Holder(Solenoid InSolenoid, Solenoid OutSolenoid);
+class Holder
+{
+public:
+		holder
+		{Solenoid InSolenoid,
+		 Solenoid OutSolenoid};
 
-		enum {PISTON_IN,PISTON_OUT};
+		enum holder_t { HOLDER_IN, HOLDER_OUT
+		};
 
 		static const char
 };
 
-#endif
+
 
 
 

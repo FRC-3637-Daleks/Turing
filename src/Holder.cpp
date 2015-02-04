@@ -4,54 +4,51 @@
  *  Created on: Jan 31, 2015
  *      Author: elija_000
 
- Holder
+XX Holder() - constructs Holder
 
-Holder() - constructs Holder
+XX enum Position_t PISTON_OUT, PISTON_IN
 
-enum Position_t PISTON_OUT, PISTON_IN
+XX Holder_t getPosition() - returns current state of pistons (in or out)
 
-setPosition(Position_t p) - either extends or retracts pistons based on value of p
+XX setPosition(holder_t p) - either extends or retracts pistons based on value of p
 
-Position_t getPosition() - returns current state of pistons (in or out)
+XX retract() - retracts pistons
 
-retract() - retracts pistons
-
-extend() - extends pistons
+XX extend() - extends pistons
 
  */
-//#include "Holder.h"
-
-using namespace std;
+#include "Holder.h"
 
 
-void Holder()
+void Holder::setPosition(holder_t p) // either extends or retracts pistons based on value of p
 {
+	m_currentState = p;
+	switch(m_currentState) {
+		case HOLDER_IN:
+			retract();
+			break;
+		case HOLDER_OUT:
+			extend();
+			break;
+		default:
+			break;
+		}
+}
 
-	Solenoid1 = new Solenoid(1);
-
-	int currentPosition = getPosition();  //set currentPosition to current position of holder
-
-	setPosition(currentPosition, desiredPosition); /*either extends or retracts pistons based on value of desired position*/
-
-	// 0 = holder is in retract position
-	// 1 = holder is in extend position
-
-	if (currentPosition == desiredPosition){
-	}else if (desiredPosition == 1){ //if desiredPosition is to extend then extend
-		Solenoid1.set(true);//extend();
-	}else if (desiredPosition == 0){ //if desiredPosition is to retract then retract
-		//Holder.set(DoubleSolenoid.Value.kReverse)//retract();
-		Solenoid1.set(false);
-	}
+void Holder::getPosition()   //returns current state of pistons (in or out)
+{
+	m_currentState = /*  NOT SURE HOW TO DERIVE CURRENT STATS*/;
+	return m_currentState;
+}
 
 void extend()
 {
-
+	/*  NOT SURE YET */
 }
 
 void retract()
 {
-
+	/*  NOT SURE YET */
 }
 
 };
