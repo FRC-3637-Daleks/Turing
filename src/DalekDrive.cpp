@@ -71,7 +71,7 @@ DalekDrive::DalekDrive(const Wheel_t wheelConfig,
 
 DalekDrive::DalekDrive(const Wheel_t wheelConfig, const short leftFront, const short rightFront, const short leftRear, const short rightRear, const int syncGroup)
 {
-	Motor ms[] = {Motor(leftFront, LEFT_FRONT), Motor(rightFront, RIGHT_FRONT), Motor(leftRear, LEFT_REAR), Motor(rightRear, RIGHT_REAR)};
+	Motor ms[] = {Motor(leftFront, LEFT_FRONT, syncGroup), Motor(rightFront, RIGHT_FRONT, syncGroup), Motor(leftRear, LEFT_REAR, syncGroup), Motor(rightRear, RIGHT_REAR, syncGroup)};
 	init(wheelConfig, ms, syncGroup);
 	// calls alternate constructor with paramaters rearranged
 }

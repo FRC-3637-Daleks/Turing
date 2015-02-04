@@ -55,7 +55,7 @@ public:  // static declares/defines
 
 	public:
 		CANTalon *operator-> () const {return motor;};
-		void SetSpeed(const float speed) {if(motor) motor->Set(speed*(flip? -1:1));};
+		void SetSpeed(const float speed) {if(motor) motor->Set(speed*(flip? -1:1), syncGroup);};
 		void SetMecSpeed(const float x, const float y, const float theta)
 		{
 			//printf("DalekDrive::Motor::SetMecSpeed(%f, %f, %f)\nlocation=%d\nmecFuncs[location]=%p\n", x, y, theta, location, mecFuncs[location]);
