@@ -14,7 +14,8 @@ private:
 	double m_P, m_I, m_D;
 	Height_t m_targetState;
 public:
-	Lifter(int talID1, int talID2, double P, double I, double D, double upLim, double lowLim);
+	Lifter(int talID1, int talID2, double P, double I, double D,
+			int iZone, double rampRate, double upLim, double lowLim);
 	void setP(double P);
 	double getP();
 	void setI(double I);

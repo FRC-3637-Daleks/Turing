@@ -7,7 +7,7 @@ const double Lifter::States[] = {
 };
 
 Lifter::Lifter(int talID1, int talID2,
-		double P, double I, double D,
+		double P, double I, double D, int iZone, double rampRate,
 		double upLim, double lowLim): m_tal1(talID1), m_tal2(talID2)
 {
 	m_P = P;
@@ -17,6 +17,17 @@ Lifter::Lifter(int talID1, int talID2,
 	m_lowLim = lowLim;
 	m_targetPos = 0.0;
 	m_targetState = Height_t::Ground;
+	m_tal1.SetFeedbackDevice(CANTalon::QuadEncoder);
+	m_tal1.SetControlMode(CANTalon::ControlMode::kPosition);
+	m_tal1.SetPID(m_P, m_I, m_D);
+	m_tal1.SetIzone(iZone);
+	m_tal1.SetVoltageRampRate(rampRate);
+	//m_tal1.ConfigLimitMode(CANSpeedController::kLimitMode_SoftPositionLimits);
+	m_tal1.ConfigForwardLimit(2000);
+	m_tal1.ConfigReverseLimit(-2000);
+	m_tal2.SetControlMode(CANSpeedController::kFollower);
+	m_tal2.Set(talID1);
+
 }
 
 void Lifter::setP(double P)
