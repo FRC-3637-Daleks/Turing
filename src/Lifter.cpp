@@ -2,22 +2,19 @@
 #include "stdio.h"
 #include "WPILib.h"
 
-const double Height_t::States[] = {
+const double Lifter::States[] = {
 		0.0, 1.0, 1.5, 2.0, 3.0
 };
 
-Lifter::Lifter(CANTalon tal1, CANTalon tal2,
+Lifter::Lifter(int talID1, int talID2,
 		double P, double I, double D,
-		double upLim, double lowLim, Holder h)
+		double upLim, double lowLim): m_tal1(talID1), m_tal2(talID2)
 {
-	m_tal1 = tal1;
-	m_tal2 = tal2;
 	m_P = P;
 	m_I = I;
 	m_D = D;
 	m_upLim = upLim;
 	m_lowLim = lowLim;
-	m_h = h;
 	m_targetPos = 0.0;
 	m_targetState = Height_t::Ground;
 }
@@ -84,7 +81,7 @@ double Lifter::getDistanceToTarget()
 bool Lifter::setTargetState(Height_t h)
 {
 	m_targetState = h;
-	int i;
+	/*int i;
 	switch(m_targetState)
 	{
 	case Height_t::Ground:
@@ -104,9 +101,9 @@ bool Lifter::setTargetState(Height_t h)
 		break;
 	default:
 		i = 0;
-	}
+	}*/
 
-	m_tal1.SetPosition(Height_t::States[i]);
+	m_tal1.SetPosition(States[m_targetState]);
 
 	if (Lifter::getCurrentState() == Lifter::getTargetState())
 	{
@@ -118,16 +115,16 @@ bool Lifter::setTargetState(Height_t h)
 	}
 }
 
-Height_t Lifter::getTargetState()
+Lifter::Height_t Lifter::getTargetState()
 {
 	return m_targetState;
 }
 
-Height_t Lifter::getCurrentState()
+Lifter::Height_t Lifter::getCurrentState()
 {
 	for(int i = 0; i < 5; i++)
 	{
-		if (Lifter::getCurrentPosition() < Height_t::States[i])
+		if (Lifter::getCurrentPosition() < States[i])
 		{
 			switch(i)
 			{
