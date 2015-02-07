@@ -16,9 +16,10 @@ private:
 	PowerDistributionPanel PDP;
 	DalekDrive drive;
 	Joystick left, right;
+	Compressor compressor;
 
 public:
-	Turing(): drive(DalekDrive::Wheel_t::MECANUM_WHEELS, 2, 1, 4, 3), left(0), right(1)
+	Turing(): drive(DalekDrive::Wheel_t::MECANUM_WHEELS, Robot::FRONT_LEFT, Robot::FRONT_RIGHT, Robot::BACK_LEFT, Robot::BACK_RIGHT), left(0), right(1)
 	{
 		drive[DalekDrive::LEFT_FRONT].SetFlip(true);
 		drive[DalekDrive::LEFT_REAR].SetFlip(true);
@@ -31,10 +32,14 @@ public:
 			SmartDashService::GetInstance().addLog<double>(f, Logger::MakeComponentName("pdp_current", i));
 		}
 
-
 		auto volt = Logger::MakeLogValue("VOLTAGE", &PDP, &PowerDistributionPanel::GetVoltage);
 		SmartDashService::GetInstance().addLog<double>(volt, "pdp_voltage");
 
+		auto compressorCur = Logger::MakeLogValue("compressor_current", &compressor, &Compressor::GetCompressorCurrent);
+		SmartDashService::GetInstance().addLog(compressorCur, "compressor_current");
+
+		Logger::StartLogging();
+		SmartDashService::GetInstance().startLogging();
 
 		Logger::LogState("GENERAL", LEVEL_t::INFO, "Turing object constructed");
 		Logger::LogState("GENERAL", LEVEL_t::NOTICE, string("Built: ")+__DATE__+' '+__TIME__);
@@ -48,6 +53,7 @@ private:
 
 	void DisabledInit() override
 	{
+		compressor.Start();
 		Logger::LogState("GENERAL", LEVEL_t::INFO, "Disabled Init Complete");
 	}
 
