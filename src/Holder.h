@@ -7,28 +7,32 @@
 #ifndef _HOLDER_H_
 #define _HOLDER_H_
 
-// This file should only be included in Holder.cpp
-
 #include "WPILib.h"
-
 #include "Hardware.h"
 
-#include "Logger.h"
-#include "SmartDashService.h"
+class Solenoid;
 
-class Holder
-{
+class Holder {
 public:
-		holder
-		{Solenoid InSolenoid,
-		 Solenoid OutSolenoid};
+	Holder(uint8_t ValveIn, uint8_t ValveOut);
+	Holder(Solenoid &ValveIn, Solenoid &ValveOut);
+	Holder(Solenoid *ValveIn, Solenoid *ValveOut);
 
-		enum holder_t { HOLDER_IN, HOLDER_OUT
-		};
+	void setPosition(holder_t p);
+	holder_t getPosition();
+	void extend();
+	void retract();
 
-		static const char
+private:
+		Solenoid *m_a;
+		Solenoid *m_b;
+		bool free_needed;
+		char m_currentState;
+		char m_holderState;
+		enum holder_t { HOLDER_IN, HOLDER_OUT, NUM_STATES };
 };
 
+#endif
 
 
 

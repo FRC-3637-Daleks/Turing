@@ -18,9 +18,40 @@ XX extend() - extends pistons
 
  */
 #include "Holder.h"
+#include "WPILib.h"
 
+Holder::Holder(uint8_t ValveIn, uint8_t ValveOut)
+{
+	m_a = new Solenoid(ValveIn);
+	m_b = new Solenoid(ValveOut);
+	m_currentState = HOLDER_IN;
+	m_holderState = HOLDER_IN;
+	m_needFree = true;
+	return;
+};
 
-void Holder::setPosition(holder_t p) // either extends or retracts pistons based on value of p
+Holder::Holder(Solenoid &ValveIn, Solenoid &ValveOut)
+{
+	m_a = &ValveIn;
+	m_b = &ValveOut;
+	m_currentState = HOLDER_IN;
+	m_holderState = HOLDER_IN;
+	m_needFree = false;
+	return;
+};
+
+Holder::Holder(Solenoid *ValveIn, Solenoid *ValveOut)
+{
+	m_a = ValveIn;
+	m_b = ValveOut;
+	m_currentState = HOLDER_IN;
+	m_holderState = HOLDER_IN;
+	m_needFree = false;
+	return;
+}
+
+void
+Holder::setPosition(holder_t p) // either extends or retracts pistons based on value of p
 {
 	m_currentState = p;
 	switch(m_currentState) {
@@ -32,25 +63,36 @@ void Holder::setPosition(holder_t p) // either extends or retracts pistons based
 			break;
 		default:
 			break;
-		}
+	}
+	return;
 }
 
-void Holder::getPosition()   //returns current state of pistons (in or out)
+holder_t
+Holder::getPosition()   //returns current state of pistons (in or out)
 {
-	m_currentState = /*  NOT SURE HOW TO DERIVE CURRENT STATS*/;
-	return m_currentState;
+
+	if (m_a->Get())
+		m_holderState = HOLDER_IN;
+	else
+		m_holderState = HOLDER_OUT;
+	//m_holderState = (m_a->Get() ? HOLDER_IN : HOLDER_OUT);
+	return m_holderState;
 }
 
-void extend()
+void
+extend()
 {
-	/*  NOT SURE YET */
+	//close output, open input
+	m_a->Set(true);
+	m_b->Set(false);
+	return;
 }
 
-void retract()
+void
+retract()
 {
-	/*  NOT SURE YET */
+	//close input, open output
+	m_a->Set(false);
+	m_b->Set(true);
+	return;
 }
-
-}
-
-
