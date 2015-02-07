@@ -1,5 +1,4 @@
 #include "Turing.h"
-#include "Lifter.h"
 
 using namespace std;
 
@@ -16,11 +15,14 @@ class Turing: public IterativeRobot
 private:
 	PowerDistributionPanel PDP;
 	DalekDrive drive;
+	Lifter lift;
+	Holder hold;
 	Joystick left, right;
 	Compressor compressor;
 
 public:
-	Turing(): drive(DalekDrive::Wheel_t::MECANUM_WHEELS, Robot::FRONT_LEFT, Robot::FRONT_RIGHT, Robot::BACK_LEFT, Robot::BACK_RIGHT), left(0), right(1)
+	Turing(): drive(DalekDrive::Wheel_t::MECANUM_WHEELS, Robot::FRONT_LEFT, Robot::FRONT_RIGHT, Robot::BACK_LEFT, Robot::BACK_RIGHT),
+			  lift(5, 6, 2.0, 0.005, 0.0, 20, 50.0, 11550., -1.0), hold(0, 1), left(0), right(1)
 	{
 		drive[DalekDrive::LEFT_FRONT].SetFlip(true);
 		drive[DalekDrive::LEFT_REAR].SetFlip(true);
@@ -49,6 +51,8 @@ public:
 private:
 	void RobotInit() override
 	{
+		lift.calibrate();
+		hold.setPosition(Holder::HOLDER_IN);
 		Logger::LogState("GENERAL", LEVEL_t::INFO, "Robot init complete");
 	}
 
@@ -80,6 +84,27 @@ private:
 	void TeleopPeriodic() override
 	{
 		drive.Drive(right.GetX(), right.GetY(), left.GetX());
+		if(left.GetRawButton(1))
+		{
+			lift.setTargetPosition(0.0);
+		}
+		else if(left.GetRawButton(2))
+		{
+			lift.setTargetPosition(1000.0);
+		}
+		else if(left.GetRawButton(3))
+		{
+			lift.setTargetPosition(6000.0);
+		}
+
+		if(right.GetRawButton(3))
+		{
+			hold.setPosition(Holder::HOLDER_OUT);
+		}
+		else if(right.GetRawButton(2))
+		{
+			hold.setPosition(Holder::HOLDER_IN);
+		}
 	}
 
 	void TestInit() override
