@@ -17,17 +17,41 @@ Lifter::Lifter(int talID1, int talID2,
 	m_lowLim = lowLim;
 	m_targetPos = 0.0;
 	m_targetState = Height_t::Ground;
-	m_tal1.SetFeedbackDevice(CANTalon::QuadEncoder);
-	m_tal1.SetControlMode(CANTalon::ControlMode::kPosition);
-	m_tal1.SetPID(m_P, m_I, m_D);
-	m_tal1.SetIzone(iZone);
-	m_tal1.SetVoltageRampRate(rampRate);
-	//m_tal1.ConfigLimitMode(CANSpeedController::kLimitMode_SoftPositionLimits);
-	m_tal1.ConfigForwardLimit(2000);
-	m_tal1.ConfigReverseLimit(-2000);
+	m_iZone = iZone;
+	m_rampRate = rampRate;
+
+	calibrate();
+
 	m_tal2.SetControlMode(CANSpeedController::kFollower);
 	m_tal2.Set(talID1);
 
+}
+
+void Lifter::calibrate()
+{
+	if(!m_tal1.GetReverseLimitOK())
+	{
+		m_tal1.SelectProfileSlot(0);
+		m_tal1.SetFeedbackDevice(CANTalon::QuadEncoder);
+		/*m_tal1.SetPID(m_P, m_I, m_D);
+		m_tal1.SetIzone(m_iZone);
+		m_tal1.SetCloseLoopRampRate(m_rampRate);
+		*/
+		m_tal1.ConfigLimitMode(CANSpeedController::kLimitMode_SoftPositionLimits);
+		m_tal1.ConfigForwardLimit(m_upLim);
+		m_tal1.ConfigReverseLimit(m_lowLim);
+		m_tal1.SetSensorDirection(true);
+		m_tal1.SetControlMode(CANTalon::ControlMode::kPosition);
+		m_tal1.SetPosition(0.0);
+		calibrated = true;
+	}
+	else
+	{
+		m_tal1.SetControlMode(CANTalon::ControlMode::kPercentVbus);
+		m_tal1.SetVoltageRampRate(m_rampRate);
+		m_tal1.Set(-0.5);
+		calibrated = false;
+	}
 }
 
 void Lifter::setP(double P)
@@ -62,8 +86,15 @@ double Lifter::getD()
 
 bool Lifter::setTargetPosition(double position)
 {
+	if(!isCalibrated())
+	{
+		calibrate();
+		return false;
+	}
+
 	m_targetPos = position;
-	m_tal1.SetPosition(position);
+	m_tal1.SetCloseLoopRampRate(m_rampRate);
+	m_tal1.Set(position);
 	if (getCurrentPosition() == position)
 	{
 		return true;
@@ -114,7 +145,7 @@ bool Lifter::setTargetState(Height_t h)
 		i = 0;
 	}*/
 
-	m_tal1.SetPosition(States[m_targetState]);
+	setTargetPosition(States[m_targetState]);
 
 	if (Lifter::getCurrentState() == Lifter::getTargetState())
 	{

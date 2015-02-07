@@ -10,9 +10,12 @@ public:
 	static const double States[];
 private:
 	CANTalon m_tal1, m_tal2;
-	double m_upLim, m_lowLim, m_targetPos;
+	int m_iZone;
+	double m_upLim, m_lowLim, m_targetPos, m_rampRate;
 	double m_P, m_I, m_D;
 	Height_t m_targetState;
+	bool calibrated;
+
 public:
 	Lifter(int talID1, int talID2, double P, double I, double D,
 			int iZone, double rampRate, double upLim, double lowLim);
@@ -33,6 +36,8 @@ public:
 	bool setTargetState(Height_t height);
 	Height_t getTargetState();
 	Height_t getCurrentState();
+	void calibrate();
+	const bool isCalibrated() const {return calibrated;};
 };
 
 
