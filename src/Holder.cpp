@@ -28,7 +28,7 @@ Holder::Holder(uint8_t ValveIn, uint8_t ValveOut)
 	m_holderState = HOLDER_IN;
 	m_needFree = true;
 	return;
-};
+}
 
 Holder::Holder(Solenoid &ValveIn, Solenoid &ValveOut)
 {
@@ -38,7 +38,7 @@ Holder::Holder(Solenoid &ValveIn, Solenoid &ValveOut)
 	m_holderState = HOLDER_IN;
 	m_needFree = false;
 	return;
-};
+}
 
 Holder::Holder(Solenoid *ValveIn, Solenoid *ValveOut)
 {
@@ -67,7 +67,7 @@ Holder::setPosition(holder_t p) // either extends or retracts pistons based on v
 	return;
 }
 
-holder_t
+Holder::holder_t
 Holder::getPosition()   //returns current state of pistons (in or out)
 {
 
@@ -80,7 +80,7 @@ Holder::getPosition()   //returns current state of pistons (in or out)
 }
 
 void
-extend()
+Holder::extend()
 {
 	//close output, open input
 	m_a->Set(true);
@@ -89,7 +89,7 @@ extend()
 }
 
 void
-retract()
+Holder::retract()
 {
 	//close input, open output
 	m_a->Set(false);

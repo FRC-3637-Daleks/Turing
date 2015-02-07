@@ -18,6 +18,8 @@ public:
 	Holder(Solenoid &ValveIn, Solenoid &ValveOut);
 	Holder(Solenoid *ValveIn, Solenoid *ValveOut);
 
+	enum holder_t { HOLDER_IN, HOLDER_OUT, NUM_STATES };
+
 	void setPosition(holder_t p);
 	holder_t getPosition();
 	void extend();
@@ -26,10 +28,9 @@ public:
 private:
 		Solenoid *m_a;
 		Solenoid *m_b;
-		bool free_needed;
-		char m_currentState;
-		char m_holderState;
-		enum holder_t { HOLDER_IN, HOLDER_OUT, NUM_STATES };
+		bool m_needFree;
+		holder_t m_currentState;
+		holder_t m_holderState;
 };
 
 #endif
