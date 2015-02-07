@@ -1,4 +1,5 @@
 #include "Turing.h"
+#include "Lifter.h"
 
 using namespace std;
 
