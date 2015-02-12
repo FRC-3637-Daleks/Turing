@@ -19,13 +19,15 @@
 
 class Solenoid;
 
+class DigitalInput;
+
 class Holder {
 public:
 	Holder(uint8_t ValveIn, uint8_t ValveOut);
 	Holder(Solenoid &ValveIn, Solenoid &ValveOut);
 	Holder(Solenoid *ValveIn, Solenoid *ValveOut);
 
-	enum holder_t { HOLDER_IN, HOLDER_OUT, NUM_STATES };
+	enum holder_t { HOLDER_IN, HOLDER_OUT, HOLDING, NUM_STATES };
 
 enum sensor_t {ON, OFF};
 
@@ -33,11 +35,12 @@ enum sensor_t {ON, OFF};
 	holder_t getPosition();
 	void extend();
 	void retract();
-	sensor_t getSensorState(sensor_t Safety);
+	sensor_t getSensorState(DigitalInput sensorDetector);
 
 private:
 		Solenoid *m_a;
 		Solenoid *m_b;
+		DigitalInput *m_safety;
 		bool m_needFree;
 		holder_t m_currentState;
 		holder_t m_holderState;
