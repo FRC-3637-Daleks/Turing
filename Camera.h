@@ -19,13 +19,14 @@ public:
 	Camera(Servo &ServoX, Servo &ServoY);
 	Camera(Servo *ServoX, Servo *ServoY);
 
-	enum Camera_t { CAMERA_NEW_XY_TARGET, CAMERA_AT_XY_TARGET,
+	enum Camera_t { CAMERA_NEW_TARGET, CAMERA_AT_TARGET,
 					NUM_STATES };  // Go to (x,y)
 
-	void setPosition(Camera_t p);
+	void setPanPosition(Camera_t p);
+	void setTiltPosition(Camera_t p);
 	Camera_t getPosition();
-	Camera_t Pan();
-	Camera_t Tilt();
+	Camera_t Pan(float PanTarget);
+	Camera_t Tilt(float TiltTarget);
 
 private:
 		Servo *c_x;

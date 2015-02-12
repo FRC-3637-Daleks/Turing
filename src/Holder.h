@@ -27,10 +27,13 @@ public:
 
 	enum holder_t { HOLDER_IN, HOLDER_OUT, NUM_STATES };
 
+enum sensor_t {ON, OFF};
+
 	void setPosition(holder_t p);
 	holder_t getPosition();
 	void extend();
 	void retract();
+	sensor_t getSensorState(sensor_t Safety);
 
 private:
 		Solenoid *m_a;
@@ -38,6 +41,8 @@ private:
 		bool m_needFree;
 		holder_t m_currentState;
 		holder_t m_holderState;
+		sensor_t Safety;
+
 };
 
 #endif

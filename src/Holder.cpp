@@ -80,6 +80,15 @@ Holder::getPosition()   //returns current state of pistons (in or out)
 }
 
 
+Holder::sensor_t
+Holder::getSensorState(DigitalInput sensorDetector)
+{
+if (m_safety->Get())
+	m_holderState = HOLDING;
+	return m_holderState;
+
+}
+
 Holder::extend()
 {
 	//close output, open input
@@ -93,10 +102,24 @@ Holder::extend()
 
 Holder::retract()
 {
-	//close input, open output
-	m_a->Set(false);
-	m_b->Set(true);
-	m_holderState = HOLDER_IN;
-	m_currentState = m_holderState;
-	return m_currentState;
+	if (getSensorState(m_safety) = HOLDING)
+		Safety=ON;
+	else Safety=OFF;
+
+	switch(Safety) {
+	case ON:
+		m_currentState = HOLDING;
+		return m_currentState;
+		break;
+	case OFF:
+		//close input, open output
+			m_a->Set(false);
+			m_b->Set(true);
+			m_holderState = HOLDER_IN;
+			m_currentState = m_holderState;
+
+			return m_currentState;
+
+	}
+
 }
