@@ -35,7 +35,7 @@ enum sensor_t {ON, OFF};
 	holder_t getPosition();
 	void extend();
 	void retract();
-	sensor_t getSensorState(DigitalInput sensorDetector);
+	sensor_t getSensorState();
 
 private:
 		Solenoid *m_a;
@@ -44,7 +44,7 @@ private:
 		bool m_needFree;
 		holder_t m_currentState;
 		holder_t m_holderState;
-		sensor_t Safety;
+		sensor_t m_sensorState;
 
 };
 
