@@ -2,23 +2,27 @@
 #include "stdio.h"
 #include "WPILib.h"
 
+// States are in Inches
 const double Lifter::States[] = {
-		0.0, 1.0, 1.5, 2.0, 3.0
+		3.0, 8.5, 12.0, 13.5, 18.0, 19.0, 20.0, 24.5, 26.0 // BinT1 is tentative
 };
 
 Lifter::Lifter(int talID1, int talID2,
 		double P, double I, double D, int iZone, double rampRate,
-		double upLim, double lowLim): m_tal1(talID1), m_tal2(talID2)
+		double upLim, double lowLim,
+		double ticksPerInch, double inchesOffGround): m_tal1(talID1), m_tal2(talID2)
 {
 	m_P = P;
 	m_I = I;
 	m_D = D;
-	m_upLim = upLim;
-	m_lowLim = lowLim;
+	m_ticksPerInch = ticksPerInch;	// Temporarily 600
+	m_upLim = (upLim * ticksPerInch);	// Input in inches
+	m_lowLim = (lowLim * ticksPerInch);	// Input in inches
 	m_targetPos = 0.0;
 	m_targetState = Height_t::Ground;
 	m_iZone = iZone;
 	m_rampRate = rampRate;
+	m_inchesOffGround = inchesOffGround;
 
 	calibrate();
 
@@ -42,7 +46,7 @@ void Lifter::calibrate()
 		//m_tal1.ConfigReverseLimit(m_lowLim);
 		m_tal1.SetSensorDirection(true);
 		m_tal1.SetControlMode(CANTalon::ControlMode::kPosition);
-		m_tal1.SetPosition(m_lowLim);
+		m_tal1.SetPosition(0.0);
 		calibrated = true;
 		m_targetPos = m_lowLim;
 	}
@@ -105,8 +109,8 @@ bool Lifter::setTargetPosition(double position)
 	}
 
 	m_tal1.SetCloseLoopRampRate(m_rampRate);
-	m_tal1.Set(position);
-	if (getCurrentPosition() == position)
+	m_tal1.Set(m_targetPos);
+	if (getCurrentPosition() == m_targetPos)
 	{
 		return true;
 	}
@@ -134,29 +138,8 @@ double Lifter::getDistanceToTarget()
 bool Lifter::setTargetState(Height_t h)
 {
 	m_targetState = h;
-	/*int i;
-	switch(m_targetState)
-	{
-	case Height_t::Ground:
-		i = 0;
-		break;
-	case Height_t::Tote1:
-		i = 1;
-		break;
-	case Height_t::ToteCan:
-		i = 2;
-		break;
-	case Height_t::Tote2:
-		i = 3;
-		break;
-	case Height_t::Tote3:
-		i = 4;
-		break;
-	default:
-		i = 0;
-	}*/
 
-	setTargetPosition(States[m_targetState]);
+	setTargetPosition(inchesOffGroundToTicks(States[m_targetState]));
 
 	if (Lifter::getCurrentState() == Lifter::getTargetState())
 	{
@@ -185,26 +168,48 @@ Lifter::Height_t Lifter::getCurrentState()
 				return Height_t::Ground;
 				break;
 			case 1:
-				return Height_t::Tote1;
+				return Height_t::Step;
 				break;
 			case 2:
-				return Height_t::ToteCan;
+				return Height_t::StickUp;
 				break;
 			case 3:
-				return Height_t::Tote2;
+				return Height_t::Bin0;
 				break;
 			case 4:
-				return Height_t::Tote3;
+				return Height_t::Bin1;
+				break;
+			case 5:
+				return Height_t::BinUp;
+				break;
+			case 6:
+				return Height_t::Holding;
+				break;
+			case 7:
+				return Height_t::ToteUp;
+				break;
+			case 8:
+				return Height_t::BinT1;
 				break;
 			default:
-				return Height_t::Tote3;
+				return Height_t::Ground;
 			}
 		}
 	}
-	return Height_t::Tote3;
+	return Height_t::Ground;
 }
 
 void Lifter::offsetTarget(double offset)
 {
 	Lifter::setTargetPosition(m_targetPos + offset);
+}
+
+double Lifter::inchToTicks(double inches)
+{
+	return (inches * m_ticksPerInch);
+}
+
+double Lifter::inchesOffGroundToTicks(double inches)
+{
+	return inchToTicks((inches - m_inchesOffGround)); // Subtracting distance to ground
 }

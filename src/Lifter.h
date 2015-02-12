@@ -6,7 +6,7 @@
 
 class Lifter {
 public:
-	enum Height_t {Ground = 0, Tote1, ToteCan, Tote2, Tote3};
+	enum Height_t {Ground = 0, Step, StickUp, Bin0, Bin1, BinUp, Holding, ToteUp, BinT1};
 	static const double States[];
 private:
 	CANTalon m_tal1, m_tal2;
@@ -15,10 +15,12 @@ private:
 	double m_P, m_I, m_D;
 	Height_t m_targetState;
 	bool calibrated;
+	double m_ticksPerInch, m_inchesOffGround;
 
 public:
 	Lifter(int talID1, int talID2, double P, double I, double D,
-			int iZone, double rampRate, double upLim, double lowLim);
+			int iZone, double rampRate, double upLim, double lowLim,
+			double ticksPerInch, double inchesOffGround);
 	void setP(double P);
 	double getP();
 	void setI(double I);
@@ -39,6 +41,8 @@ public:
 	void calibrate();
 	const bool isCalibrated() const {return calibrated;};
 	void offsetTarget(double offset);
+	double inchToTicks(double inches);
+	double inchesOffGroundToTicks(double inches);
 };
 
 
