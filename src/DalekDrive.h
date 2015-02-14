@@ -73,13 +73,13 @@ private:  // data members
 	int syncGroup;
 
 private:
-	void init(const Wheel_t wheelConfig, const Motor m[N_MOTORS], const int syncGroup);
+	void init(const Wheel_t wheelConfig, const Motor m[N_MOTORS], const float ramp, const int syncGroup);
 	void UpdateSyncGroup();
 
 public:
-	DalekDrive(const Wheel_t wheelConfig, Motor const &leftFront, Motor const &rightFront, Motor const &leftRear, Motor const &rightRear, int syncGroup=1);
-	DalekDrive(const Wheel_t wheelConfig, const short leftFront, const short rightFront, const short leftRear, const short rightRear, int syncGroup=1);
-	DalekDrive(const Wheel_t wheelConfig, const Motor m[N_MOTORS], int syncGroup=1);
+	DalekDrive(const Wheel_t wheelConfig, Motor const &leftFront, Motor const &rightFront, Motor const &leftRear, Motor const &rightRear, const float ramp=10.0, int syncGroup=1);
+	DalekDrive(const Wheel_t wheelConfig, const short leftFront, const short rightFront, const short leftRear, const short rightRear, const float ramp=10.0, int syncGroup=1);
+	DalekDrive(const Wheel_t wheelConfig, const Motor m[N_MOTORS], const float ramp=10.0, int syncGroup=1);
 
 	const Wheel_t GetWheels() const {return wheels;};
 
