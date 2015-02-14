@@ -9,7 +9,7 @@
 #include "OperatorConsole.h"
 
 OperatorConsole::OperatorConsole(const short driveLeftID, const short driveRightID, const short copilotLeftID, const short copilotRightID, const float precision):
-	m_driveLeft(driveLeftID), m_driveRight(driveRightID), m_copilotLeft(driveLeftID), m_copilotRight(driveRightID),
+	m_driveLeft(driveLeftID), m_driveRight(driveRightID), m_copilotLeft(copilotLeftID), m_copilotRight(copilotRightID),
 	precisionFactor(precision), flips({0}), squaredDrive(true), squaredCam(false), squaredLift(false), squaredBinPull(false),
 	liftUp(false), liftDown(false),
 	precisionEnabled(false), relativeDriveEnabled(false), steadyDriveEnabled(true), copilotMode(ROUTINE), autonMode(FORWARD),
@@ -73,12 +73,12 @@ const float OperatorConsole::GetDriveYaw()
 
 const float OperatorConsole::GetCamX()
 {
-	return convertAxis(m_copilotLeft.GetAxis(GamePad::PadAxisType::LEFT_X));
+	return convertAxis(m_copilotLeft.GetAxis(GamePad::PadAxisType::LEFT_X))/2.0+0.5;
 }
 
 const float OperatorConsole::GetCamY()
 {
-	return convertAxis(m_copilotLeft.GetAxis(GamePad::PadAxisType::LEFT_Y));
+	return convertAxis(m_copilotLeft.GetAxis(GamePad::PadAxisType::LEFT_Y))/2.0+0.5;
 }
 
 const bool OperatorConsole::PollPrecisionDriving()
@@ -96,12 +96,13 @@ void OperatorConsole::PollLifterHeight()
 	if(!m_copilotLeft.GetButton(GamePad::TOP_RIGHT_SHOULDER) && !m_copilotLeft.GetButton(GamePad::BOTTOM_RIGHT_SHOULDER))
 		liftUp = liftDown = false;
 
+
 	if(!liftUp && m_copilotLeft.GetButton(GamePad::TOP_RIGHT_SHOULDER))
 	{
 		liftUp = true;
 		targetHeight = Lifter::Height_t(int(targetHeight)+1);
-		if(targetHeight >= Lifter::BinT1)
-			targetHeight = Lifter::BinT1;
+		if(targetHeight >= Lifter::Top)
+			targetHeight = Lifter::Top;
 	}
 
 	if(!liftDown && m_copilotLeft.GetButton(GamePad::BOTTOM_RIGHT_SHOULDER))
@@ -113,4 +114,12 @@ void OperatorConsole::PollLifterHeight()
 	}
 }
 
+const bool OperatorConsole::GetHoldExtend()
+{
+	return m_copilotLeft.GetButton(GamePad::B4);
+}
 
+const bool OperatorConsole::GetHoldRetract()
+{
+	return m_copilotLeft.GetButton(GamePad::B2);
+}
