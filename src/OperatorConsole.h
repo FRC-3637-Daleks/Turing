@@ -26,7 +26,7 @@ private:
 
 private:	/// Hardware
 	Joystick m_driveLeft, m_driveRight;
-	Joystick m_copilotLeft;		///< Actual joystick type unknown
+	GamePad m_copilotLeft;		///< Actual joystick type unknown
 	Joystick m_copilotRight;		///< Actual joystick type unknown
 
 private:	/// Configuration
@@ -34,10 +34,14 @@ private:	/// Configuration
 	bool flips[AnalogControls::N_CONTROLS];
 	bool squaredDrive, squaredCam, squaredLift, squaredBinPull;		///< Axis squaring
 
+private:	/// Button states
+	bool liftUp, liftDown;
+
 private:	/// Dynamic settings
 	bool precisionEnabled, relativeDriveEnabled, steadyDriveEnabled;
 	CopilotMode_t copilotMode;
 	AutonomousMode_t autonMode;
+	Lifter::Height_t targetHeight;
 
 public:
 	OperatorConsole(const short driveLeftID, const short driveRightID, const short copilotLeftID, const short copilotRightID, const float precision=0.3);
@@ -51,10 +55,11 @@ public:
 	void UpdateDriveControls();
 
 	/// Updates controls during disabled mode
-	void UpdatePreGame();
+	void UpdatePreGame() {};
 
 public:	/// Class internal status Get and Set functions
 	const float GetPrecisionFactor() const {return precisionFactor;};
+	const float GetPrecision() const;
 	const bool GetFlip(const AnalogControls control) const;
 	void SetFlip(const AnalogControls control, const bool flip);
 
@@ -88,6 +93,8 @@ public:	/// Class internal status Get and Set functions
 	const CopilotMode_t GetCopilotMode() const {return copilotMode;};
 	void SetCopilotMode(const CopilotMode_t mode) {copilotMode = mode;};
 
+	const Lifter::Height_t GetLiftTarget() const {return targetHeight;};
+
 public: /// Analog Get Functions
 	const float GetDriveX();
 	const float GetDriveY();
@@ -100,6 +107,7 @@ public: /// Analog Get Functions
 private:	/// Private Button State Poll Functions
 	const bool PollPrecisionDriving();
 	const bool PollRelativeDriving();
+	void PollLifterHeight();
 
 public:		/// Button State Functions
 	const bool GetCenterCamera();

@@ -59,7 +59,7 @@ public:  // static declares/defines
 		void SetMecSpeed(const float x, const float y, const float theta)
 		{
 			//printf("DalekDrive::Motor::SetMecSpeed(%f, %f, %f)\nlocation=%d\nmecFuncs[location]=%p\n", x, y, theta, location, mecFuncs[location]);
-			SetSpeed((mecFuncs[location])(-x, y, -theta));
+			SetSpeed((mecFuncs[location])(x, y, theta));
 
 		};
 
