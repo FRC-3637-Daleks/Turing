@@ -4,7 +4,7 @@
 
 // States are in Inches
 const double Lifter::States[] = {
-		3.0, 8.5, 12.0, 13.5, 18.0, 19.0, 20.0, 24.5, 26.0 // BinT1 is tentative
+		3.0, 8.5, 12.0, 13.5, 18.0, 19.0, 20.0, 24.5, 39.0, 70.0 // BinT1 is tentative
 };
 
 Lifter::Lifter(int talID1, int talID2,
@@ -35,13 +35,12 @@ void Lifter::calibrate()
 {
 	if(!m_tal1.GetReverseLimitOK())
 	{
-		m_tal1.SelectProfileSlot(0);
+		//m_tal1.SelectProfileSlot(0);
 		m_tal1.SetFeedbackDevice(CANTalon::QuadEncoder);
-		/*m_tal1.SetPID(m_P, m_I, m_D);
+		m_tal1.SetPID(m_P, m_I, m_D);
 		m_tal1.SetIzone(m_iZone);
 		m_tal1.SetCloseLoopRampRate(m_rampRate);
-		*/
-		m_tal1.ConfigLimitMode(CANSpeedController::kLimitMode_SoftPositionLimits);
+		m_tal1.ConfigLimitMode(CANSpeedController::kLimitMode_SwitchInputsOnly);
 		m_tal1.ConfigForwardLimit(m_upLim);
 		//m_tal1.ConfigReverseLimit(m_lowLim);
 		m_tal1.SetSensorDirection(true);
@@ -139,21 +138,14 @@ bool Lifter::setTargetState(Height_t h)
 {
 	m_targetState = h;
 
-	if (m_targetState == Ground)
-	{
-		Lifter::offsetTarget(-100.0);
-		if(!m_tal1.GetReverseLimitOK())
-		{
-			calibrate();
-		}
-	}
-	else
-	{
-		setTargetPosition(inchesOffGroundToTicks(States[m_targetState]));
-	}
-
+	setTargetPosition(inchesOffGroundToTicks(States[m_targetState]));
 	if (Lifter::getCurrentState() == Lifter::getTargetState())
 	{
+		if(Lifter::getCurrentPosition() <= 100 && m_targetState == Ground)
+		{
+			calibrate();
+			return isCalibrated();
+		}
 		return true;
 	}
 	else

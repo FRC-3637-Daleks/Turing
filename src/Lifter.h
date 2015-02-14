@@ -6,7 +6,7 @@
 
 class Lifter {
 public:
-	enum Height_t {Ground = 0, Step, StickUp, Bin0, Bin1, BinUp, Holding, ToteUp, BinT1};
+	enum Height_t {Ground = 0, Step, StickUp, Bin0, Bin1, BinUp, Holding, ToteUp, BinT1, Top};
 	static const double States[];
 private:
 	CANTalon m_tal1, m_tal2;
