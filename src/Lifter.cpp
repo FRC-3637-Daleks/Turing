@@ -139,7 +139,18 @@ bool Lifter::setTargetState(Height_t h)
 {
 	m_targetState = h;
 
-	setTargetPosition(inchesOffGroundToTicks(States[m_targetState]));
+	if (m_targetState == Ground)
+	{
+		Lifter::offsetTarget(-100.0);
+		if(!m_tal1.GetReverseLimitOK())
+		{
+			calibrate();
+		}
+	}
+	else
+	{
+		setTargetPosition(inchesOffGroundToTicks(States[m_targetState]));
+	}
 
 	if (Lifter::getCurrentState() == Lifter::getTargetState())
 	{
@@ -199,7 +210,7 @@ Lifter::Height_t Lifter::getCurrentState()
 	return Height_t::Ground;
 }
 
-void Lifter::offsetTarget(double offset)
+void Lifter::offsetTarget(double offset)	// Inches
 {
 	Lifter::setTargetPosition(m_targetPos + offset);
 }
