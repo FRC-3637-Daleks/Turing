@@ -8,29 +8,30 @@ class Lifter {
 public:
 	enum Height_t {Ground = 0, Step, StackUp, Holding, ToteUp, BinT1, BinT2, BinT3, Top};
 	static const double States[];
-private:
-	CANTalon m_tal1, m_tal2;
-	int m_iZone;
-	double m_upLim, m_lowLim, m_targetPos, m_rampRate;
-	double m_P, m_I, m_D;
-	Height_t m_targetState;
-	bool calibrated;
-	double m_ticksPerInch, m_inchesOffGround;
+	static constexpr double ticksPerInch = 183.0;
+	static constexpr double inchesOffGround = 3.0;
+	static constexpr double toleranceTicks = 20.0;
 
 public:
-	Lifter(int talID1, int talID2, double P, double I, double D,
-			int iZone, double rampRate, double upLim, double lowLim,
-			double ticksPerInch=120.0, double inchesOffGround=3.0);
-	void setP(double P);
-	double getP();
-	void setI(double I);
-	double getI();
-	void setD(double D);
-	double getD();
-	void setUpLim(double upLim);
-	double getUpLim();
-	void setLowLim(double lowLim);
-	double getLowLim();
+	struct PIDConfig
+	{
+		double P;
+		double I;
+		double D;
+		unsigned int iZone;
+		PIDConfig(const double iP, const double iI=0.0, const double iD=0.0, const unsigned int iiZone=200): P(iP), I(iI), D(iD), iZone(iiZone) {};
+	};
+
+private:
+	CANTalon m_tal1, m_tal2;
+	PIDConfig pid;
+	double rampRate;
+	double targetPosition;
+	Height_t targetState;
+	bool calibrated;
+
+public:
+	Lifter(int talID1, int talID2, PIDConfig iPID, double ramp);
 	bool setTargetPosition(double position);
 	double getTargetPosition();
 	double getCurrentPosition();
