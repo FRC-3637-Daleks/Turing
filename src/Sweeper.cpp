@@ -12,10 +12,14 @@
 class Sweeper {
 
 private:
-
+/*
 	void OperatorControl() {
-			while (IsOperatorControl() && IsEnabled()) {
+			while (IsOperatorControl() && IsEnabled())
+			{
 
 				m_motor.Set(m_stick.GetY());
+			};
+	*/                        };
 
-};
+
+

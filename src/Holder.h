@@ -18,7 +18,6 @@
 #include "Hardware.h"
 
 class Solenoid;
-
 class DigitalInput;
 
 class Holder {
@@ -28,8 +27,9 @@ public:
 	Holder(Solenoid *ValveIn, Solenoid *ValveOut);
 
 	enum holder_t { HOLDER_IN, HOLDER_OUT, HOLDING, NUM_STATES };
+	enum sensor_t { TRUE_T, FALSE_F };
 
-bool sensor_t;
+	bool sensor_bool;
 
 	void setPosition(holder_t p);
 	holder_t getPosition();
