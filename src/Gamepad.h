@@ -15,7 +15,7 @@ public:
 	 */
 	typedef enum
 	{
-		LEFT_X=1, LEFT_Y, RIGHT_X, RIGHT_Y, PAD_X, PAD_Y
+		LEFT_X=0, LEFT_Y, RIGHT_X, RIGHT_Y, PAD_X, PAD_Y
 	} PadAxisType;
 
 
