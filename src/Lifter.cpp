@@ -6,8 +6,9 @@
 const double Lifter::States[] = {
 		[Lifter::Ground]=3.0,
 		[Lifter::Step]=8.5,
+		[Lifter::StackDown]=9.0,
 		[Lifter::StackUp]=12.0,
-		[Lifter::Holding]=20.0,
+		[Lifter::ToteDown]=20.0,
 		[Lifter::ToteUp]=24.5,
 		[Lifter::BinT1]=39.0,
 		[Lifter::BinT2]=51.0,
