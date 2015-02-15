@@ -15,10 +15,10 @@ private:
 
 public:
 	Turing(): drive(DalekDrive::Wheel_t::MECANUM_WHEELS, Robot::FRONT_LEFT, Robot::FRONT_RIGHT, Robot::BACK_LEFT, Robot::BACK_RIGHT, 50.0),
-			  lift(5, 6, 2.0, 0.005, 0.0, 20, 50.0, 11550, -1.0, 183.0, 2.5),
-			  hold(0, 1, 2),
-			  op(0, 1, 2, 3),
-			  gimbal(1, 0, 0.0, 0.0)
+			  lift(Robot::LIFT_1, Robot::LIFT_2, 2.0, 0.005, 0.0, 20, 50.0, 11550, -1.0, 183.0, 2.5),
+			  hold(Robot::HOLDER_RETRACT, Robot::HOLDER_EXTEND, Robot::TOTE_SWITCH),
+			  op(Robot::DRIVER_LEFT, Robot::DRIVER_RIGHT, Robot::COPILOT_LEFT, Robot::COPILOT_RIGHT),
+			  gimbal(Robot::CAMERA_X, Robot::CAMERA_Y, 0.0, 0.0)
 	{
 		drive[DalekDrive::LEFT_FRONT].SetFlip(true);
 		drive[DalekDrive::LEFT_REAR].SetFlip(true);
