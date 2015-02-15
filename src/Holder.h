@@ -29,7 +29,7 @@ public:
 
 	enum holder_t { HOLDER_IN, HOLDER_OUT, HOLDING, NUM_STATES };
 
-enum sensor_t {ON, OFF};
+bool sensor_t;
 
 	void setPosition(holder_t p);
 	holder_t getPosition();

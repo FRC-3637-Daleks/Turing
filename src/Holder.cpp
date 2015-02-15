@@ -76,7 +76,7 @@ Holder::getPosition()   //returns current state of pistons (in or out)
 	else
 		m_holderState = HOLDER_OUT;
 
-	if (getSensorState() == ON)
+	if (getSensorState() == true)
 		m_holderState=HOLDING;
 
 	//m_holderState = (m_a->Get() ? HOLDER_IN : HOLDER_OUT);
