@@ -15,7 +15,7 @@ private:
 
 public:
 	Turing(): drive(DalekDrive::Wheel_t::MECANUM_WHEELS, Robot::FRONT_LEFT, Robot::FRONT_RIGHT, Robot::BACK_LEFT, Robot::BACK_RIGHT, 50.0),
-			  lift(5, 6, 2.0, 0.005, 0.0, 20, 50.0, 11550, -1.0, 155, 3.0), hold(0, 1), op(0, 1, 2, 3), gimbal(0, 1, 0.0, 0.0)
+			  lift(5, 6, 2.0, 0.005, 0.0, 20, 50.0, 11550, -1.0, 183.0, 2.5), hold(0, 1, 2), op(0, 1, 2, 3), gimbal(1, 0, 0.0, 0.0)
 	{
 		drive[DalekDrive::LEFT_FRONT].SetFlip(true);
 		drive[DalekDrive::LEFT_REAR].SetFlip(true);
@@ -23,6 +23,9 @@ public:
 		op.SetDriveSquared(true);
 		op.SetFlip(OperatorConsole::AnalogControls::DRIVE_X, true);
 		op.SetFlip(OperatorConsole::DRIVE_YAW, true);
+		op.SetFlip(OperatorConsole::AnalogControls::CAM_X, true);
+		op.SetFlip(OperatorConsole::AnalogControls::CAM_Y, true);
+
 	}
 
 private:
@@ -62,7 +65,9 @@ private:
 		drive.Drive(op.GetDriveX(), op.GetDriveY(), op.GetDriveYaw());
 		gimbal.setPosition(op.GetCamX(), op.GetCamY());
 		SmartDashboard::PutNumber("position", double(op.GetLiftTarget()));
+
 		lift.setTargetState(op.GetLiftTarget());
+
 		if(op.GetHoldExtend())
 			hold.extend();
 		else if(op.GetHoldRetract())
