@@ -27,7 +27,7 @@ private:
 	PIDConfig pid;
 	double rampRate;
 	double targetPosition;
-	Height_t targetState;
+	Height_t targetState, previousState;
 	bool calibrated;
 
 public:

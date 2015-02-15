@@ -128,10 +128,10 @@ Lifter::Height_t Lifter::getCurrentState()
 	{
 		if(fabs(getCurrentPosition() - inchesOffGroundToTicks(States[i])) < toleranceTicks) 	// Checks to see if its within the tolerance of the state
 		{
-			return Height_t(i);
+			return previousState = Height_t(i);
 		}
 	}
-	return Height_t::Ground;
+	return previousState;
 }
 
 void Lifter::offsetTarget(double offset)	// Inches
