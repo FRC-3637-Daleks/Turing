@@ -3,8 +3,17 @@
 #include "WPILib.h"
 
 // States are in Inches
+//	enum Height_t {Ground = 0, Step, StackUp, Holding, ToteUp, BinT1, BinT2, BinT3, Top};
 const double Lifter::States[] = {
-		3.0, 8.5, 12.0, 13.5, 18.0, 19.0, 20.0, 24.5, 39.0, 70.0 // BinT1 is tentative
+		[Lifter::Ground]=3.0,
+		[Lifter::Step]=8.5,
+		[Lifter::StackUp]=12.0,
+		[Lifter::Holding]=20.0,
+		[Lifter::ToteUp]=24.5,
+		[Lifter::BinT1]=39.0,
+		[Lifter::BinT2]=51.0,
+		[Lifter::BinT3]=63.0,
+		[Lifter::Top]=75.0
 };
 
 Lifter::Lifter(int talID1, int talID2,
@@ -161,42 +170,11 @@ Lifter::Height_t Lifter::getTargetState()
 
 Lifter::Height_t Lifter::getCurrentState()
 {
-	for(int i = 0; i < 5; i++)
+	for(int i = 0; i < Top; i++)
 	{
-		if (Lifter::getCurrentPosition() < States[i])
+		if (Lifter::getCurrentPosition() < inchesOffGroundToTicks(States[i]))
 		{
-			switch(i)
-			{
-			case 0:
-				return Height_t::Ground;
-				break;
-			case 1:
-				return Height_t::Step;
-				break;
-			case 2:
-				return Height_t::StickUp;
-				break;
-			case 3:
-				return Height_t::Bin0;
-				break;
-			case 4:
-				return Height_t::Bin1;
-				break;
-			case 5:
-				return Height_t::BinUp;
-				break;
-			case 6:
-				return Height_t::Holding;
-				break;
-			case 7:
-				return Height_t::ToteUp;
-				break;
-			case 8:
-				return Height_t::BinT1;
-				break;
-			default:
-				return Height_t::Ground;
-			}
+			return Height_t(i);
 		}
 	}
 	return Height_t::Ground;
