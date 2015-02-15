@@ -93,6 +93,7 @@ public:	/// Class internal status Get and Set functions
 	const CopilotMode_t GetCopilotMode() const {return copilotMode;};
 	void SetCopilotMode(const CopilotMode_t mode) {copilotMode = mode;};
 
+	void SetLiftTarget(const Lifter::Height_t target) {targetHeight = target;};
 	const Lifter::Height_t GetLiftTarget() const {return targetHeight;};
 
 public: /// Analog Get Functions

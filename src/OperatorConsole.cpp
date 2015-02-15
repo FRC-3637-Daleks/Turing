@@ -39,6 +39,10 @@ const float OperatorConsole::convertAxis(const float raw, const bool squared, co
 void OperatorConsole::UpdateDriveControls()
 {
 	SetPrecisionEnabled(PollPrecisionDriving());	/// Precision Driving
+	if(GetPrecisionEnabled())
+		SetDriveSquared(false);
+	else
+		SetDriveSquared(true);
 	SetRelativeDriveEnabled(PollRelativeDriving());	/// Relative Driving
 	PollLifterHeight();
 }
@@ -83,7 +87,10 @@ const float OperatorConsole::GetCamY()
 
 const bool OperatorConsole::PollPrecisionDriving()
 {
-	return m_driveRight.GetTrigger() && m_driveLeft.GetTrigger();
+	if(m_driveRight.GetRawButton(10) && GetPrecision() == true)
+		return false;
+	else if(m_driveRight.GetRawButton(11) && GetPrecision() == false)
+		return true;
 }
 
 const bool OperatorConsole::PollRelativeDriving()
@@ -122,4 +129,9 @@ const bool OperatorConsole::GetHoldExtend()
 const bool OperatorConsole::GetHoldRetract()
 {
 	return m_copilotLeft.GetButton(GamePad::B2);
+}
+
+const float OperatorConsole::GetLift()
+{
+	return 50.0*convertAxis(m_copilotLeft.GetAxis(GamePad::RIGHT_Y));
 }
