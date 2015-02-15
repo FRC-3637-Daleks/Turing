@@ -11,7 +11,7 @@
 #include "WPILib.h"
 #include "Hardware.h"
 
-class Talon;
+class CANTalon;
 class CANTalon;
 class DigitalInput;
 class Joystick;
@@ -26,10 +26,10 @@ class Sweeper {
 	enum sweeper_t { SWEEPER_UP, SWEEPER_DOWN, NUM_STATES };
 
 
-	void setPosition(holder_t p);
-	holder_t getPosition();
-	void extend();
-	void retract();
+	sweeper_t setPosition(sweeper_t p);
+	sweeper_t getPosition();
+	void lowerSweeper();
+	void raiseSweeper();
 
 private:
 		CANTalon m_motor;

@@ -14,7 +14,7 @@ XX setPosition(holder_t p) - either extends or retracts pistons based on value o
 
 XX retract() - retracts pistons
 
-XX extend() - extefnds pistons
+XX extend() - extends pistons
 
  */
 #include "Holder.h"
@@ -75,22 +75,8 @@ Holder::getPosition()   //returns current state of pistons (in or out)
 		m_holderState = HOLDER_IN;
 	else
 		m_holderState = HOLDER_OUT;
-
-	if (getSensorState() == true)
-		m_holderState=HOLDING;
-
 	//m_holderState = (m_a->Get() ? HOLDER_IN : HOLDER_OUT);
 	return m_holderState;
-}
-
-
-Holder::sensor_t
-Holder::getSensorState()
-{
-if (m_safety->Get())
-	m_holderState = HOLDING;
-	return m_sensorState;
-
 }
 
 void
@@ -99,24 +85,14 @@ Holder::extend()
 	//close output, open input
 	m_a->Set(true);
 	m_b->Set(false);
-	m_holderState = HOLDER_OUT;
-	m_currentState = m_holderState;
 	return;
 }
 
 void
 Holder::retract()
 {
-if (getPosition() == HOLDING)
+	//close input, open output
+	m_a->Set(false);
+	m_b->Set(true);
 	return;
-		//close input, open output
-			m_a->Set(false);
-			m_b->Set(true);
-			m_holderState = HOLDER_IN;
-			m_currentState = m_holderState;
-
-			return;
-
-	}
-
-
+}
