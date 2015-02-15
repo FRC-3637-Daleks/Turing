@@ -36,7 +36,7 @@ Sweeper::Sweeper(CANTalon *m_talon)
 	return;
 }
 
-sweeper_t
+Sweeper::sweeper_t
 Sweeper::setPosition(sweeper_t p) // either RAISES or LOWERS Sweeper based on Input value
 {
 	m_targetState = p;
@@ -50,18 +50,18 @@ Sweeper::setPosition(sweeper_t p) // either RAISES or LOWERS Sweeper based on In
 		default:
 			break;
 	}
-	return;
+	return m_targetState;
 }
 
-sweeper_t
+Sweeper::sweeper_t
 Sweeper::getPosition()   //returns current state of Sweeper (SWEEPER_UP or SWEEPER_DOWN)
 {
-	if (m_t->Get()=0)  //If GET from TALON object returns 0, then it is UP
-		m_sweeperState = SWEEPER_UP;
+	if (m_t->Get()==0)  //If GET from TALON object returns 0, then it is UP
+		m_currentState = SWEEPER_UP;
 	else
-		m_sweeperState = SWEEPER_DOWN;
+		m_currentState = SWEEPER_DOWN;
 
-	return m_sweeperState;
+	return m_currentState;
 }
 
 void
@@ -69,7 +69,7 @@ Sweeper::lowerSweeper()
 {
 	//Figure out the current and Target Sweeper positions, see if movement is needed
 	m_currentState = getPosition();
-	m_targetState =  setPosition();
+	setPosition(m_targetState);
 
 	//If currentPosition != targetPosition then move
 	if (m_currentState != m_targetState)
@@ -82,7 +82,8 @@ Sweeper::raiseSweeper()
 {
 //Figure out the current and Target Sweeper positions, see if movement is needed
 	m_currentState = Sweeper::getPosition();
-	m_targetState = Sweeper::setPosition();
+	setPosition(m_targetState);
+
 
 	//If currentPosition != targetPosition then move
 	if (m_currentState != m_targetState)

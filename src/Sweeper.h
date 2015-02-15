@@ -11,7 +11,7 @@
 #include "WPILib.h"
 #include "Hardware.h"
 
-class CANTalon;
+class Talon;
 class CANTalon;
 class DigitalInput;
 class Joystick;
@@ -32,6 +32,7 @@ class Sweeper {
 	void raiseSweeper();
 
 private:
+		CANTalon *m_t;
 		CANTalon m_motor;
 	    Joystick m_stick;
 		bool m_needFree;
