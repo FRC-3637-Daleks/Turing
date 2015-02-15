@@ -62,7 +62,7 @@ void OperatorConsole::SetFlip(const AnalogControls control, const bool flip)
 
 const float OperatorConsole::GetDriveX()
 {
-	return convertAxis(m_driveRight.GetX(), GetDriveSquared(), GetFlip(DRIVE_X), GetPrecision());
+	return convertAxis(m_driveRight.GetX(), GetDriveSquared(), GetFlip(DRIVE_X), 1.0);
 }
 
 const float OperatorConsole::GetDriveY()
