@@ -16,9 +16,9 @@ class DigitalInput;
 
 class Holder {
 public:
-	Holder(uint8_t ValveIn, uint8_t ValveOut);
-	Holder(Solenoid &ValveIn, Solenoid &ValveOut);
-	Holder(Solenoid *ValveIn, Solenoid *ValveOut);
+	Holder(uint8_t ValveIn, uint8_t ValveOut, uint8_t safety);
+	Holder(Solenoid &ValveIn, Solenoid &ValveOut, DigitalInput &safety);
+	Holder(Solenoid *ValveIn, Solenoid *ValveOut, DigitalInput *safety);
 
 	enum holder_t { HOLDER_IN, HOLDER_OUT, HOLDING, NUM_STATES };
 

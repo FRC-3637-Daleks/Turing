@@ -24,30 +24,33 @@ XX extend() - extefnds pistons
 #include "Holder.h"
 #include "WPILib.h"
 
-Holder::Holder(uint8_t ValveIn, uint8_t ValveOut)
+Holder::Holder(uint8_t ValveIn, uint8_t ValveOut, uint8_t safety)
 {
 	m_a = new Solenoid(ValveIn);
 	m_b = new Solenoid(ValveOut);
+	m_safety = new DigitalInput(safety);
 	m_currentState = HOLDER_IN;
 	m_holderState = HOLDER_IN;
 	m_needFree = true;
 	return;
 }
 
-Holder::Holder(Solenoid &ValveIn, Solenoid &ValveOut)
+Holder::Holder(Solenoid &ValveIn, Solenoid &ValveOut, DigitalInput &safety)
 {
 	m_a = &ValveIn;
 	m_b = &ValveOut;
+	m_safety = &safety;
 	m_currentState = HOLDER_IN;
 	m_holderState = HOLDER_IN;
 	m_needFree = false;
 	return;
 }
 
-Holder::Holder(Solenoid *ValveIn, Solenoid *ValveOut)
+Holder::Holder(Solenoid *ValveIn, Solenoid *ValveOut, DigitalInput *safety)
 {
 	m_a = ValveIn;
 	m_b = ValveOut;
+	m_safety = safety;
 	m_currentState = HOLDER_IN;
 	m_holderState = HOLDER_IN;
 	m_needFree = false;
@@ -74,14 +77,13 @@ Holder::setPosition(holder_t p) // either extends or retracts pistons based on v
 Holder::holder_t
 Holder::getPosition()   //returns current state of pistons (in or out)
 {
-
 	if (m_a->Get())
 		m_holderState = HOLDER_IN;
 	else
 		m_holderState = HOLDER_OUT;
 
 	if (getSensorState() == ON)
-		m_holderState=HOLDING;
+		m_holderState = HOLDING;
 
 	//m_holderState = (m_a->Get() ? HOLDER_IN : HOLDER_OUT);
 	return m_holderState;
@@ -90,8 +92,17 @@ Holder::getPosition()   //returns current state of pistons (in or out)
 Holder::sensor_t
 Holder::getSensorState()
 {
-if (m_safety->Get())
-	m_holderState = HOLDING;
+	if (!m_safety->Get())
+	{
+		m_sensorState = ON;
+		printf("pressed\n");
+	}
+	else
+	{
+		m_sensorState = OFF;
+		printf("released\n");
+	}
+
 	return m_sensorState;
 
 }
