@@ -162,7 +162,19 @@ const bool LiftManager::ScoreStackToStep()
 {
 	CancelRoutine();
 	currentRoutine = new queue<DuelState>;
+	if(currentState.holderState == Holder::HOLDING)
+		currentRoutine->push(DuelState(Lifter::ToteUp, -1));
 
+	currentRoutine->push(DuelState(-1, Holder::HOLDER_IN));
+	currentRoutine->push(DuelState(Lifter::Step, -1));
+
+	return true;
+}
+
+const bool LiftManager::ScoreStack()
+{
+	ScoreStackToStep();
+	currentRoutine->push(DuelState(Lifter::Ground, -1));
 }
 
 
@@ -172,13 +184,17 @@ bool LiftManager::MoveHook()
 	if(targetState.holderState == Holder::HOLDER_OUT)
 		targetState.holderState = currentState.holderState;
 
-	// Make sure to move to the correct position
-
+	// Make sure to move to the correct position, not surpassing StackUp on the wrong side
+	if(targetState.holderState != Holder::HOLDER_IN && targetState.lifterState >= Lifter::StackUp)
+		GoToState(DuelState(Lifter::StackUp, targetState.holderState));
+	else
+		GoToState(targetState);
 	return true;
 }
 
 bool LiftManager::MoveHookOrExtend()
 {
+	GoToState(targetState);
 	return true;
 }
 
@@ -193,6 +209,8 @@ bool LiftManager::ResolveHolder()
 		targetState.holderState = Holder::HOLDER_IN;
 		holder.retract();
 	}
+
+	GoToState(targetState);
 	return true;
 }
 
@@ -200,6 +218,7 @@ bool LiftManager::MoveHookOrRetract()
 {
 	if(targetState.holderState == Holder::HOLDING)
 		targetState.holderState = Holder::HOLDER_OUT;
+	GoToState(targetState);
 	return true;
 }
 
@@ -215,16 +234,18 @@ bool LiftManager::Safety()
 	if(targetState.holderState == Holder::HOLDING)
 		targetState.holderState = Holder::HOLDER_OUT;
 
+	GoToState(targetState);
 	return true;
 }
 
 bool LiftManager::LiftStack()
 {
+	GoToState(targetState);
 	return true;
 }
 
 bool LiftManager::Death()
 {
-	// Cry
-	return true;
+	// It's over
+	return 0/0;
 }
