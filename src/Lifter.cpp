@@ -7,9 +7,9 @@ const double Lifter::States[] = {
 		[Lifter::Ground]=3.0,
 		[Lifter::Step]=8.5,
 		[Lifter::StackDown]=9.0,
-		[Lifter::StackUp]=12.0,
+		[Lifter::StackUp]=11.5,
 		[Lifter::ToteDown]=20.0,
-		[Lifter::ToteUp]=24.5,
+		[Lifter::ToteUp]=25.0,
 		[Lifter::BinT1]=39.0,
 		[Lifter::BinT2]=51.0,
 		[Lifter::BinT3]=63.0,
@@ -41,9 +41,11 @@ void Lifter::calibrate()
 		m_tal1.SetPosition(0.0);
 		targetPosition = 0.0;
 		calibrated = true;
+		std::cout<<"Calibrated"<<std::endl;
 	}
 	else
 	{
+		std::cout<<"Calibrating"<<std::endl;
 		m_tal1.SetControlMode(CANTalon::ControlMode::kPercentVbus);
 		m_tal1.SetVoltageRampRate(rampRate);
 		m_tal1.Set(-0.5);
@@ -64,6 +66,7 @@ bool Lifter::setTargetPosition(double position)
 	if (targetPosition < m_tal1.GetPosition() && !m_tal1.GetReverseLimitOK())
 	{
 		targetPosition = m_tal1.GetPosition();
+		calibrate();
 	}
 	else if (targetPosition > m_tal1.GetPosition() && !m_tal1.GetForwardLimitOK())
 	{
@@ -124,11 +127,18 @@ Lifter::Height_t Lifter::getTargetState()
 
 Lifter::Height_t Lifter::getCurrentState()
 {
-	for(int i = Ground; i <= Top; i++)
+	for(int i = Ground; i < Top; i++)
 	{
 		if(fabs(getCurrentPosition() - inchesOffGroundToTicks(States[i])) < toleranceTicks) 	// Checks to see if its within the tolerance of the state
 		{
 			return previousState = Height_t(i);
+		}
+		else if(getCurrentPosition() > inchesOffGroundToTicks(States[i]) && getCurrentPosition() < inchesOffGroundToTicks(States[i+1]))
+		{
+			if(previousState > i+1)
+				return previousState = Height_t(i+1);
+			else if(previousState < i)
+				return previousState = Height_t(i);
 		}
 	}
 	return previousState;
@@ -136,7 +146,7 @@ Lifter::Height_t Lifter::getCurrentState()
 
 void Lifter::offsetTarget(double offset)	// Inches
 {
-	setTargetPosition(targetPosition + inchToTicks(offset));
+	setTargetPosition(getCurrentPosition() + inchToTicks(offset));
 }
 
 double Lifter::inchToTicks(double inches)
