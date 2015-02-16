@@ -28,7 +28,7 @@ const LiftManager::STATE_FUNC LiftManager::funcs[][Holder::NUM_STATES] = {
 
 	[Lifter::StackUp] = {
 			[Holder::HOLDER_IN] = &LiftManager::MoveHook,
-			[Holder::HOLDER_OUT] = &LiftManager::PushToteToStack,
+			[Holder::HOLDER_OUT] = &LiftManager::Safety,
 			[Holder::HOLDING] = &LiftManager::LiftStack
 	},
 
@@ -72,17 +72,108 @@ const LiftManager::STATE_FUNC LiftManager::funcs[][Holder::NUM_STATES] = {
 const bool LiftManager::ExecuteCurrent()
 {
 	currentState = ResolveCurrentState();
+
+	bool ret;
 	if(funcs[targetState.lifterState][targetState.holderState] == NULL)
-		return false;
+		ret = false;
 	else
-		return (this->*(funcs[targetState.lifterState][targetState.holderState]))();
+		ret = (this->*(funcs[targetState.lifterState][targetState.holderState]))();
+
+	if(ret && currentRoutine != NULL)
+	{
+		if(currentState == targetState)	// Next state in routine
+		{
+			if(currentRoutine->front().holderState >= Holder::HOLDER_IN)
+				targetState.holderState = currentRoutine->front().holderState;
+
+			if(currentRoutine->front().lifterState >= Lifter::Ground)
+				targetState.lifterState = currentRoutine->front().lifterState;
+
+			currentRoutine->pop();
+			if(currentRoutine->empty())
+			{
+				delete currentRoutine;
+				currentRoutine = NULL;
+			}
+		}
+	}
+
+	return ret;
 }
+
+void LiftManager::GoToState(const DuelState &state)
+{
+	holder.setPosition(targetState.holderState);
+
+	// Allows manual movement
+	if(currentState.lifterState != targetState.lifterState)
+		lifter.setTargetState(targetState.lifterState);
+
+}
+
+void LiftManager::SetHeightTarget(const Lifter::Height_t h)
+{
+	targetState.lifterState = h;
+	ExecuteCurrent();
+}
+
+void LiftManager::SetHolderTarget(const Holder::holder_t h)
+{
+	targetState.holderState = h;
+	ExecuteCurrent();
+}
+
+void LiftManager::OffsetTarget(const double inches)
+{
+	lifter.offsetTarget(inches);
+	ExecuteCurrent();
+}
+
+void LiftManager::CancelRoutine()
+{
+	if(currentRoutine != NULL)
+	{
+		delete currentRoutine;
+		currentRoutine = NULL;
+	}
+}
+
+const bool LiftManager::GoToGround()
+{
+	CancelRoutine();
+	SetHeightTarget(Lifter::Ground);
+	return true;
+}
+
+const bool LiftManager::PushToteToStack()
+{
+	CancelRoutine();
+	if(currentState.lifterState != Lifter::Ground)
+		return false;
+	currentRoutine = new queue<DuelState>;
+	currentRoutine->push(DuelState(Lifter::ToteUp, -1));
+	currentRoutine->push(DuelState(-1, Holder::HOLDER_OUT));
+	currentRoutine->push(DuelState(Lifter::ToteDown, -1));
+
+	return true;
+}
+
+const bool LiftManager::ScoreStackToStep()
+{
+	CancelRoutine();
+	currentRoutine = new queue<DuelState>;
+
+}
+
 
 bool LiftManager::MoveHook()
 {
 	// Disallow hook movement in these areas
 	if(targetState.holderState == Holder::HOLDER_OUT)
 		targetState.holderState = currentState.holderState;
+
+	// Make sure to move to the correct position
+
 	return true;
 }
 
@@ -112,11 +203,13 @@ bool LiftManager::MoveHookOrRetract()
 	return true;
 }
 
-bool LiftManager::PushToteToStack()
+bool LiftManager::Safety()
 {
 	// Ensures it does not break
 	if(targetState.lifterState > Lifter::StackUp)
-		targetState.lifterState = Lifter::StackUp;
+	{
+		targetState.holderState = Holder::HOLDER_IN;
+	}
 
 	// Ensures target is accurate
 	if(targetState.holderState == Holder::HOLDING)
