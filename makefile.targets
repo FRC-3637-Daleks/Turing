@@ -2,4 +2,4 @@ port_names:
 	@echo 'Downloading Hardware.h'
 	wget --no-check-certificate -nv http://tinyurl.com/dalek15-wiring -O ../src/Hardware.h
 
-# src/Hardware.o: port_names
+# src/Hardware.o:
