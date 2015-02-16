@@ -58,7 +58,6 @@ private:
 
 	void TeleopInit() override
 	{
-		SmartDashboard::init();
 	}
 
 	void TeleopPeriodic() override
@@ -66,7 +65,6 @@ private:
 		op.UpdateDriveControls();
 		drive.Drive(op.GetDriveX(), op.GetDriveY(), op.GetDriveYaw());
 		gimbal.setPosition(op.GetCamX(), op.GetCamY());
-		SmartDashboard::PutNumber("position", double(op.GetLiftTarget()));
 
 		lift.setTargetState(op.GetLiftTarget());
 
