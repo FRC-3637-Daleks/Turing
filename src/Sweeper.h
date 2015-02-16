@@ -11,9 +11,6 @@
 #include "WPILib.h"
 #include "Hardware.h"
 
-class Talon;
-class CANTalon;
-
 class Sweeper {
 
 	Sweeper(uint32_t m_talon);
@@ -23,16 +20,14 @@ class Sweeper {
 	enum sweeper_t { SWEEPER_UP, SWEEPER_DOWN, NUM_STATES };
 
 
-	bool  goForward(float motorSpeed);
-	bool  goReverse(float motorSpeed);
-	bool  Stop();
+	void  goForward(float motorSpeed);
+	void  goReverse(float motorSpeed);
+	void  Stop();
 
 private:
-	CANTalon m_t;
+		CANTalon *m_t;
 
-		CANTalon m_motor;
 		bool m_needFree;
-
 
 };
 
