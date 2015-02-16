@@ -10,6 +10,7 @@ private:
 	Compressor compressor;
 	Lifter lift;
 	Holder hold;
+	LiftManager manager;
 	OperatorConsole op;
 	CameraGimbal gimbal;
 
@@ -17,6 +18,7 @@ public:
 	Turing(): drive(DalekDrive::Wheel_t::MECANUM_WHEELS, Robot::FRONT_LEFT, Robot::FRONT_RIGHT, Robot::BACK_LEFT, Robot::BACK_RIGHT, 50.0),
 			  lift(Robot::LIFT_1, Robot::LIFT_2, Lifter::PIDConfig(2.0, 0.005, 0.0, 20), 50.0),
 			  hold(Robot::HOLDER_RETRACT, Robot::HOLDER_EXTEND, Robot::TOTE_SWITCH),
+			  manager(lift, hold),
 			  op(Robot::DRIVER_LEFT, Robot::DRIVER_RIGHT, Robot::COPILOT_LEFT, Robot::COPILOT_RIGHT),
 			  gimbal(Robot::CAMERA_X, Robot::CAMERA_Y, 0.0, 0.0)
 	{
@@ -65,13 +67,17 @@ private:
 		op.UpdateDriveControls();
 		drive.Drive(op.GetDriveX(), op.GetDriveY(), op.GetDriveYaw());
 		gimbal.setPosition(op.GetCamX(), op.GetCamY());
+		manager.OffsetTarget(op.GetLift());
+		if(op.GetGround())
+			manager.GoToGround();
+		else if(op.GetScoreStep())
+			manager.ScoreStackToStep();
+		else if(op.GetScore())
+			manager.ScoreStack();
+		else if(op.GetPushTote())
+			manager.PushToteToStack();
 
-		lift.setTargetState(op.GetLiftTarget());
-
-		if(op.GetHoldExtend())
-			hold.extend();
-		else if(op.GetHoldRetract())
-			hold.retract();
+		manager.ExecuteCurrent();
 	}
 
 	void TestInit() override

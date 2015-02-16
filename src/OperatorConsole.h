@@ -114,7 +114,10 @@ public:		/// Button State Functions
 	const bool GetCenterCamera();
 	const bool GetHoldExtend();
 	const bool GetHoldRetract();
-	/*...*/
+	const bool GetGround();
+	const bool GetPushTote();
+	const bool GetScore();
+	const bool GetScoreStep();
 };
 
 

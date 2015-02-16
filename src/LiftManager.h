@@ -45,6 +45,9 @@ public:
 	virtual ~LiftManager() {};
 
 public:
+	const bool ExecuteCurrent();
+
+public:
 	const Lifter::Height_t GetCurrentHeight() {return lifter.getCurrentState();};
 	const Holder::holder_t GetCurrentHoldState() {return holder.getPosition();};
 	void SetHeightTarget(const Lifter::Height_t h);
@@ -63,7 +66,6 @@ public:
 private:
 	const DuelState ResolveCurrentState() {return {lifter.getCurrentState(), holder.getPosition()};};
 	void GoToState(const DuelState &state);
-	const bool ExecuteCurrent();
 
 private:	/// State functions
 	bool MoveHook();

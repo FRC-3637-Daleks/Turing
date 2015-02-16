@@ -135,3 +135,23 @@ const float OperatorConsole::GetLift()
 {
 	return 50.0*convertAxis(m_copilotLeft.GetAxis(GamePad::RIGHT_Y));
 }
+
+const bool OperatorConsole::GetGround()
+{
+	return m_copilotLeft.GetButton(GamePad::B2);
+}
+
+const bool OperatorConsole::GetPushTote()
+{
+	return m_copilotLeft.GetButton(GamePad::B3);
+}
+
+const bool OperatorConsole::GetScoreStep()
+{
+	return m_copilotLeft.GetButton(GamePad::B4);
+}
+
+const bool OperatorConsole::GetScore()
+{
+	return m_copilotLeft.GetButton(GamePad::B1);
+}
