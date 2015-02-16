@@ -30,8 +30,9 @@ Holder::Holder(uint8_t ValveIn, uint8_t ValveOut, uint8_t safety)
 	m_b = new Solenoid(ValveOut);
 	m_safety = new DigitalInput(safety);
 	m_currentState = HOLDER_IN;
-	m_holderState = HOLDER_IN;
+	m_targetState = HOLDER_IN;
 	m_needFree = true;
+	retract();
 	return;
 }
 
@@ -41,8 +42,9 @@ Holder::Holder(Solenoid &ValveIn, Solenoid &ValveOut, DigitalInput &safety)
 	m_b = &ValveOut;
 	m_safety = &safety;
 	m_currentState = HOLDER_IN;
-	m_holderState = HOLDER_IN;
+	m_targetState = HOLDER_IN;
 	m_needFree = false;
+	retract();
 	return;
 }
 
@@ -52,16 +54,16 @@ Holder::Holder(Solenoid *ValveIn, Solenoid *ValveOut, DigitalInput *safety)
 	m_b = ValveOut;
 	m_safety = safety;
 	m_currentState = HOLDER_IN;
-	m_holderState = HOLDER_IN;
+	m_targetState = HOLDER_IN;
 	m_needFree = false;
+	retract();
 	return;
 }
 
 void
-Holder::setPosition(holder_t p) // either extends or retracts pistons based on value of p
+Holder::setTargetPosition(holder_t p) // either extends or retracts pistons based on value of p
 {
-	m_currentState = p;
-	switch(m_currentState) {
+	switch(p) {
 		case HOLDER_IN:
 			retract();
 			break;
@@ -75,18 +77,23 @@ Holder::setPosition(holder_t p) // either extends or retracts pistons based on v
 }
 
 Holder::holder_t
-Holder::getPosition()   //returns current state of pistons (in or out)
+Holder::getCurrentPosition()   //returns current state of pistons (in or out)
 {
-	if (m_a->Get())
-		m_holderState = HOLDER_IN;
-	else
-		m_holderState = HOLDER_OUT;
+	if (m_a->Get() == false && waitExceeded())
+		m_currentState = HOLDER_IN;
+	else if(getSensorState() == ON)
+		m_currentState = HOLDING;
+	else if (waitExceeded())
+		m_currentState = HOLDER_OUT;
+	// else it remains the same
 
-	if (getSensorState() == ON)
-		m_holderState = HOLDING;
+	return m_currentState;
+}
 
-	//m_holderState = (m_a->Get() ? HOLDER_IN : HOLDER_OUT);
-	return m_holderState;
+Holder::holder_t
+Holder::getTargetPosition()
+{
+	return m_targetState;
 }
 
 Holder::sensor_t
@@ -95,12 +102,10 @@ Holder::getSensorState()
 	if (!m_safety->Get())
 	{
 		m_sensorState = ON;
-		printf("pressed\n");
 	}
 	else
 	{
 		m_sensorState = OFF;
-		printf("released\n");
 	}
 
 	return m_sensorState;
@@ -110,23 +115,42 @@ Holder::getSensorState()
 void
 Holder::extend()
 {
+	if(m_targetState != HOLDER_OUT)
+	{
+		reset();
+		m_targetState = HOLDER_OUT;
+	}
 	//close output, open input
 	m_a->Set(true);
 	m_b->Set(false);
-	m_holderState = HOLDER_OUT;
-	m_currentState = m_holderState;
 	return;
 }
 
 void
 Holder::retract()
 {
-	if (getPosition() == HOLDING)
+	if (getCurrentPosition() == HOLDING)   // must not retract with switch on
 		return;
-		//close input, open output
+
+	if (m_targetState != HOLDER_IN)
+	{
+		reset();
+		m_targetState = HOLDER_IN;
+	}
+	//close input, open output
 	m_a->Set(false);
 	m_b->Set(true);
-	m_holderState = HOLDER_IN;
-	m_currentState = m_holderState;
 	return;
+}
+
+void
+Holder::reset()
+{
+	timer = clock();
+}
+
+bool
+Holder::waitExceeded(double mils)
+{
+	return clock() - timer >  mils*CLOCKS_PER_SEC/1000.0;
 }
