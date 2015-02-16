@@ -28,7 +28,8 @@ class Sweeper {
 	bool  Stop();
 
 private:
-		CANTalon *m_t;
+	CANTalon m_t;
+
 		CANTalon m_motor;
 		bool m_needFree;
 

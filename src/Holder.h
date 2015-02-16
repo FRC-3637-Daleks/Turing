@@ -20,6 +20,7 @@
 class Solenoid;
 class DigitalInput;
 
+
 class Holder {
 public:
 	Holder(uint8_t ValveIn, uint8_t ValveOut);

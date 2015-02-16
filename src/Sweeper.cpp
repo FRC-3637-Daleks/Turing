@@ -25,7 +25,7 @@ Sweeper::Sweeper(CANTalon &m_talon)
 
 Sweeper::Sweeper(CANTalon *m_talon)
 {
-	m_t = m_talon;
+	m_t = *m_talon;
 	m_needFree = false;
 	return;
 }
@@ -34,17 +34,19 @@ Sweeper::Sweeper(CANTalon *m_talon)
 bool
 goForward(float motorSpeed)
 {
-     m_t->Set(motorSpeed);
-}
+
+	m_t->Set(motorSpeed);
+return;}
 
 bool
 goReverse(float motorSpeed)
 {
      m_t->Set(motorSpeed);
+return;
 }
 
 bool
 Stop()
 {
      talonMotor->Set(0);
-}
+return;}
