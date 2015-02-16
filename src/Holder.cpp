@@ -70,6 +70,9 @@ Holder::setTargetPosition(holder_t p) // either extends or retracts pistons base
 		case HOLDER_OUT:
 			extend();
 			break;
+		case HOLDING:
+			extend();
+			break;
 		default:
 			break;
 	}
