@@ -36,7 +36,7 @@ private:
 	void RobotInit() override
 	{
 		lift.calibrate();
-		hold.retract();
+		lift.setTargetState(Lifter::Ground);
 	}
 
 	void DisabledInit() override
@@ -60,6 +60,7 @@ private:
 
 	void TeleopInit() override
 	{
+		manager.EnableManual(false);
 	}
 
 	void TeleopPeriodic() override
