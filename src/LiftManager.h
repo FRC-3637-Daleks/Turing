@@ -23,7 +23,7 @@ public:
 		Lifter::Height_t lifterState;
 		Holder::holder_t holderState;
 		DuelState(const int l, const int h): lifterState((Lifter::Height_t)l), holderState((Holder::holder_t)h) {};
-		DuelState()=default;
+		DuelState(): lifterState(Lifter::Ground), holderState(Holder::HOLDER_IN) {};
 		DuelState(const DuelState& other)=default;
 		const bool operator== (const DuelState& other) {return lifterState == other.lifterState && holderState == other.holderState;};
 	};

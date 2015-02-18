@@ -7,7 +7,7 @@ const double Lifter::States[] = {
 		[Lifter::Ground]=3.0,
 		[Lifter::Step]=8.5,
 		[Lifter::StackDown]=9.0,
-		[Lifter::StackUp]=11.5,
+		[Lifter::StackUp]=10.0,
 		[Lifter::ToteDown]=20.0,
 		[Lifter::ToteUp]=25.0,
 		[Lifter::BinT1]=39.0,
@@ -127,6 +127,9 @@ Lifter::Height_t Lifter::getTargetState()
 
 Lifter::Height_t Lifter::getCurrentState()
 {
+	if(!m_tal1.GetReverseLimitOK())
+		return previousState = Ground;
+
 	for(int i = Ground; i < Top; i++)
 	{
 		if(fabs(getCurrentPosition() - inchesOffGroundToTicks(States[i])) < toleranceTicks) 	// Checks to see if its within the tolerance of the state

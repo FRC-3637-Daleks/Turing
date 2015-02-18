@@ -249,7 +249,7 @@ bool LiftManager::ResolveHolder()
 	{
 		targetState.holderState = Holder::HOLDING;
 	}
-	else if(currentState.holderState == Holder::HOLDER_OUT)
+	else if(currentState.holderState == Holder::HOLDER_OUT && targetState.lifterState == currentState.lifterState)
 	{
 		targetState.holderState = Holder::HOLDER_IN;
 	}
@@ -284,7 +284,10 @@ bool LiftManager::Safety()
 
 bool LiftManager::LiftStack()
 {
-	GoToState(targetState);
+	if(currentState.holderState != Holder::HOLDING)
+		GoToState(DuelState(Lifter::StackUp, Holder::HOLDER_OUT));
+	else
+		GoToState(targetState);
 	return true;
 }
 
