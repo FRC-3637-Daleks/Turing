@@ -18,4 +18,6 @@
 #include "OperatorConsole.h"
 #include "CameraGimbal.h"
 
+#include "Razor.h"
+
 #endif
