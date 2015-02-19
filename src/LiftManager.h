@@ -83,6 +83,7 @@ private:	/// State functions
 	bool Safety();
 	bool LiftStack();
 	bool Death();
+	bool CheckTote(); // Waits a period of time
 };
 
 

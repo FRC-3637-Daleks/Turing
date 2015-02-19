@@ -98,7 +98,7 @@ const bool LiftManager::ExecuteCurrent()
 	}
 
 	bool ret;
-	std::cout<<"current state: ("<<currentState.lifterState<<", "<<currentState.holderState<<")"<<std::endl;
+	//std::cout<<"current state: ("<<currentState.lifterState<<", "<<currentState.holderState<<")"<<std::endl;
 	if(funcs[currentState.lifterState][currentState.holderState] == NULL)
 	{
 		ret = false;
@@ -138,11 +138,14 @@ const bool LiftManager::ExecuteCurrent()
 
 void LiftManager::GoToState(const DuelState &state)
 {
-	holder.setTargetPosition(targetState.holderState);
+	holder.setTargetPosition(state.holderState);
 
 	// Allows manual movement
 	if(currentState.lifterState != targetState.lifterState)
-		lifter.setTargetState(targetState.lifterState);
+	{
+		std::cout<<"Setting lifter to target: "<<state.lifterState<<std::endl;
+		lifter.setTargetState(state.lifterState);
+	}
 
 }
 
@@ -228,10 +231,14 @@ bool LiftManager::MoveHook()
 		targetState.holderState = currentState.holderState;
 
 	// Make sure to move to the correct position, not surpassing StackUp on the wrong side
-	if(currentState.holderState != Holder::HOLDER_IN && targetState.lifterState >= Lifter::StackUp)
+	if(currentState.holderState != Holder::HOLDER_IN && targetState.lifterState >= Lifter::StackUp && currentState.lifterState < Lifter::StackUp)
+	{
 		GoToState(DuelState(Lifter::StackUp, targetState.holderState));
+	}
 	else
+	{
 		GoToState(targetState);
+	}
 
 	return true;
 }
@@ -269,7 +276,7 @@ bool LiftManager::MoveHookOrRetract()
 bool LiftManager::Safety()
 {
 	// Ensures it does not break
-	if(targetState.lifterState > Lifter::StackUp)
+	if(targetState.lifterState >= Lifter::StackUp)
 	{
 		targetState.holderState = Holder::HOLDER_IN;
 	}
@@ -278,15 +285,19 @@ bool LiftManager::Safety()
 	if(targetState.holderState == Holder::HOLDING)
 		targetState.holderState = currentState.holderState;
 
-	GoToState(targetState);
+	std::cout<<"Safety()"<<std::endl;
+	if(targetState.lifterState >= Lifter::StackUp)
+		GoToState(DuelState(Lifter::StackUp, targetState.holderState));
+	else
+		GoToState(targetState);
 	return true;
 }
 
 bool LiftManager::LiftStack()
 {
-	if(currentState.holderState != Holder::HOLDING)
-		GoToState(DuelState(Lifter::StackUp, Holder::HOLDER_OUT));
-	else
+	/*if(targetState.lifterState > Lifter::StackUp)
+		GoToState(DuelState(Lifter::StackUp, targetState.holderState));
+	else*/
 		GoToState(targetState);
 	return true;
 }
