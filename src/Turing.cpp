@@ -28,7 +28,7 @@ public:
 		op.SetDriveSquared(true);
 		op.SetFlip(OperatorConsole::AnalogControls::DRIVE_X, true);
 		op.SetFlip(OperatorConsole::DRIVE_YAW, true);
-		op.SetFlip(OperatorConsole::AnalogControls::CAM_X, true);
+		op.SetFlip(OperatorConsole::AnalogControls::CAM_X, false);
 		op.SetFlip(OperatorConsole::AnalogControls::CAM_Y, true);
 	}
 
@@ -68,7 +68,6 @@ private:
 		op.UpdateDriveControls();
 		drive.Drive(op.GetDriveX(), op.GetDriveY(), op.GetDriveYaw());
 		gimbal.setPosition(op.GetCamX(), op.GetCamY());
-		manager.OffsetTarget(op.GetLift());
 		if(op.GetGround())
 			manager.GoToGround();
 		else if(op.GetScoreStep())
@@ -78,7 +77,16 @@ private:
 		else if(op.GetPushTote())
 			manager.PushToteToStack();
 
-		manager.ExecuteCurrent();
+		if(!op.GetLifterAuto())
+		{
+			manager.EnableManual(false);
+			manager.ExecuteCurrent();
+		}
+		else
+		{
+			manager.EnableManual(true);
+			manager.OffsetTarget(op.GetLift());
+		}
 	}
 
 	void TestInit() override
