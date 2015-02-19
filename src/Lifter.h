@@ -4,6 +4,8 @@
 
 #include "WPILib.h"
 
+#define MAX_TALON_CURRENT 100
+
 class Lifter {
 public:
 	enum Height_t {Ground = 0, Step, StackDown, StackUp, ToteDown, ToteUp, BinT1, BinT2, BinT3, Top, NUM_STATES};

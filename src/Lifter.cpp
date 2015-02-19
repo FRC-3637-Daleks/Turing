@@ -75,6 +75,8 @@ bool Lifter::setTargetPosition(double position)
 	}
 
 	m_tal1.Set(targetPosition);
+	check();	// If the motors are stalling, pulls back
+
 	if (getCurrentPosition() == targetPosition)
 	{
 		return true;
@@ -171,11 +173,11 @@ void Lifter::check()
 	{
 		if (getCurrentPosition() < getTargetPosition())
 		{
-			setTargetPosition(targetPosition - 100.0);
+			m_tal1.Set(targetPosition - 100.0);
 		}
 		else if (getCurrentPosition() > getTargetPosition())
 		{
-			setTargetPosition(targetPosition + 100.0);
+			m_tal1.Set(targetPosition + 100.0);
 		}
 	}
 }

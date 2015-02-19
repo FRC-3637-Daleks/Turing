@@ -11,8 +11,6 @@
 #define FILE_LOGGING_PERIOD 50 //milliseconds
 #define SMARTDASH_PUSHING_PERIOD 300
 
-#define MAX_TALON_CURRENT 10
-
 #define DEBUG_MODE
 
 
