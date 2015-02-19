@@ -12,7 +12,9 @@
 Sweeper::Sweeper(uint32_t m_talon)
 {
 	m_t = new CANTalon(m_talon);
-	m_needFree = true;
+	m_needFree = false;
+	m_t->ConfigLimitMode(CANSpeedController::kLimitMode_SwitchInputsOnly);
+	m_t->SetControlMode(CANTalon::ControlMode::kPercentVbus);
 	return;
 }
 
@@ -20,6 +22,8 @@ Sweeper::Sweeper(CANTalon &m_talon)
 {
 	m_t = &m_talon;
 	m_needFree = false;
+	m_t->ConfigLimitMode(CANSpeedController::kLimitMode_SwitchInputsOnly);
+	m_t->SetControlMode(CANTalon::ControlMode::kPercentVbus);
 	return;
 }
 
@@ -27,27 +31,21 @@ Sweeper::Sweeper(CANTalon *m_talon)
 {
 	m_t = m_talon;
 	m_needFree = false;
+	m_t->ConfigLimitMode(CANSpeedController::kLimitMode_SwitchInputsOnly);
+	m_t->SetControlMode(CANTalon::ControlMode::kPercentVbus);
 	return;
 }
 
 
 void
-Sweeper::goForward(float motorSpeed)
+Sweeper::setPosition(float motorSpeed)
 {
-
 	m_t->Set(motorSpeed);
 return;}
 
 void
-Sweeper::goReverse(float motorSpeed)
-{
-     m_t->Set(motorSpeed);
-return;
-}
-
-void
 Sweeper::Stop()
 {
-     m_t->Set(0);
+	m_t->Set(0);
 return;
 }

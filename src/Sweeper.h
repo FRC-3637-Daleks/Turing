@@ -11,17 +11,14 @@
 #include "WPILib.h"
 #include "Hardware.h"
 
-class Sweeper {
+class Sweeper { //Sweeper no sweeping!
 
 	Sweeper(uint32_t m_talon);
 	Sweeper(CANTalon &m_talon);
 	Sweeper(CANTalon *m_talon);
 
-	enum sweeper_t { SWEEPER_UP, SWEEPER_DOWN, NUM_STATES };
 
-
-	void  goForward(float motorSpeed);
-	void  goReverse(float motorSpeed);
+	void  setPosition(float motorSpeed);
 	void  Stop();
 
 private:
