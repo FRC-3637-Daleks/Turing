@@ -155,3 +155,8 @@ const bool OperatorConsole::GetScore()
 {
 	return m_copilotLeft.GetButton(GamePad::B1);
 }
+
+const bool OperatorConsole::GetLifterAuto()
+{
+	return m_copilotLeft.GetButton(GamePad::TOP_RIGHT_SHOULDER);
+}

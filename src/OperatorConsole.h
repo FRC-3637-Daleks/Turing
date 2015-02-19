@@ -118,6 +118,7 @@ public:		/// Button State Functions
 	const bool GetPushTote();
 	const bool GetScore();
 	const bool GetScoreStep();
+	const bool GetLifterAuto();
 };
 
 
