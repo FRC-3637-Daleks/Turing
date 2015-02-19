@@ -44,6 +44,7 @@ public:
 	void offsetTarget(double offset);
 	double inchToTicks(double inches);
 	double inchesOffGroundToTicks(double inches);
+	void check();
 };
 
 

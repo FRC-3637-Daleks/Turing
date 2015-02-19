@@ -1,6 +1,7 @@
 #include "Lifter.h"
 #include "stdio.h"
 #include "WPILib.h"
+#include "Config.h"
 
 // States are in Inches
 const double Lifter::States[] = {
@@ -162,4 +163,19 @@ double Lifter::inchToTicks(double inches)
 double Lifter::inchesOffGroundToTicks(double inches)
 {
 	return inchToTicks((inches - inchesOffGround)); // Subtracting distance to ground
+}
+
+void Lifter::check()
+{
+	if (m_tal1.GetOutputCurrent() > MAX_TALON_CURRENT)
+	{
+		if (getCurrentPosition() < getTargetPosition())
+		{
+			setTargetPosition(targetPosition - 100.0);
+		}
+		else if (getCurrentPosition() > getTargetPosition())
+		{
+			setTargetPosition(targetPosition + 100.0);
+		}
+	}
 }
