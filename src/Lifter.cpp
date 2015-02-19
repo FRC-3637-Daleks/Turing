@@ -7,7 +7,7 @@ const double Lifter::States[] = {
 		[Lifter::Ground]=3.0,
 		[Lifter::Step]=8.5,
 		[Lifter::StackDown]=9.0,
-		[Lifter::StackUp]=10.0,
+		[Lifter::StackUp]=12.0,
 		[Lifter::ToteDown]=20.0,
 		[Lifter::ToteUp]=25.0,
 		[Lifter::BinT1]=39.0,
@@ -105,13 +105,15 @@ bool Lifter::setTargetState(Height_t h)
 
 	setTargetPosition(inchesOffGroundToTicks(States[targetState]));
 
+
+	if(Lifter::getCurrentPosition() <= 100 && targetState == Ground)
+	{
+		calibrate();
+		return isCalibrated();
+	}
+
 	if (Lifter::getCurrentState() == Lifter::getTargetState())
 	{
-		if(Lifter::getCurrentPosition() <= 100 && targetState == Ground)
-		{
-			calibrate();
-			return isCalibrated();
-		}
 		return true;
 	}
 	else
