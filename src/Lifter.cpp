@@ -75,7 +75,6 @@ bool Lifter::setTargetPosition(double position)
 	}
 
 	m_tal1.Set(targetPosition);
-	check();	// If the motors are stalling, pulls back
 
 	if (getCurrentPosition() == targetPosition)
 	{
