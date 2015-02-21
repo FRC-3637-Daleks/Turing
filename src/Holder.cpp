@@ -14,51 +14,73 @@ XX setPosition(holder_t p) - either extends or retracts pistons based on value o
 
 XX retract() - retracts pistons
 
+<<<<<<< HEAD
 XX extend() - extends pistons
+=======
+<<<<<<< HEAD
+XX extend() - extends pistons
+=======
+XX extend() - extefnds pistons
+>>>>>>> origin/Dev-elijah-4real-MKII
+>>>>>>> master
 
  */
 #include "Holder.h"
 #include "WPILib.h"
 
-Holder::Holder(uint8_t ValveIn, uint8_t ValveOut)
+Holder::Holder(uint8_t ValveIn, uint8_t ValveOut, uint8_t safety)
 {
 	m_a = new Solenoid(ValveIn);
 	m_b = new Solenoid(ValveOut);
+	m_safety = new DigitalInput(safety);
 	m_currentState = HOLDER_IN;
-	m_holderState = HOLDER_IN;
+	m_targetState = HOLDER_IN;
 	m_needFree = true;
+	reset();
+	resetSensorTimer();
+	retract();
 	return;
 }
 
-Holder::Holder(Solenoid &ValveIn, Solenoid &ValveOut)
+Holder::Holder(Solenoid &ValveIn, Solenoid &ValveOut, DigitalInput &safety)
 {
 	m_a = &ValveIn;
 	m_b = &ValveOut;
+	m_safety = &safety;
 	m_currentState = HOLDER_IN;
-	m_holderState = HOLDER_IN;
+	m_targetState = HOLDER_IN;
 	m_needFree = false;
+	reset();
+	resetSensorTimer();
+	retract();
 	return;
 }
 
-Holder::Holder(Solenoid *ValveIn, Solenoid *ValveOut)
+Holder::Holder(Solenoid *ValveIn, Solenoid *ValveOut, DigitalInput *safety)
 {
 	m_a = ValveIn;
 	m_b = ValveOut;
+	m_safety = safety;
 	m_currentState = HOLDER_IN;
-	m_holderState = HOLDER_IN;
+	m_targetState = HOLDER_IN;
 	m_needFree = false;
+	reset();
+	resetSensorTimer();
+	retract();
 	return;
 }
 
 void
-Holder::setPosition(holder_t p) // either extends or retracts pistons based on value of p
+Holder::setTargetPosition(holder_t p) // either extends or retracts pistons based on value of p
 {
-	m_currentState = p;
-	switch(m_currentState) {
+	switch(p) {
 		case HOLDER_IN:
 			retract();
 			break;
 		case HOLDER_OUT:
+			extend();
+			break;
+		case HOLDING:
 			extend();
 			break;
 		default:
@@ -68,20 +90,51 @@ Holder::setPosition(holder_t p) // either extends or retracts pistons based on v
 }
 
 Holder::holder_t
-Holder::getPosition()   //returns current state of pistons (in or out)
+Holder::getCurrentPosition()   //returns current state of pistons (in or out)
 {
+	if (m_a->Get() == false && waitExceeded())
+		m_currentState = HOLDER_IN;
+	else if(getSensorState() == ON)
+		m_currentState = HOLDING;
+	else if (waitExceeded())
+		m_currentState = HOLDER_OUT;
+	// else it remains the same
 
-	if (m_a->Get())
-		m_holderState = HOLDER_IN;
+	return m_currentState;
+}
+
+Holder::holder_t
+Holder::getTargetPosition()
+{
+	return m_targetState;
+}
+
+Holder::sensor_t
+Holder::getSensorState()
+{
+	if (!m_safety->Get())
+	{
+		resetSensorTimer();
+		m_sensorState = ON;
+	}
 	else
-		m_holderState = HOLDER_OUT;
-	//m_holderState = (m_a->Get() ? HOLDER_IN : HOLDER_OUT);
-	return m_holderState;
+	{
+		if(waitExceededSensor())
+			m_sensorState = OFF;
+	}
+
+	return m_sensorState;
+
 }
 
 void
 Holder::extend()
 {
+	if(m_targetState != HOLDER_OUT)
+	{
+		reset();
+		m_targetState = HOLDER_OUT;
+	}
 	//close output, open input
 	m_a->Set(true);
 	m_b->Set(false);
@@ -91,8 +144,40 @@ Holder::extend()
 void
 Holder::retract()
 {
+	if (getCurrentPosition() == HOLDING)   // must not retract with switch on
+		return;
+
+	if (m_targetState != HOLDER_IN)
+	{
+		reset();
+		m_targetState = HOLDER_IN;
+	}
 	//close input, open output
 	m_a->Set(false);
 	m_b->Set(true);
 	return;
+}
+
+void
+Holder::reset()
+{
+	timer = clock();
+}
+
+void
+Holder::resetSensorTimer()
+{
+	sensorTimer = clock();
+}
+
+bool
+Holder::waitExceeded(double mils)
+{
+	return clock() - timer >  mils*CLOCKS_PER_SEC/1000.0;
+}
+
+bool
+Holder::waitExceededSensor(double mils)
+{
+	return clock() - sensorTimer > mils*CLOCKS_PER_SEC/1000.0;
 }

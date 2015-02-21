@@ -10,4 +10,14 @@
 #include "Logger.h"
 #include "SmartDashService.h"
 
+#include "Holder.h"
+#include "Lifter.h"
+#include "DalekDrive.h"
+#include "LiftManager.h"
+
+#include "OperatorConsole.h"
+#include "CameraGimbal.h"
+
+#include "Razor.h"
+
 #endif

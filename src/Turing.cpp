@@ -2,58 +2,56 @@
 
 using namespace std;
 
-Loggable::FAIL_COMMAND currentTooHigh(double cur)
-{
-	stringstream curString;
-	curString<<cur;
-	Logger::LogState("POWERDISTRIBUTIONPANEL", LEVEL_t::ALERT, string("Current level too high: ")+curString.str()+" amps");
-	return Loggable::KILL;
-}
-
 class Turing: public IterativeRobot
 {
 private:
 	PowerDistributionPanel PDP;
+	DalekDrive drive;
+	Compressor compressor;
+	Lifter lift;
+	Holder hold;
+	LiftManager manager;
+	OperatorConsole op;
+	CameraGimbal gimbal;
 
 public:
-	Turing()
+	Turing(): drive(DalekDrive::Wheel_t::MECANUM_WHEELS, Robot::FRONT_LEFT, Robot::FRONT_RIGHT, Robot::BACK_LEFT, Robot::BACK_RIGHT, 50.0),
+			  lift(Robot::LIFT_1, Robot::LIFT_2, Lifter::PIDConfig(2.0, 0.005, 0.0, 20), 50.0),
+			  hold(Robot::HOLDER_RETRACT, Robot::HOLDER_EXTEND, Robot::TOTE_SWITCH),
+			  manager(lift, hold),
+			  op(Robot::DRIVER_LEFT, Robot::DRIVER_RIGHT, Robot::COPILOT_LEFT, Robot::COPILOT_RIGHT),
+			  gimbal(Robot::CAMERA_X, Robot::CAMERA_Y, 0.0, 0.0)
 	{
-		/*TODO: Have Dash Thread poll Log thread for most recent data
-		 * Write function in ValueLog which returns most previous val
-		 */
-		for(int i = 0; i <= 15; i++)
-		{
-			auto f = Logger::MakeLogValue<double>("PowerDistributionPanel", Logger::MakeComponentName("current", i).c_str(), std::bind(&PowerDistributionPanel::GetCurrent, &PDP, i));
-			SmartDashService::GetInstance().addLog<double>(f, Logger::MakeComponentName("pdp_current", i));
-		}
+		drive[DalekDrive::LEFT_FRONT].SetFlip(true);
+		drive[DalekDrive::LEFT_REAR].SetFlip(true);
 
-
-		auto volt = Logger::MakeLogValue("VOLTAGE", &PDP, &PowerDistributionPanel::GetVoltage);
-		SmartDashService::GetInstance().addLog<double>(volt, "pdp_voltage");
-
-
-		Logger::LogState("GENERAL", LEVEL_t::INFO, "Turing object constructed");
-		Logger::LogState("GENERAL", LEVEL_t::NOTICE, string("Built: ")+__DATE__+' '+__TIME__);
+		op.SetDriveSquared(true);
+		op.SetFlip(OperatorConsole::AnalogControls::DRIVE_X, true);
+		op.SetFlip(OperatorConsole::DRIVE_YAW, true);
+		op.SetFlip(OperatorConsole::AnalogControls::CAM_X, false);
+		op.SetFlip(OperatorConsole::AnalogControls::CAM_Y, true);
+		op.SetFlip(OperatorConsole::LIFT, true);
 	}
 
 private:
 	void RobotInit() override
 	{
-		Logger::LogState("GENERAL", LEVEL_t::INFO, "Robot init complete");
+		lift.calibrate();
+		lift.setTargetState(Lifter::Ground);
 	}
 
 	void DisabledInit() override
 	{
-		Logger::LogState("GENERAL", LEVEL_t::INFO, "Disabled Init Complete");
+		compressor.Start();
 	}
 
 	void DisabledPeriodic() override
 	{
+		op.UpdatePreGame();
 	}
 
 	void AutonomousInit() override
 	{
-		Logger::LogState("GENERAL", LEVEL_t::INFO, "Autonomous Init Complete, ready to crack enigma.");
 	}
 
 	void AutonomousPeriodic() override
@@ -63,17 +61,39 @@ private:
 
 	void TeleopInit() override
 	{
-		Logger::LogState("GENERAL", LEVEL_t::INFO, "Teleop Init Complete");
+		manager.EnableManual(false);
 	}
 
 	void TeleopPeriodic() override
 	{
+		lift.check();	// Temporary location of call of check
 
+		op.UpdateDriveControls();
+		drive.Drive(op.GetDriveX(), op.GetDriveY(), op.GetDriveYaw());
+		gimbal.setPosition(op.GetCamX(), op.GetCamY());
+		if(op.GetGround())
+			manager.GoToGround();
+		else if(op.GetScoreStep())
+			manager.ScoreStackToStep();
+		else if(op.GetScore())
+			manager.ScoreStack();
+		else if(op.GetPushTote())
+			manager.PushToteToStack();
+
+		if(!op.GetLifterAuto())
+		{
+			manager.EnableManual(false);
+			manager.ExecuteCurrent();
+		}
+		else
+		{
+			manager.EnableManual(true);
+			manager.OffsetTarget(op.GetLift());
+		}
 	}
 
 	void TestInit() override
 	{
-		Logger::LogState("GENERAL", LEVEL_t::INFO, "Test Init Complete");
 	}
 
 	void TestPeriodic() override

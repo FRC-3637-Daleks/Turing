@@ -5,17 +5,16 @@
  *      Author: elija_000
  */
 
-/*
- * Holder.h
- *
- *  Created on: Jan 31, 2015
- *      Author: elija_000
- */
 #ifndef _HOLDER_H_
 #define _HOLDER_H_
 
+#include <ctime>
+
 #include "WPILib.h"
 #include "Hardware.h"
+
+#define PISTON_TRAVEL_TIME 200 // Milliseconds
+#define SENSOR_SWITCH_TIME 75  // Milliseconds
 
 class Solenoid;
 class DigitalInput;
@@ -23,20 +22,25 @@ class DigitalInput;
 
 class Holder {
 public:
-	Holder(uint8_t ValveIn, uint8_t ValveOut);
-	Holder(Solenoid &ValveIn, Solenoid &ValveOut);
-	Holder(Solenoid *ValveIn, Solenoid *ValveOut);
+	Holder(uint8_t ValveIn, uint8_t ValveOut, uint8_t safety);
+	Holder(Solenoid &ValveIn, Solenoid &ValveOut, DigitalInput &safety);
+	Holder(Solenoid *ValveIn, Solenoid *ValveOut, DigitalInput *safety);
 
 	enum holder_t { HOLDER_IN, HOLDER_OUT, HOLDING, NUM_STATES };
-	enum sensor_t { TRUE_T, FALSE_F };
+	enum sensor_t { ON, OFF };
 
-	bool sensor_bool;
-
-	void setPosition(holder_t p);
-	holder_t getPosition();
+	void setTargetPosition(holder_t p);
+	holder_t getCurrentPosition();
+	holder_t getTargetPosition();
 	void extend();
 	void retract();
 	sensor_t getSensorState();
+
+private:
+	void reset();
+	void resetSensorTimer();
+	bool waitExceeded(double mils=PISTON_TRAVEL_TIME);
+	bool waitExceededSensor(double mils=SENSOR_SWITCH_TIME);
 
 private:
 		Solenoid *m_a;
@@ -44,9 +48,9 @@ private:
 		DigitalInput *m_safety;
 		bool m_needFree;
 		holder_t m_currentState;
-		holder_t m_holderState;
+		holder_t m_targetState;
 		sensor_t m_sensorState;
-
+		clock_t timer, sensorTimer;
 };
 
 #endif
