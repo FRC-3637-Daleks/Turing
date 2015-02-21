@@ -30,6 +30,7 @@ Lifter::Lifter(int talID1, int talID2, PIDConfig iPID, double ramp): m_tal1(talI
 
 void Lifter::calibrate()
 {
+	// If the Limit Switch is triggered
 	if(!m_tal1.GetReverseLimitOK())
 	{
 		m_tal1.SetFeedbackDevice(CANTalon::QuadEncoder);
@@ -43,6 +44,7 @@ void Lifter::calibrate()
 		targetPosition = 0.0;
 		calibrated = true;
 	}
+	// If the Limit Switch hasn't been triggered.
 	else
 	{
 		m_tal1.SetControlMode(CANTalon::ControlMode::kPercentVbus);
