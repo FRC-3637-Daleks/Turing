@@ -14,6 +14,7 @@
 #include "Hardware.h"
 
 #define PISTON_TRAVEL_TIME 200 // Milliseconds
+#define SENSOR_SWITCH_TIME 75  // Milliseconds
 
 class Solenoid;
 class DigitalInput;
@@ -37,7 +38,9 @@ enum sensor_t {ON, OFF};
 
 private:
 	void reset();
+	void resetSensorTimer();
 	bool waitExceeded(double mils=PISTON_TRAVEL_TIME);
+	bool waitExceededSensor(double mils=SENSOR_SWITCH_TIME);
 
 private:
 		Solenoid *m_a;
@@ -47,7 +50,7 @@ private:
 		holder_t m_currentState;
 		holder_t m_targetState;
 		sensor_t m_sensorState;
-		clock_t timer;
+		clock_t timer, sensorTimer;
 };
 
 #endif

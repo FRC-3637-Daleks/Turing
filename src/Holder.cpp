@@ -32,6 +32,8 @@ Holder::Holder(uint8_t ValveIn, uint8_t ValveOut, uint8_t safety)
 	m_currentState = HOLDER_IN;
 	m_targetState = HOLDER_IN;
 	m_needFree = true;
+	reset();
+	resetSensorTimer();
 	retract();
 	return;
 }
@@ -44,6 +46,8 @@ Holder::Holder(Solenoid &ValveIn, Solenoid &ValveOut, DigitalInput &safety)
 	m_currentState = HOLDER_IN;
 	m_targetState = HOLDER_IN;
 	m_needFree = false;
+	reset();
+	resetSensorTimer();
 	retract();
 	return;
 }
@@ -56,6 +60,8 @@ Holder::Holder(Solenoid *ValveIn, Solenoid *ValveOut, DigitalInput *safety)
 	m_currentState = HOLDER_IN;
 	m_targetState = HOLDER_IN;
 	m_needFree = false;
+	reset();
+	resetSensorTimer();
 	retract();
 	return;
 }
@@ -104,11 +110,13 @@ Holder::getSensorState()
 {
 	if (!m_safety->Get())
 	{
+		resetSensorTimer();
 		m_sensorState = ON;
 	}
 	else
 	{
-		m_sensorState = OFF;
+		if(waitExceededSensor())
+			m_sensorState = OFF;
 	}
 
 	return m_sensorState;
@@ -152,11 +160,22 @@ Holder::reset()
 	timer = clock();
 }
 
+void
+Holder::resetSensorTimer()
+{
+	sensorTimer = clock();
+}
+
 bool
 Holder::waitExceeded(double mils)
 {
 	return clock() - timer >  mils*CLOCKS_PER_SEC/1000.0;
 }
 
+bool
+Holder::waitExceededSensor(double mils)
+{
+	return clock() - sensorTimer > mils*CLOCKS_PER_SEC/1000.0;
+}
 
 
