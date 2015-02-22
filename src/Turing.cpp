@@ -30,7 +30,7 @@ public:
 		op.SetFlip(OperatorConsole::DRIVE_YAW, true);
 		op.SetFlip(OperatorConsole::AnalogControls::CAM_X, false);
 		op.SetFlip(OperatorConsole::AnalogControls::CAM_Y, true);
-		op.SetFlip(OperatorConsole::LIFT, true);
+		op.SetFlip(OperatorConsole::AnalogControls::LIFT, true);
 	}
 
 private:

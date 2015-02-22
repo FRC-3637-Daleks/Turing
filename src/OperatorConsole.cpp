@@ -133,7 +133,7 @@ const bool OperatorConsole::GetHoldRetract()
 
 const float OperatorConsole::GetLift()
 {
-	return 50.0*convertAxis(m_copilotLeft.GetAxis(GamePad::RIGHT_Y));
+	return 50.0*convertAxis(m_copilotLeft.GetAxis(GamePad::RIGHT_Y), squaredLift, flips[LIFT], 1.0);
 }
 
 const bool OperatorConsole::GetGround()

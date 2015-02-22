@@ -32,6 +32,12 @@ const LiftManager::STATE_FUNC LiftManager::funcs[][Holder::NUM_STATES] = {
 			[Holder::HOLDING] = &LiftManager::LiftStack
 	},
 
+	[Lifter::ToteScore] = {
+			[Holder::HOLDER_IN] = &LiftManager::MoveHook,
+			[Holder::HOLDER_OUT] = &LiftManager::ResolveHolder,
+			[Holder::HOLDING] = &LiftManager::MoveHook
+	},
+
 	[Lifter::ToteDown] = {
 			[Holder::HOLDER_IN] = &LiftManager::MoveHook,
 			[Holder::HOLDER_OUT] = &LiftManager::ResolveHolder,
@@ -98,7 +104,7 @@ const bool LiftManager::ExecuteCurrent()
 	}
 
 	bool ret;
-	//std::cout<<"current state: ("<<currentState.lifterState<<", "<<currentState.holderState<<")"<<std::endl;
+	std::cout<<"current state: ("<<currentState.lifterState<<", "<<currentState.holderState<<")"<<std::endl;
 	if(funcs[currentState.lifterState][currentState.holderState] == NULL)
 	{
 		ret = false;
@@ -110,7 +116,7 @@ const bool LiftManager::ExecuteCurrent()
 
 	if(ret && currentRoutine != NULL)
 	{
-		if(currentState == targetState)	// Next state in routine
+		if(currentState == targetState && ExceedTimer())	// Next state in routine
 		{
 			std::cout<<"Next step in routine"<<std::endl;
 			if(currentRoutine->front().holderState >= Holder::HOLDER_IN)
@@ -123,6 +129,12 @@ const bool LiftManager::ExecuteCurrent()
 			{
 				std::cout<<"Lifter State: "<<currentState.lifterState<<" -> "<<currentRoutine->front().lifterState<<std::endl;
 				SetHeightTarget(currentRoutine->front().lifterState);
+			}
+
+			if(currentRoutine->front().lifterState >= Lifter::Ground)
+			{
+				std::cout<<"Delaying"<<std::endl;
+				SetTimer(100);
 			}
 
 			currentRoutine->pop();
@@ -190,7 +202,7 @@ const bool LiftManager::PushToteToStack()
 	currentRoutine = new queue<DuelState>;
 	currentRoutine->push(DuelState(Lifter::ToteUp, -1));
 	currentRoutine->push(DuelState(-1, Holder::HOLDER_OUT));
-	currentRoutine->push(DuelState(Lifter::ToteDown, -1));
+	currentRoutine->push(DuelState(Lifter::ToteScore, -1));
 
 	routineMode = PUSH_TOTE;
 	return true;
@@ -226,6 +238,8 @@ const bool LiftManager::ScoreStack()
 
 bool LiftManager::MoveHook()
 {
+	timing = false;
+
 	// Disallow hook movement in these areas
 	if(targetState.holderState == Holder::HOLDER_OUT)
 		targetState.holderState = currentState.holderState;
@@ -245,6 +259,7 @@ bool LiftManager::MoveHook()
 
 bool LiftManager::MoveHookOrExtend()
 {
+	timing = false;
 	std::cout<<"Can Open Pistons"<<std::endl;
 	GoToState(targetState);
 	return true;
@@ -252,6 +267,7 @@ bool LiftManager::MoveHookOrExtend()
 
 bool LiftManager::ResolveHolder()
 {
+	timing = false;
 	if(currentState.holderState == Holder::HOLDING)
 	{
 		targetState.holderState = Holder::HOLDING;
@@ -267,6 +283,7 @@ bool LiftManager::ResolveHolder()
 
 bool LiftManager::MoveHookOrRetract()
 {
+	timing = false;
 	if(targetState.holderState == Holder::HOLDING)
 		targetState.holderState = currentState.holderState;
 	GoToState(targetState);
@@ -275,6 +292,7 @@ bool LiftManager::MoveHookOrRetract()
 
 bool LiftManager::Safety()
 {
+	timing = false;
 	// Ensures it does not break
 	if(targetState.lifterState >= Lifter::StackUp)
 	{
@@ -298,7 +316,18 @@ bool LiftManager::LiftStack()
 	/*if(targetState.lifterState > Lifter::StackUp)
 		GoToState(DuelState(Lifter::StackUp, targetState.holderState));
 	else*/
+	if(!timing)
+	{
+		SetTimer(75);
+		timing = true;
+		return true;
+	}
+	else if(ExceedTimer())
+	{
 		GoToState(targetState);
+		timing = false;
+	}
+
 	return true;
 }
 
