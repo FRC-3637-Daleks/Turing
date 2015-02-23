@@ -28,7 +28,7 @@ public:
 		op.SetDriveSquared(true);
 		op.SetFlip(OperatorConsole::AnalogControls::DRIVE_X, true);
 		op.SetFlip(OperatorConsole::DRIVE_YAW, true);
-		op.SetFlip(OperatorConsole::AnalogControls::CAM_X, false);
+		op.SetFlip(OperatorConsole::AnalogControls::CAM_X, true);
 		op.SetFlip(OperatorConsole::AnalogControls::CAM_Y, true);
 		op.SetFlip(OperatorConsole::AnalogControls::LIFT, true);
 	}
@@ -66,7 +66,6 @@ private:
 
 	void TeleopPeriodic() override
 	{
-		lift.check();	// Temporary location of call of check
 
 		op.UpdateDriveControls();
 		drive.Drive(op.GetDriveX(), op.GetDriveY(), op.GetDriveYaw());
@@ -90,6 +89,7 @@ private:
 			manager.EnableManual(true);
 			manager.OffsetTarget(op.GetLift());
 		}
+
 	}
 
 	void TestInit() override

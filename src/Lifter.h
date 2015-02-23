@@ -10,7 +10,7 @@ class Lifter {
 public:
 	enum Height_t {Ground = 0, Step, StackDown, StackUp, ToteScore, ToteDown, ToteUp, BinT1, BinT2, BinT3, Top, NUM_STATES};
 	static const double States[];
-	static constexpr double ticksPerInch = 183.0;
+	static constexpr double ticksPerInch = 210.0;
 	static constexpr double inchesOffGround = 3.0;
 	static constexpr double toleranceTicks = 20.0;
 
@@ -31,6 +31,10 @@ private:
 	double targetPosition;
 	Height_t targetState, previousState;
 	bool calibrated;
+
+public:
+	CANTalon& GetMasterTal() {return m_tal1;};
+	CANTalon& GetSlaveTal() {return m_tal2;};
 
 public:
 	Lifter(int talID1, int talID2, PIDConfig iPID, double ramp);

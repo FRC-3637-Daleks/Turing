@@ -88,10 +88,10 @@ Holder::setTargetPosition(holder_t p) // either extends or retracts pistons base
 Holder::holder_t
 Holder::getCurrentPosition()   //returns current state of pistons (in or out)
 {
-	if (m_a->Get() == false && waitExceeded())
-		m_currentState = HOLDER_IN;
-	else if(getSensorState() == ON)
+	if(getSensorState() == ON)
 		m_currentState = HOLDING;
+	else if (m_a->Get() == false && waitExceeded())
+		m_currentState = HOLDER_IN;
 	else if (waitExceeded())
 		m_currentState = HOLDER_OUT;
 	// else it remains the same
