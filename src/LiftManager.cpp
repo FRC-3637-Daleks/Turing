@@ -80,11 +80,7 @@ void LiftManager::EnableManual(const bool mode)
 	if(GetCurrentHoldState() != Holder::HOLDING)
 		manual = mode;
 	else if(mode == false)
-	{
-		if(manual == true)
-			lifter.offsetTarget(0.0);
 		manual = false;
-	}
 }
 
 const bool LiftManager::OffsetTarget(const double inches)
@@ -105,10 +101,6 @@ const bool LiftManager::ExecuteCurrent()
 		holder.retract();
 		SetHeightTarget(currentState.lifterState);	// When thrown back into automatic it will know the closest state
 		return false;
-	}
-	else
-	{
-		//lifter.offsetTarget(0.0);
 	}
 
 	bool ret;
@@ -165,10 +157,6 @@ void LiftManager::GoToState(const DuelState &state)
 	{
 		std::cout<<"Setting lifter to target: "<<state.lifterState<<std::endl;
 		lifter.setTargetState(state.lifterState);
-	}
-	else if(routineMode == GROUND)
-	{
-		lifter.setTargetState(Lifter::Ground);
 	}
 
 }

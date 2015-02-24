@@ -77,12 +77,12 @@ const float OperatorConsole::GetDriveYaw()
 
 const float OperatorConsole::GetCamX()
 {
-	return convertAxis(m_copilotLeft.GetAxis(GamePad::PadAxisType::LEFT_X), GetCamSquared(), GetFlip(AnalogControls::CAM_Y))/2.0+0.5;
+	return convertAxis(m_copilotLeft.GetAxis(GamePad::PadAxisType::LEFT_X))/2.0+0.5;
 }
 
 const float OperatorConsole::GetCamY()
 {
-	return convertAxis(m_copilotLeft.GetAxis(GamePad::PadAxisType::LEFT_Y), GetCamSquared(), GetFlip(AnalogControls::CAM_Y))/2.0+0.5;
+	return convertAxis(m_copilotLeft.GetAxis(GamePad::PadAxisType::LEFT_Y))/2.0+0.5;
 }
 
 const bool OperatorConsole::PollPrecisionDriving()
@@ -133,7 +133,7 @@ const bool OperatorConsole::GetHoldRetract()
 
 const float OperatorConsole::GetLift()
 {
-	return 4.0*convertAxis(m_copilotLeft.GetAxis(GamePad::RIGHT_Y), squaredLift, flips[LIFT], 1.0);
+	return 50.0*convertAxis(m_copilotLeft.GetAxis(GamePad::RIGHT_Y), squaredLift, flips[LIFT], 1.0);
 }
 
 const bool OperatorConsole::GetGround()
