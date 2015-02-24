@@ -114,7 +114,7 @@ const bool LiftManager::ExecuteCurrent()
 	bool ret;
 	std::cout<<"current state: ("<<currentState.lifterState<<", "<<currentState.holderState<<")"<<std::endl;
 
-	if(currentState.lifterState == Lifter::TRANSITION || currentState.holderState == Lifter::TRANSITION)
+	if(currentState.lifterState == Lifter::TRANSITION || currentState.holderState == Holder::TRANSITION)
 		return false;
 
 	if(funcs[currentState.lifterState][currentState.holderState] == NULL)
@@ -128,7 +128,7 @@ const bool LiftManager::ExecuteCurrent()
 
 	if(ret && currentRoutine != NULL)
 	{
-		if(currentState == targetState && ExceedTimer())	// Next state in routine
+		if(currentState == targetState)	// Next state in routine
 		{
 			std::cout<<"Next step in routine"<<std::endl;
 			if(currentRoutine->front().holderState >= Holder::HOLDER_IN)
@@ -141,12 +141,6 @@ const bool LiftManager::ExecuteCurrent()
 			{
 				std::cout<<"Lifter State: "<<currentState.lifterState<<" -> "<<currentRoutine->front().lifterState<<std::endl;
 				SetHeightTarget(currentRoutine->front().lifterState);
-			}
-
-			if(currentRoutine->front().lifterState >= Lifter::Ground)
-			{
-				std::cout<<"Delaying"<<std::endl;
-				SetTimer(100);
 			}
 
 			currentRoutine->pop();
@@ -163,18 +157,7 @@ const bool LiftManager::ExecuteCurrent()
 void LiftManager::GoToState(const DuelState &state)
 {
 	holder.setTargetPosition(state.holderState);
-
-	// Allows manual movement
-	if(currentState.lifterState != targetState.lifterState)
-	{
-		std::cout<<"Setting lifter to target: "<<state.lifterState<<std::endl;
-		lifter.setTargetState(state.lifterState);
-	}
-	else if(routineMode == GROUND)
-	{
-		lifter.setTargetState(Lifter::Ground);
-	}
-
+	lifter.setTargetPosition(state.lifterState);
 }
 
 void LiftManager::SetHeightTarget(const Lifter::Height_t h)
@@ -254,7 +237,6 @@ const bool LiftManager::ScoreStack()
 
 bool LiftManager::MoveHook()
 {
-	timing = false;
 
 	// Disallow hook movement in these areas
 	if(targetState.holderState == Holder::HOLDER_OUT)
@@ -275,15 +257,12 @@ bool LiftManager::MoveHook()
 
 bool LiftManager::MoveHookOrExtend()
 {
-	timing = false;
-	std::cout<<"Can Open Pistons"<<std::endl;
 	GoToState(targetState);
 	return true;
 }
 
 bool LiftManager::ResolveHolder()
 {
-	timing = false;
 	if(currentState.holderState == Holder::HOLDING)
 	{
 		targetState.holderState = Holder::HOLDING;
@@ -299,7 +278,6 @@ bool LiftManager::ResolveHolder()
 
 bool LiftManager::MoveHookOrRetract()
 {
-	timing = false;
 	if(targetState.holderState == Holder::HOLDING)
 		targetState.holderState = currentState.holderState;
 	GoToState(targetState);
@@ -308,7 +286,6 @@ bool LiftManager::MoveHookOrRetract()
 
 bool LiftManager::Safety()
 {
-	timing = false;
 	// Ensures it does not break
 	if(targetState.lifterState >= Lifter::StackUp)
 	{
@@ -319,7 +296,6 @@ bool LiftManager::Safety()
 	if(targetState.holderState == Holder::HOLDING)
 		targetState.holderState = currentState.holderState;
 
-	std::cout<<"Safety()"<<std::endl;
 	if(targetState.lifterState >= Lifter::StackUp)
 		GoToState(DuelState(Lifter::StackUp, targetState.holderState));
 	else
@@ -329,26 +305,12 @@ bool LiftManager::Safety()
 
 bool LiftManager::LiftStack()
 {
-	/*if(targetState.lifterState > Lifter::StackUp)
-		GoToState(DuelState(Lifter::StackUp, targetState.holderState));
-	else*/
-	if(!timing)
-	{
-		SetTimer(75);
-		timing = true;
-		return true;
-	}
-	else if(ExceedTimer())
-	{
-		GoToState(targetState);
-		timing = false;
-	}
-
+	GoToState(targetState);
 	return true;
 }
 
 bool LiftManager::Death()
 {
 	std::cout<<"It\'s over"<<std::endl;
-	return 0/0;
+	return false;
 }

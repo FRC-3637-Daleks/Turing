@@ -41,15 +41,13 @@ private:
 	DuelState targetState, currentState;
 	Routine *currentRoutine;
 	ROUTINE_t routineMode;
-	clock_t delay;
-	bool timing;
 	bool manual;
 
 
 public:
 	LiftManager(Lifter &lift, Holder &hold): lifter(lift), holder(hold),
 			targetState(Lifter::Ground, Holder::HOLDER_IN), currentState(Lifter::Ground, Holder::HOLDER_IN),
-			currentRoutine(NULL), routineMode(NONE), delay(0), manual(false) {};
+			currentRoutine(NULL), routineMode(NONE), manual(false) {};
 	virtual ~LiftManager() {};
 
 public:
@@ -76,8 +74,6 @@ public:
 private:
 	const DuelState ResolveCurrentState() {return DuelState(GetCurrentHeight(), GetCurrentHoldState());};
 	void GoToState(const DuelState &state);
-	void SetTimer(const int del) {delay = clock()+del*CLOCKS_PER_SEC/1000.0;};
-	const bool ExceedTimer() const {return clock() > delay;};
 
 private:	/// State functions
 	bool MoveHook();
