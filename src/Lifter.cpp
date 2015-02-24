@@ -42,6 +42,7 @@ void Lifter::calibrate()
 		m_tal1.SetControlMode(CANTalon::ControlMode::kPosition);
 		m_tal1.SetPosition(0.0);
 		targetPosition = 0.0;
+		targetState = Ground;
 		calibrated = true;
 		std::cout<<"Calibrated"<<std::endl;
 	}
@@ -51,6 +52,7 @@ void Lifter::calibrate()
 		m_tal1.SetControlMode(CANTalon::ControlMode::kPercentVbus);
 		m_tal1.SetVoltageRampRate(rampRate);
 		m_tal1.Set(-0.5);
+		targetState = TRANSITION;
 		calibrated = false;
 	}
 }
@@ -108,7 +110,6 @@ bool Lifter::setTargetState(Height_t h)
 
 	setTargetPosition(inchesOffGroundToTicks(States[targetState]));
 
-
 	if(Lifter::getCurrentPosition() <= 100 && targetState == Ground)
 	{
 		calibrate();
@@ -132,21 +133,18 @@ Lifter::Height_t Lifter::getTargetState()
 
 Lifter::Height_t Lifter::getCurrentState()
 {
+	if(targetState == TRANSITION)
+		return previousState = TRANSITION;
+
 	if(!m_tal1.GetReverseLimitOK())
 		return previousState = Ground;
 
+	previousState = TRANSITION;
 	for(int i = Ground; i < Top; i++)
 	{
 		if(fabs(getCurrentPosition() - inchesOffGroundToTicks(States[i])) < toleranceTicks) 	// Checks to see if its within the tolerance of the state
 		{
 			return previousState = Height_t(i);
-		}
-		else if(getCurrentPosition() > inchesOffGroundToTicks(States[i]) && getCurrentPosition() < inchesOffGroundToTicks(States[i+1]))
-		{
-			if(previousState > i+1)
-				return previousState = Height_t(i+1);
-			else if(previousState < i)
-				return previousState = Height_t(i);
 		}
 	}
 	return previousState;
@@ -154,6 +152,7 @@ Lifter::Height_t Lifter::getCurrentState()
 
 void Lifter::offsetTarget(double offset)	// Inches
 {
+	targetState = TRANSITION;
 	setTargetPosition(getCurrentPosition() + inchToTicks(offset));
 }
 
