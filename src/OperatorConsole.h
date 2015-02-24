@@ -51,11 +51,6 @@ private:
 	static const float convertAxis(const float raw, const bool squared=true, const bool flip=false, const double precision=1.0);
 
 public:
-	Joystick& GetDriverLeft() {return m_driveLeft;};
-	Joystick& GetDriverRight() {return m_driveRight;};
-	GamePad& GetCopilotLeft() {return m_copilotLeft;};
-
-public:
 	/// Updates controls for when humans are driving
 	void UpdateDriveControls();
 

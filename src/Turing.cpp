@@ -92,11 +92,6 @@ private:
 
 	}
 
-	void ManualMode()
-	{
-
-	}
-
 	void TestInit() override
 	{
 	}
