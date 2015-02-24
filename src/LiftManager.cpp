@@ -113,6 +113,10 @@ const bool LiftManager::ExecuteCurrent()
 
 	bool ret;
 	std::cout<<"current state: ("<<currentState.lifterState<<", "<<currentState.holderState<<")"<<std::endl;
+
+	if(currentState.lifterState == Lifter::TRANSITION || currentState.holderState == Lifter::TRANSITION)
+		return false;
+
 	if(funcs[currentState.lifterState][currentState.holderState] == NULL)
 	{
 		ret = false;
