@@ -58,12 +58,12 @@ Holder::Holder(Solenoid &ValveIn, Solenoid &ValveOut, DigitalInput &safety)
 
 Holder::Holder(Solenoid *ValveIn, Solenoid *ValveOut, DigitalInput *safety)
 {
-	m_a = ValveIn;
-	m_b = ValveOut;
-	m_safety = safety;
+	m_a = ValveIn; ///sets m_a to be the input valve
+	m_b = ValveOut; ///sets m_b to be the output valve
+	m_safety = safety; ///sets m_safety to be the safety
 	m_currentState = HOLDER_IN;
 	m_targetState = HOLDER_IN;
-	m_needFree = false;
+	m_needFree = false; ///sets it to not use more memory than has been allocated
 	reset();
 	resetSensorTimer();
 	retract();
@@ -71,7 +71,7 @@ Holder::Holder(Solenoid *ValveIn, Solenoid *ValveOut, DigitalInput *safety)
 }
 
 void
-Holder::setTargetPosition(holder_t p) // either extends or retracts pistons based on value of p
+Holder::setTargetPosition(holder_t p) /// either extends or retracts pistons based on value of p
 {
 	switch(p) {
 		case HOLDER_IN:
@@ -90,7 +90,7 @@ Holder::setTargetPosition(holder_t p) // either extends or retracts pistons base
 }
 
 Holder::holder_t
-Holder::getCurrentPosition()   //returns current state of pistons (in or out)
+Holder::getCurrentPosition()   ///returns current state of pistons (in or out)
 {
 	if (m_a->Get() == false && waitExceeded())
 		m_currentState = HOLDER_IN;
@@ -98,13 +98,13 @@ Holder::getCurrentPosition()   //returns current state of pistons (in or out)
 		m_currentState = HOLDING;
 	else if (waitExceeded())
 		m_currentState = HOLDER_OUT;
-	// else it remains the same
+	/// else it remains the same
 
 	return m_currentState;
 }
 
 Holder::holder_t
-Holder::getTargetPosition()
+Holder::getTargetPosition() ///says what the target state is
 {
 	return m_targetState;
 }
@@ -135,7 +135,7 @@ Holder::extend()
 		reset();
 		m_targetState = HOLDER_OUT;
 	}
-	//close output, open input
+	///close output, open input
 	m_a->Set(true);
 	m_b->Set(false);
 	return;
@@ -144,22 +144,22 @@ Holder::extend()
 void
 Holder::retract()
 {
-	if (getCurrentPosition() == HOLDING)   // must not retract with switch on
+	if (getCurrentPosition() == HOLDING)   ///arms must not retract with switch on
 		return;
 
-	if (m_targetState != HOLDER_IN)
+	if (m_targetState != HOLDER_IN) ///if the target state isn't holder in reset and make the target state holder in
 	{
 		reset();
 		m_targetState = HOLDER_IN;
 	}
-	//close input, open output
+	///close input, open output
 	m_a->Set(false);
 	m_b->Set(true);
 	return;
 }
 
 void
-Holder::reset()
+Holder::reset() ///doesn't report current position until timer clears
 {
 	timer = clock();
 }
