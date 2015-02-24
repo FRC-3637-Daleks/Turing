@@ -32,8 +32,7 @@ Holder::Holder(uint8_t ValveIn, uint8_t ValveOut, uint8_t safety)
 	m_currentState = HOLDER_IN;
 	m_targetState = HOLDER_IN;
 	m_needFree = true;
-	reset();
-	resetSensorTimer();
+	reset(0.0);
 	retract();
 	return;
 }
@@ -46,8 +45,7 @@ Holder::Holder(Solenoid &ValveIn, Solenoid &ValveOut, DigitalInput &safety)
 	m_currentState = HOLDER_IN;
 	m_targetState = HOLDER_IN;
 	m_needFree = false;
-	reset();
-	resetSensorTimer();
+	reset(0.0);
 	retract();
 	return;
 }
@@ -60,8 +58,7 @@ Holder::Holder(Solenoid *ValveIn, Solenoid *ValveOut, DigitalInput *safety)
 	m_currentState = HOLDER_IN;
 	m_targetState = HOLDER_IN;
 	m_needFree = false;
-	reset();
-	resetSensorTimer();
+	reset(0.0);
 	retract();
 	return;
 }
@@ -69,6 +66,8 @@ Holder::Holder(Solenoid *ValveIn, Solenoid *ValveOut, DigitalInput *safety)
 void
 Holder::setTargetPosition(holder_t p) // either extends or retracts pistons based on value of p
 {
+	if(getCurrentPosition() == TRANSITION)
+		return;
 	switch(p) {
 		case HOLDER_IN:
 			retract();
@@ -79,6 +78,8 @@ Holder::setTargetPosition(holder_t p) // either extends or retracts pistons base
 		case HOLDING:
 			extend();
 			break;
+		case TRANSITION:
+			break;
 		default:
 			break;
 	}
@@ -86,15 +87,16 @@ Holder::setTargetPosition(holder_t p) // either extends or retracts pistons base
 }
 
 Holder::holder_t
-Holder::getCurrentPosition()   //returns current state of pistons (in or out)
+Holder::getCurrentPosition()   //returns current state of pistons
 {
-	if(getSensorState() == ON)
+	if(!ready())
+		m_currentState = TRANSITION;
+	else if(getSensorState() == ON)
 		m_currentState = HOLDING;
-	else if (m_a->Get() == false && waitExceeded())
-		m_currentState = HOLDER_IN;
-	else if (waitExceeded())
+	else if (m_a->Get() == true)
 		m_currentState = HOLDER_OUT;
-	// else it remains the same
+	else
+		m_currentState = HOLDER_IN;
 
 	return m_currentState;
 }
@@ -110,12 +112,12 @@ Holder::getSensorState()
 {
 	if (!m_safety->Get())
 	{
-		resetSensorTimer();
+		reset(SENSOR_SWITCH_TIME);
 		m_sensorState = ON;
 	}
 	else
 	{
-		if(waitExceededSensor())
+		if(ready())
 			m_sensorState = OFF;
 	}
 
@@ -128,7 +130,7 @@ Holder::extend()
 {
 	if(m_targetState != HOLDER_OUT)
 	{
-		reset();
+		reset(PISTON_TRAVEL_TIME);
 		m_targetState = HOLDER_OUT;
 	}
 	//close output, open input
@@ -145,7 +147,7 @@ Holder::retract()
 
 	if (m_targetState != HOLDER_IN)
 	{
-		reset();
+		reset(PISTON_TRAVEL_TIME);
 		m_targetState = HOLDER_IN;
 	}
 	//close input, open output
@@ -155,27 +157,13 @@ Holder::retract()
 }
 
 void
-Holder::reset()
+Holder::reset(const long mils)
 {
-	timer = clock();
-}
-
-void
-Holder::resetSensorTimer()
-{
-	sensorTimer = clock();
+	timer = std::chrono::system_clock::now() + std::chrono::milliseconds(mils);
 }
 
 bool
-Holder::waitExceeded(double mils)
+Holder::ready()
 {
-	return clock() - timer >  mils*CLOCKS_PER_SEC/1000.0;
+	return std::chrono::system_clock::now() > timer;
 }
-
-bool
-Holder::waitExceededSensor(double mils)
-{
-	return clock() - sensorTimer > mils*CLOCKS_PER_SEC/1000.0;
-}
-
-
