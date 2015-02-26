@@ -24,6 +24,23 @@ XX extend() - extefnds pistons
 #include "Holder.h"
 #include "WPILib.h"
 
+const std::string Holder::GetName(const holder_t h)
+{
+	switch(h)
+	{
+	case TRANSITION:
+		return "TRANSITION";
+	case HOLDER_IN:
+		return "HOLDER_IN";
+	case HOLDER_OUT:
+		return "HOLDER_OUT";
+	case HOLDING:
+		return "HOLDING";
+	default:
+		return "ERRRRRRRRRR";
+	}
+}
+
 Holder::Holder(uint8_t ValveIn, uint8_t ValveOut, uint8_t safety)
 {
 	m_a = new Solenoid(ValveIn);
@@ -67,7 +84,10 @@ void
 Holder::setTargetPosition(holder_t p) // either extends or retracts pistons based on value of p
 {
 	if(getCurrentPosition() == TRANSITION)
+	{
 		return;
+	}
+
 	switch(p) {
 		case HOLDER_IN:
 			retract();
@@ -91,6 +111,8 @@ Holder::getCurrentPosition()   //returns current state of pistons
 {
 	if(!ready())
 		m_currentState = TRANSITION;
+	else if(getSensorState() == SWITCH_TRANSITION)
+		m_currentState = TRANSITION;
 	else if(getSensorState() == ON)
 		m_currentState = HOLDING;
 	else if (m_a->Get() == true)
@@ -112,11 +134,15 @@ Holder::getSensorState()
 {
 	if (!m_safety->Get())
 	{
-		reset(SENSOR_SWITCH_TIME);
 		m_sensorState = ON;
 	}
 	else
 	{
+		if(m_sensorState == ON)
+		{
+			reset(SENSOR_SWITCH_TIME);
+			m_sensorState = SWITCH_TRANSITION;
+		}
 		if(ready())
 			m_sensorState = OFF;
 	}
@@ -142,7 +168,7 @@ Holder::extend()
 void
 Holder::retract()
 {
-	if (getCurrentPosition() == HOLDING)   // must not retract with switch on
+	if (getCurrentPosition() == HOLDING || getCurrentPosition() == TRANSITION)   // must not retract with switch on
 		return;
 
 	if (m_targetState != HOLDER_IN)

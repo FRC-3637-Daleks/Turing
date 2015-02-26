@@ -9,7 +9,7 @@ const double Lifter::States[] = {
 		[Lifter::Step]=8.5,
 		[Lifter::StackDown]=9.0,
 		[Lifter::StackUp]=13.0,
-		[Lifter::ToteScore]=13.0,
+		[Lifter::ToteScore]=14.25,
 		[Lifter::ToteDown]=20.0,
 		[Lifter::ToteUp]=30.0,
 		[Lifter::BinT1]=39.0,
@@ -17,6 +17,39 @@ const double Lifter::States[] = {
 		[Lifter::BinT3]=63.0,
 		[Lifter::Top]=75.0
 };
+
+const std::string Lifter::GetName(const Height_t h)
+{
+	switch(h)
+	{
+	case Lifter::TRANSITION:
+		return "TRANSITION;";
+	case Lifter::Ground:
+		return "Ground";
+	case Lifter::Step:
+		return "Step";
+	case Lifter::StackDown:
+		return "StackDown";
+	case Lifter::StackUp:
+		return "StackUp";
+	case Lifter::ToteScore:
+		return "ToteScore";
+	case Lifter::ToteDown:
+		return "ToteDown";
+	case Lifter::ToteUp:
+		return "ToteUp";
+	case Lifter::BinT1:
+		return "BinT1";
+	case Lifter::BinT2:
+		return "BinT2";
+	case Lifter::BinT3:
+		return "BinT3";
+	case Lifter::Top:
+		return "Top";
+	default:
+		return "ERRRRRRR";
+	}
+}
 
 Lifter::Lifter(int talID1, int talID2, PIDConfig iPID, double ramp): m_tal1(talID1), m_tal2(talID2), pid(iPID), rampRate(ramp)
 {
@@ -44,15 +77,15 @@ void Lifter::calibrate()
 		targetPosition = 0.0;
 		targetState = Ground;
 		calibrated = true;
-		std::cout<<"Calibrated"<<std::endl;
+		//std::cout<<"Calibrated"<<std::endl;
 	}
 	else
 	{
-		std::cout<<"Calibrating"<<std::endl;
+		//std::cout<<"Calibrating"<<std::endl;
 		m_tal1.SetControlMode(CANTalon::ControlMode::kPercentVbus);
 		m_tal1.SetVoltageRampRate(rampRate);
 		m_tal1.Set(-0.5);
-		targetState = TRANSITION;
+		//targetState = TRANSITION;
 		calibrated = false;
 	}
 }
@@ -110,7 +143,7 @@ bool Lifter::setTargetState(Height_t h)
 
 	setTargetPosition(inchesOffGroundToTicks(States[targetState]));
 
-	if(Lifter::getCurrentPosition() <= 100 && targetState == Ground)
+	if(Lifter::getCurrentPosition() <= 200 && targetState == Ground)
 	{
 		calibrate();
 		return isCalibrated();
@@ -134,20 +167,20 @@ Lifter::Height_t Lifter::getTargetState()
 Lifter::Height_t Lifter::getCurrentState()
 {
 	if(targetState == TRANSITION)
-		return previousState = TRANSITION;
+		return TRANSITION;
 
 	if(!m_tal1.GetReverseLimitOK())
-		return previousState = Ground;
+		return Ground;
 
-	previousState = TRANSITION;
 	for(int i = Ground; i < Top; i++)
 	{
 		if(fabs(getCurrentPosition() - inchesOffGroundToTicks(States[i])) < toleranceTicks) 	// Checks to see if its within the tolerance of the state
 		{
-			return previousState = Height_t(i);
+			return Height_t(i);
 		}
 	}
-	return previousState;
+
+	return Top;
 }
 
 void Lifter::offsetTarget(double offset)	// Inches

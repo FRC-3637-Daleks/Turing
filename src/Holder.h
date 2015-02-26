@@ -28,8 +28,9 @@ public:
 	Holder(Solenoid *ValveIn, Solenoid *ValveOut, DigitalInput *safety);
 
 	enum holder_t {TRANSITION=-1, HOLDER_IN=0, HOLDER_OUT, HOLDING, NUM_STATES };
+	static const std::string GetName(const holder_t h);
 
-	enum sensor_t {ON, OFF};
+	enum sensor_t {SWITCH_TRANSITION=-1, ON, OFF};
 
 	void setTargetPosition(holder_t p);
 	holder_t getCurrentPosition();
