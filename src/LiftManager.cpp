@@ -182,7 +182,6 @@ const bool LiftManager::GoToGround()
 {
 	CancelRoutine();
 	SetHeightTarget(Lifter::Ground);
-	lifter.setTargetPosition(Lifter::Ground);	// Ensures it is set correctly beyond if it is currently in a transition state
 	return true;
 }
 

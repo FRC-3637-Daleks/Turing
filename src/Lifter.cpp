@@ -166,11 +166,8 @@ Lifter::Height_t Lifter::getTargetState()
 
 Lifter::Height_t Lifter::getCurrentState()
 {
-	if(targetState == TRANSITION)
-		return TRANSITION;
-
 	if(!m_tal1.GetReverseLimitOK())
-		return Ground;
+			return Ground;
 
 	for(int i = Ground; i < Top; i++)
 	{
@@ -179,6 +176,10 @@ Lifter::Height_t Lifter::getCurrentState()
 			return Height_t(i);
 		}
 	}
+
+	if(targetState == TRANSITION)
+		return TRANSITION;
+
 
 	return Top;
 }
