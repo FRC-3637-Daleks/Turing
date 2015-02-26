@@ -16,7 +16,7 @@ private:
 
 public:
 	Turing(): drive(DalekDrive::Wheel_t::MECANUM_WHEELS, Robot::FRONT_LEFT, Robot::FRONT_RIGHT, Robot::BACK_LEFT, Robot::BACK_RIGHT, 50.0),
-			  lift(Robot::LIFT_1, Robot::LIFT_2, Lifter::PIDConfig(2.0, 0.005, 0.0, 20), 50.0),
+			  lift(Robot::LIFT_1, Robot::LIFT_2, Lifter::PIDConfig(2.0, 0.000, 0.0, 20), 50.0),
 			  hold(Robot::HOLDER_RETRACT, Robot::HOLDER_EXTEND, Robot::TOTE_SWITCH),
 			  manager(lift, hold),
 			  op(Robot::DRIVER_LEFT, Robot::DRIVER_RIGHT, Robot::COPILOT_LEFT, Robot::COPILOT_RIGHT),
@@ -38,11 +38,12 @@ private:
 	{
 		lift.calibrate();
 		lift.setTargetState(Lifter::Ground);
+		manager.EnableManual(false);
+		compressor.Start();
 	}
 
 	void DisabledInit() override
 	{
-		compressor.Start();
 	}
 
 	void DisabledPeriodic() override
@@ -61,12 +62,10 @@ private:
 
 	void TeleopInit() override
 	{
-		manager.EnableManual(false);
 	}
 
 	void TeleopPeriodic() override
 	{
-
 		op.UpdateDriveControls();
 		drive.Drive(op.GetDriveX(), op.GetDriveY(), op.GetDriveYaw());
 		gimbal.setPosition(op.GetCamX(), op.GetCamY());
@@ -90,11 +89,16 @@ private:
 			manager.OffsetTarget(op.GetLift());
 		}
 
+		//std::cout<<"Current: Lifter: "<<Lifter::GetName(lift.getCurrentState())<<"\tHolder: "<<Holder::GetName(hold.getCurrentPosition())<<std::endl;
 	}
 
 	void ManualMode()
 	{
-
+		lift.offsetTarget(op.GetLift());
+		if(op.GetHoldExtend())
+			hold.setTargetPosition(Holder::HOLDER_OUT);
+		else if(op.GetHoldRetract())
+			hold.setTargetPosition(Holder::HOLDER_IN);
 	}
 
 	void TestInit() override
@@ -103,6 +107,10 @@ private:
 
 	void TestPeriodic() override
 	{
+		op.UpdateDriveControls();
+		drive.Drive(op.GetDriveX(), op.GetDriveY(), op.GetDriveYaw());
+		gimbal.setPosition(op.GetCamX(), op.GetCamY());
+		ManualMode();
 
 	}
 };
