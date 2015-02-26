@@ -7,10 +7,21 @@
 
 #include "ToggleInput.h"
 
+void FlickInput::Update()
+{
+	const bool pressed = Pressed();
+	if(pressed && !previous)
+		SetState(true);
+	else
+		SetState(false);
+
+	previous = pressed;
+}
+
 void ToggleInput::Update()
 {
 	const bool pressed = Pressed();
 	if(pressed && !previous)
-		state = !state;
+		SetState(!GetState());
 	previous = pressed;
 }

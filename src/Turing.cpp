@@ -67,38 +67,55 @@ private:
 	void TeleopPeriodic() override
 	{
 		op.UpdateDriveControls();
-		drive.Drive(op.GetDriveX(), op.GetDriveY(), op.GetDriveYaw());
-		gimbal.setPosition(op.GetCamX(), op.GetCamY());
-		if(op.GetGround())
-			manager.GoToGround();
-		else if(op.GetScoreStep())
-			manager.ScoreStackToStep();
-		else if(op.GetScore())
-			manager.ScoreStack();
-		else if(op.GetPushTote())
-			manager.PushToteToStack();
 
-		if(!op.GetLifterAuto())
+		drive.Drive(op.GetDriveX(), op.GetDriveY(), op.GetDriveYaw());
+
+		gimbal.setPosition(op.GetCamX(), op.GetCamY());
+
+
+		std::cout<<Lifter::GetName(lift.getCurrentState())<<", "<<Holder::GetName(hold.getCurrentPosition())<<std::endl;
+		if(!op.GetManual())
 		{
 			manager.EnableManual(false);
+
+			if(op.GetGround())
+				manager.GoToGround();
+			else if(op.GetScoreStep())
+				manager.ScoreStackToStep();
+			else if(op.GetScore())
+				manager.ScoreStack();
+			else if(op.GetPushTote())
+				manager.PushToteToStack();
+
 			manager.ExecuteCurrent();
+		}
+		else
+		{
+			ManualMode();
+		}
+
+	}
+
+	void ManualMode()
+	{
+		if(op.GetIncrementManual())
+		{
+			manager.EnableManual(false);
+			manager.SetHeightTarget(op.GetLiftTarget());
+			if(op.GetHoldExtend())
+				manager.SetHolderTarget(Holder::HOLDER_OUT);
+			else if(op.GetHoldRetract())
+				manager.SetHolderTarget(Holder::HOLDER_IN);
 		}
 		else
 		{
 			manager.EnableManual(true);
 			manager.OffsetTarget(op.GetLift());
+			if(op.GetHoldExtend())
+				hold.setTargetPosition(Holder::HOLDER_OUT);
+			else if(op.GetHoldRetract())
+				hold.setTargetPosition(Holder::HOLDER_IN);
 		}
-
-		//std::cout<<"Current: Lifter: "<<Lifter::GetName(lift.getCurrentState())<<"\tHolder: "<<Holder::GetName(hold.getCurrentPosition())<<std::endl;
-	}
-
-	void ManualMode()
-	{
-		lift.offsetTarget(op.GetLift());
-		if(op.GetHoldExtend())
-			hold.setTargetPosition(Holder::HOLDER_OUT);
-		else if(op.GetHoldRetract())
-			hold.setTargetPosition(Holder::HOLDER_IN);
 	}
 
 	void TestInit() override
@@ -111,7 +128,6 @@ private:
 		drive.Drive(op.GetDriveX(), op.GetDriveY(), op.GetDriveYaw());
 		gimbal.setPosition(op.GetCamX(), op.GetCamY());
 		ManualMode();
-
 	}
 };
 

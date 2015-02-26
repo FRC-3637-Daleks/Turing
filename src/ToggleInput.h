@@ -11,24 +11,54 @@
 #include <functional>
 #include "WPILib.h"
 
-class ToggleInput
+class BoolInput
 {
 private:
 	bool state;
+
+public:
+	BoolInput(): state(false) {};
+	virtual ~BoolInput() {};
+
+public:
+	const bool GetState() const {return state;};
+	void SetState(const bool s) {state = s;};
+	virtual void Update()=0;
+};
+
+class FlickInput: public BoolInput
+{
+private:
 	bool previous;
 	std::function<bool()> callback;
 
 public:
-	explicit ToggleInput(const std::function<bool()> &fn): state(false), previous(false), callback(fn) {};
-	ToggleInput(ToggleInput&& other): state(other.state), previous(other.previous), callback(other.callback) {other.callback = nullptr;};
+	explicit FlickInput(const std::function<bool()> &fn): previous(false), callback(fn) {};
+	FlickInput(FlickInput&& other): previous(other.previous), callback(other.callback) {other.callback = nullptr;};
+	FlickInput(const FlickInput& other)=delete;
+	virtual ~FlickInput() {};
+
+public:
+	void Update() override;
+	const bool Pressed() {return callback();};
+	const bool GetUpdate() {Update(); return GetState();};
+};
+
+class ToggleInput: public BoolInput
+{
+private:
+	bool previous;
+	std::function<bool()> callback;
+
+public:
+	explicit ToggleInput(const std::function<bool()> &fn): previous(false), callback(fn) {};
+	ToggleInput(ToggleInput&& other): previous(other.previous), callback(other.callback) {other.callback = nullptr;};
 	ToggleInput(const ToggleInput&)=delete;
 	virtual ~ToggleInput() {};
 
 public:
-	void Update();
+	void Update() override;
 	const bool Pressed() {return callback();};
-	void SetState(const bool s) {state = s;};
-	const bool GetState() const {return state;};
 	const bool GetUpdate() {Update(); return GetState();};
 };
 

@@ -77,14 +77,7 @@ const LiftManager::STATE_FUNC LiftManager::funcs[][Holder::NUM_STATES] = {
 
 void LiftManager::EnableManual(const bool mode)
 {
-	if(GetCurrentHoldState() != Holder::HOLDING)
-		manual = mode;
-	else if(mode == false && manual == true)
-	{
-		if(manual == true)
-			lifter.offsetTarget(0.0);
-		manual = false;
-	}
+	manual = mode;
 }
 
 const bool LiftManager::OffsetTarget(const double inches)
@@ -187,11 +180,9 @@ void LiftManager::CancelRoutine()
 
 const bool LiftManager::GoToGround()
 {
-	if(routineMode == GROUND)
-		return true;
 	CancelRoutine();
 	SetHeightTarget(Lifter::Ground);
-	routineMode = GROUND;
+	lifter.setTargetPosition(Lifter::Ground);	// Ensures it is set correctly beyond if it is currently in a transition state
 	return true;
 }
 
