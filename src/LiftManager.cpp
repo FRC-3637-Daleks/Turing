@@ -77,6 +77,8 @@ const LiftManager::STATE_FUNC LiftManager::funcs[][Holder::NUM_STATES] = {
 
 void LiftManager::EnableManual(const bool mode)
 {
+	if(manual == false)
+		holder.retract();
 	manual = mode;
 }
 
@@ -95,7 +97,6 @@ const bool LiftManager::ExecuteCurrent()
 
 	if(manual)
 	{
-		holder.retract();
 		SetHeightTarget(state.lifterState);	// When thrown back into automatic it will know the closest state
 		return false;
 	}
