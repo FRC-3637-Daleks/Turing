@@ -22,6 +22,9 @@ private:
 	OperatorConsole op;
 	CameraGimbal gimbal;
 
+private:
+	//DRR::MosCutieService mqtt;
+
 public:
 	Turing(): mode(UNDER),
 			  drive(DalekDrive::Wheel_t::MECANUM_WHEELS, Robot::FRONT_LEFT, Robot::FRONT_RIGHT, Robot::BACK_LEFT, Robot::BACK_RIGHT, 50.0),
@@ -30,6 +33,7 @@ public:
 			  manager(lift, hold),
 			  op(Robot::DRIVER_LEFT, Robot::DRIVER_RIGHT, Robot::COPILOT_LEFT, Robot::COPILOT_RIGHT),
 			  gimbal(Robot::CAMERA_X, Robot::CAMERA_Y, 0.0, 0.0)
+			  //mqtt("state", 300)
 	{
 		drive[DalekDrive::LEFT_FRONT].SetFlip(true);
 		drive[DalekDrive::LEFT_REAR].SetFlip(true);
@@ -75,29 +79,32 @@ private:
 				mode = HOLDING;
 			break;
 		case HOLDING:
-			setTimer(std::chrono::seconds(4));
+			setTimer(std::chrono::seconds(3));
 			mode = DRIVING;
 			break;
 		case DRIVING:
-			drive.Drive(0.0, 0.75, 0.0);
+			drive.Drive(0.0, 0.25, 0.0);
 			if(timeExceeds())
 				mode = PLACING;
 			break;
 		case PLACING:
-			drive.Drive(0.0, 0.0, 0.0);
+			//drive.Drive(0.0, 0.0, 0.0);
 			manager.SetHeightTarget(Lifter::Ground);
 			if(manager.GetCurrentHeight() == Lifter::Ground)
 				mode = BACKING;
 			break;
 		case BACKING:
-			drive.Drive(0.0, -0.5, 0.0);
+			drive.Drive(0.0, 0.0, 0.0);
 			setTimer(std::chrono::seconds(1));
+			mode = END;
 			break;
 		case END:
 			if(timeExceeds())
 				drive.Drive(0.0, 0.0, 0.0);
 			break;
 		}
+
+		manager.ExecuteCurrent();
 	}
 
 	void TeleopInit() override

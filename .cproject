@@ -70,6 +70,7 @@
 							<tool id="cdt.managedbuild.tool.gnu.cross.cpp.linker.1895838080" name="Cross G++ Linker" superClass="cdt.managedbuild.tool.gnu.cross.cpp.linker">
 								<option id="gnu.cpp.link.option.libs.1363675797" name="Libraries (-l)" superClass="gnu.cpp.link.option.libs" valueType="libs">
 									<listOptionValue builtIn="false" value="wpi"/>
+									<listOptionValue builtIn="false" value="DiagRoboRIO"/>
 								</option>
 								<option id="gnu.cpp.link.option.paths.1566479969" name="Library search path (-L)" superClass="gnu.cpp.link.option.paths" valueType="libPaths">
 									<listOptionValue builtIn="false" value="&quot;${WPILIB}/cpp/current/lib&quot;"/>
@@ -170,10 +171,10 @@
 	</storageModule>
 	<storageModule moduleId="org.eclipse.cdt.core.LanguageSettingsProviders"/>
 	<storageModule moduleId="refreshScope" versionNumber="2">
-		<configuration configurationName="Debug">
+		<configuration configurationName="Simulate">
 			<resource resourceType="PROJECT" workspacePath="/Turing"/>
 		</configuration>
-		<configuration configurationName="Simulate">
+		<configuration configurationName="Debug">
 			<resource resourceType="PROJECT" workspacePath="/Turing"/>
 		</configuration>
 	</storageModule>

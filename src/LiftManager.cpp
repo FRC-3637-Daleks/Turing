@@ -77,7 +77,7 @@ const LiftManager::STATE_FUNC LiftManager::funcs[][Holder::NUM_STATES] = {
 
 void LiftManager::EnableManual(const bool mode)
 {
-	if(manual == false)
+	if(manual == false && mode == true)
 		holder.retract();
 	manual = mode;
 }
@@ -179,6 +179,7 @@ const bool LiftManager::GoToGround()
 {
 	CancelRoutine();
 	SetHeightTarget(Lifter::Ground);
+	lifter.setTargetState(Lifter::Ground);
 	return true;
 }
 
