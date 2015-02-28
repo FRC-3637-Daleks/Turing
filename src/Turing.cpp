@@ -72,7 +72,6 @@ private:
 
 		gimbal.setPosition(op.GetCamX(), op.GetCamY());
 
-
 		std::cout<<Lifter::GetName(lift.getCurrentState())<<", "<<Holder::GetName(hold.getCurrentPosition())<<std::endl;
 		if(!op.GetManual())
 		{
