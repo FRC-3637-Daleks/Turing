@@ -45,6 +45,10 @@ void OperatorConsole::UpdateDriveControls()
 {
 	for(int i = 0; inputManagers[i] != NULL; i++)
 		inputManagers[i]->Update();
+
+	if(GetGround() || GetPushTote() || GetScore() || GetScoreStep())
+		manualToggle.SetState(false);
+
 	SetPrecisionEnabled(preciseToggle.GetState());	/// Precision Driving
 	if(GetPrecisionEnabled())
 		SetDriveSquared(false);
@@ -109,12 +113,12 @@ void OperatorConsole::PollLifterHeight()
 
 const bool OperatorConsole::GetHoldExtend()
 {
-	return m_copilotLeft.GetButton(GamePad::B4);
+	return m_copilotLeft.GetButton(GamePad::TOP_RIGHT_SHOULDER);
 }
 
 const bool OperatorConsole::GetHoldRetract()
 {
-	return m_copilotLeft.GetButton(GamePad::B2);
+	return m_copilotLeft.GetButton(GamePad::BOTTOM_RIGHT_SHOULDER);
 }
 
 const float OperatorConsole::GetLift()
@@ -142,9 +146,4 @@ const bool OperatorConsole::GetScoreStep()
 const bool OperatorConsole::GetScore()
 {
 	return m_copilotLeft.GetButton(GamePad::B1);
-}
-
-const bool OperatorConsole::GetLifterAuto()
-{
-	return m_copilotLeft.GetButton(GamePad::TOP_RIGHT_SHOULDER);
 }
