@@ -5,6 +5,14 @@ using namespace std;
 class Turing: public IterativeRobot
 {
 private:
+	enum AutoMode_t {UNDER, HOLDING, DRIVING, PLACING, BACKING, END} mode;
+	typedef std::chrono::time_point<std::chrono::system_clock> second_time;
+	second_time timer;
+	static const second_time getNow() {return std::chrono::system_clock::now();};
+	const bool timeExceeds() {return getNow() > timer;};
+	void setTimer(const std::chrono::seconds s) {timer = getNow() + s;};
+
+private:
 	PowerDistributionPanel PDP;
 	DalekDrive drive;
 	Compressor compressor;
@@ -15,7 +23,8 @@ private:
 	CameraGimbal gimbal;
 
 public:
-	Turing(): drive(DalekDrive::Wheel_t::MECANUM_WHEELS, Robot::FRONT_LEFT, Robot::FRONT_RIGHT, Robot::BACK_LEFT, Robot::BACK_RIGHT, 50.0),
+	Turing(): mode(UNDER),
+			  drive(DalekDrive::Wheel_t::MECANUM_WHEELS, Robot::FRONT_LEFT, Robot::FRONT_RIGHT, Robot::BACK_LEFT, Robot::BACK_RIGHT, 50.0),
 			  lift(Robot::LIFT_1, Robot::LIFT_2, Lifter::PIDConfig(2.0, 0.000, 0.0, 20), 50.0),
 			  hold(Robot::HOLDER_RETRACT, Robot::HOLDER_EXTEND, Robot::TOTE_SWITCH),
 			  manager(lift, hold),
@@ -53,11 +62,42 @@ private:
 
 	void AutonomousInit() override
 	{
+		mode = UNDER;
 	}
 
 	void AutonomousPeriodic() override
 	{
-
+		switch(mode)
+		{
+		case UNDER:
+			manager.SetHeightTarget(Lifter::BinT1);
+			if(manager.GetCurrentHeight() == Lifter::BinT1)
+				mode = HOLDING;
+			break;
+		case HOLDING:
+			setTimer(std::chrono::seconds(4));
+			mode = DRIVING;
+			break;
+		case DRIVING:
+			drive.Drive(0.0, 0.75, 0.0);
+			if(timeExceeds())
+				mode = PLACING;
+			break;
+		case PLACING:
+			drive.Drive(0.0, 0.0, 0.0);
+			manager.SetHeightTarget(Lifter::Ground);
+			if(manager.GetCurrentHeight() == Lifter::Ground)
+				mode = BACKING;
+			break;
+		case BACKING:
+			drive.Drive(0.0, -0.5, 0.0);
+			setTimer(std::chrono::seconds(1));
+			break;
+		case END:
+			if(timeExceeds())
+				drive.Drive(0.0, 0.0, 0.0);
+			break;
+		}
 	}
 
 	void TeleopInit() override
