@@ -73,6 +73,7 @@ void Lifter::calibrate()
 		m_tal1.ConfigLimitMode(CANSpeedController::kLimitMode_SwitchInputsOnly);
 		m_tal1.SetSensorDirection(true);	// Reverse sensors
 		m_tal1.SetControlMode(CANTalon::ControlMode::kPosition);
+		std::cout<<"Resetting"<<std::endl;
 		m_tal1.SetPosition(0.0);
 		targetPosition = 0.0;
 		targetState = Ground;
