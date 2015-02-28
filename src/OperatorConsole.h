@@ -12,7 +12,9 @@
 #include "Holder.h"
 #include "Lifter.h"
 #include "DalekDrive.h"
+
 #include "Gamepad.h"
+#include "ToggleInput.h"
 
 class OperatorConsole
 {
@@ -22,7 +24,7 @@ public:
 	enum AutonomousMode_t {FORWARD, TOTE_SET, CONTAINER_SET, TOTE_STACK};
 
 private:
-	static constexpr double deadzone = 0.05;
+	static constexpr double deadzone = 0.09;
 
 private:	/// Hardware
 	Joystick m_driveLeft, m_driveRight;
@@ -35,7 +37,9 @@ private:	/// Configuration
 	bool squaredDrive, squaredCam, squaredLift, squaredBinPull;		///< Axis squaring
 
 private:	/// Button states
-	bool liftUp, liftDown;
+	ToggleInput manualToggle, incrementalToggle, preciseToggle;
+	FlickInput upFlick, downFlick;
+	BoolInput *inputManagers[6];
 
 private:	/// Dynamic settings
 	bool precisionEnabled, relativeDriveEnabled, steadyDriveEnabled;
@@ -90,11 +94,10 @@ public:	/// Class internal status Get and Set functions
 	void EnabledSteadyDrive() {SetSteadyDriveEnabled(true);};
 	void DisableSteadyDrive() {SetSteadyDriveEnabled(false);};
 
-	const CopilotMode_t GetCopilotMode() const {return copilotMode;};
-	void SetCopilotMode(const CopilotMode_t mode) {copilotMode = mode;};
+	const bool GetManual() const {return manualToggle.GetState();};
+	const bool GetIncrementManual() const {return incrementalToggle.GetState();};
 
-	void SetLiftTarget(const Lifter::Height_t target) {targetHeight = target;};
-	const Lifter::Height_t GetLiftTarget() const {return targetHeight;};
+	const Lifter::Height_t GetLiftTarget() const {if(incrementalToggle.GetState()) return targetHeight; else return Lifter::TRANSITION;};
 
 public: /// Analog Get Functions
 	const float GetDriveX();
@@ -106,7 +109,6 @@ public: /// Analog Get Functions
 	const float GetBinPull();
 
 private:	/// Private Button State Poll Functions
-	const bool PollPrecisionDriving();
 	const bool PollRelativeDriving();
 	void PollLifterHeight();
 
@@ -118,7 +120,6 @@ public:		/// Button State Functions
 	const bool GetPushTote();
 	const bool GetScore();
 	const bool GetScoreStep();
-	const bool GetLifterAuto();
 };
 
 

@@ -8,11 +8,12 @@
 
 class Lifter {
 public:
-	enum Height_t {Ground = 0, Step, StackDown, StackUp, ToteScore, ToteDown, ToteUp, BinT1, BinT2, BinT3, Top, NUM_STATES};
+	enum Height_t {TRANSITION=-1, Ground = 0, Step, StackDown, StackUp, ToteScore, ToteDown, ToteUp, BinT1, BinT2, BinT3, Top, NUM_STATES};
 	static const double States[];
-	static constexpr double ticksPerInch = 183.0;
+	static const std::string GetName(const Height_t h);
+	static constexpr double ticksPerInch = 120.0;
 	static constexpr double inchesOffGround = 3.0;
-	static constexpr double toleranceTicks = 20.0;
+	static constexpr double toleranceTicks = 80.0;
 
 public:
 	struct PIDConfig
@@ -29,7 +30,7 @@ private:
 	PIDConfig pid;
 	double rampRate;
 	double targetPosition;
-	Height_t targetState, previousState;
+	Height_t targetState;
 	bool calibrated;
 
 public:

@@ -20,4 +20,7 @@
 
 #include "Razor.h"
 
+#include "MosCutieService.h"
+
+
 #endif
