@@ -23,7 +23,8 @@ private:
 	CameraGimbal gimbal;
 
 private:
-	//DRR::MosCutieService mqtt;
+	DRR::MosCutieService mqtt;
+	DRR::FileService log;
 
 public:
 	Turing(): mode(UNDER),
@@ -32,8 +33,8 @@ public:
 			  hold(Robot::HOLDER_RETRACT, Robot::HOLDER_EXTEND, Robot::TOTE_SWITCH),
 			  manager(lift, hold),
 			  op(Robot::DRIVER_LEFT, Robot::DRIVER_RIGHT, Robot::COPILOT_LEFT, Robot::COPILOT_RIGHT),
-			  gimbal(Robot::CAMERA_X, Robot::CAMERA_Y, 0.0, 0.0)
-			  //mqtt("state", 300)
+			  gimbal(Robot::CAMERA_X, Robot::CAMERA_Y, 0.5, 0.8),
+			  mqtt("state", 100), log("/home/lvuser/log/log.csv", 50)
 	{
 		drive[DalekDrive::LEFT_FRONT].SetFlip(true);
 		drive[DalekDrive::LEFT_REAR].SetFlip(true);
@@ -41,8 +42,8 @@ public:
 		op.SetDriveSquared(true);
 		op.SetFlip(OperatorConsole::AnalogControls::DRIVE_X, true);
 		op.SetFlip(OperatorConsole::DRIVE_YAW, true);
-		op.SetFlip(OperatorConsole::AnalogControls::CAM_X, false);
-		op.SetFlip(OperatorConsole::AnalogControls::CAM_Y, true);
+		op.SetFlip(OperatorConsole::AnalogControls::CAM_X, true);
+		op.SetFlip(OperatorConsole::AnalogControls::CAM_Y, false);
 		op.SetFlip(OperatorConsole::AnalogControls::LIFT, true);
 	}
 
@@ -53,6 +54,24 @@ private:
 		lift.setTargetState(Lifter::Ground);
 		manager.EnableManual(false);
 		compressor.Start();
+
+		auto voltRef = log.Add<double>("pdp/voltage", std::bind(&PowerDistributionPanel::GetVoltage, &PDP));
+		mqtt.Add<double>("pdp/voltage", voltRef, true);
+
+		auto liftHeight = log.Add<string>("lifter/height", [this](){
+			return Lifter::GetName(manager.GetCurrentState().lifterState);
+		});
+
+		mqtt.Add<string>("lifter/height", liftHeight, false);
+
+		auto holderState = log.Add<string>("holder/position", [this](){
+					return Holder::GetName(manager.GetCurrentState().holderState);
+				});
+
+		mqtt.Add<string>("holder/position", holderState, false);
+
+		DRR::DiagnosticService::Init();
+
 	}
 
 	void DisabledInit() override
@@ -67,6 +86,7 @@ private:
 	void AutonomousInit() override
 	{
 		mode = UNDER;
+
 	}
 
 	void AutonomousPeriodic() override
@@ -83,12 +103,12 @@ private:
 			mode = DRIVING;
 			break;
 		case DRIVING:
-			drive.Drive(0.0, 0.25, 0.0);
+			drive.Drive(0.0, 0.23, 0.0);
 			if(timeExceeds())
 				mode = PLACING;
 			break;
 		case PLACING:
-			//drive.Drive(0.0, 0.0, 0.0);
+			drive.Drive(0.0, 0.12, 0.0);
 			manager.SetHeightTarget(Lifter::Ground);
 			if(manager.GetCurrentHeight() == Lifter::Ground)
 				mode = BACKING;
@@ -117,7 +137,11 @@ private:
 
 		drive.Drive(op.GetDriveX(), op.GetDriveY(), op.GetDriveYaw());
 
-		gimbal.setPosition(op.GetCamX(), op.GetCamY());
+		if(op.GetCenterCamera())
+			gimbal.setHomePosition();
+		else
+			gimbal.setPosition(op.GetCamX(), op.GetCamY());
+
 
 		std::cout<<Lifter::GetName(lift.getCurrentState())<<", "<<Holder::GetName(hold.getCurrentPosition())<<std::endl;
 		if(!op.GetManual())
