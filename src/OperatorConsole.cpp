@@ -73,27 +73,27 @@ void OperatorConsole::SetFlip(const AnalogControls control, const bool flip)
 
 const float OperatorConsole::GetDriveX()
 {
-	return convertAxis(m_driveRight.GetX(), GetDriveSquared(), GetFlip(DRIVE_X), 1.0);
+	return convertAxis(m_driveRight.GetX(), GetDriveSquared(), GetFlip(DRIVE_X), GetPrecision());
 }
 
 const float OperatorConsole::GetDriveY()
 {
-	return convertAxis(m_driveRight.GetY(), GetDriveSquared(), GetFlip(DRIVE_Y), GetPrecision());
+	return convertAxis(m_driveRight.GetY(), GetDriveSquared(), GetFlip(DRIVE_Y), GetPrecision()*GetPrecision());
 }
 
 const float OperatorConsole::GetDriveYaw()
 {
-	return convertAxis(m_driveLeft.GetX(), GetDriveSquared(), GetFlip(DRIVE_YAW), GetPrecision());
+	return convertAxis(m_driveLeft.GetX(), GetDriveSquared(), GetFlip(DRIVE_YAW), GetPrecision()*GetPrecision());
 }
 
 const float OperatorConsole::GetCamX()
 {
-	return convertAxis(m_copilotLeft.GetAxis(GamePad::PadAxisType::LEFT_X))/2.0+0.5;
+	return convertAxis(m_copilotLeft.GetAxis(GamePad::PadAxisType::LEFT_X), GetCamSquared(), GetFlip(CAM_X))/2.0+0.5;
 }
 
 const float OperatorConsole::GetCamY()
 {
-	return convertAxis(m_copilotLeft.GetAxis(GamePad::PadAxisType::LEFT_Y))/2.0+0.5;
+	return convertAxis(m_copilotLeft.GetAxis(GamePad::PadAxisType::LEFT_Y), GetCamSquared(), GetFlip(CAM_Y))/2.0+0.5;
 }
 
 const bool OperatorConsole::PollRelativeDriving()
@@ -113,12 +113,12 @@ void OperatorConsole::PollLifterHeight()
 
 const bool OperatorConsole::GetHoldExtend()
 {
-	return m_copilotLeft.GetButton(GamePad::TOP_RIGHT_SHOULDER);
+	return m_copilotLeft.GetButton(GamePad::BOTTOM_RIGHT_SHOULDER);
 }
 
 const bool OperatorConsole::GetHoldRetract()
 {
-	return m_copilotLeft.GetButton(GamePad::BOTTOM_RIGHT_SHOULDER);
+	return m_copilotLeft.GetButton(GamePad::TOP_RIGHT_SHOULDER);
 }
 
 const float OperatorConsole::GetLift()
@@ -146,4 +146,9 @@ const bool OperatorConsole::GetScoreStep()
 const bool OperatorConsole::GetScore()
 {
 	return m_copilotLeft.GetButton(GamePad::B1);
+}
+
+const bool OperatorConsole::GetCenterCamera()
+{
+	return !m_copilotLeft.GetButton(GamePad::LEFT_JOY_BUTTON);
 }
