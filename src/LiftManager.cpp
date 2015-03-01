@@ -227,7 +227,6 @@ const bool LiftManager::ScoreStack()
 	return true;
 }
 
-
 bool LiftManager::MoveHook()
 {
 	// Disallow hook movement in these areas

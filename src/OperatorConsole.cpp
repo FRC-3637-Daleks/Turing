@@ -11,7 +11,7 @@
 OperatorConsole::OperatorConsole(const short driveLeftID, const short driveRightID, const short copilotLeftID, const short copilotRightID, const float precision):
 	m_driveLeft(driveLeftID), m_driveRight(driveRightID), m_copilotLeft(copilotLeftID), m_copilotRight(copilotRightID),
 	precisionFactor(precision), flips({0}), squaredDrive(true), squaredCam(false), squaredLift(false), squaredBinPull(false),
-	manualToggle(std::bind(&GamePad::GetButton, &m_copilotLeft, GamePad::START)),
+	manualToggle(std::bind(&GamePad::GetButton, &m_copilotLeft, GamePad::START), true),
 	incrementalToggle(std::bind(&GamePad::GetButton, &m_copilotLeft, GamePad::RIGHT_JOY_BUTTON)),
 	preciseToggle([this]() -> bool {return m_driveLeft.GetRawButton(1) && m_driveRight.GetRawButton(1);}),
 	upFlick([this]() {return m_copilotLeft.GetAxis(GamePad::RIGHT_Y) > 0.5;}),
