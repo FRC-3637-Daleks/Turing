@@ -188,8 +188,9 @@ const bool LiftManager::PushToteToStack()
 	if(routineMode == PUSH_TOTE)
 		return true;
 	CancelRoutine();
-	if(currentState.lifterState != Lifter::Ground)
+	/*if(currentState.lifterState != Lifter::Ground)
 		return false;
+	*/
 	currentRoutine = new queue<DuelState>;
 	currentRoutine->push(DuelState(Lifter::ToteUp, -1));
 	currentRoutine->push(DuelState(-1, Holder::HOLDER_OUT));
