@@ -14,7 +14,7 @@
 #include "Hardware.h"
 
 #define PISTON_TRAVEL_TIME 200 // Milliseconds
-#define SENSOR_SWITCH_TIME 75  // Milliseconds
+#define SENSOR_SWITCH_TIME 500  // Milliseconds
 
 class Solenoid;
 class DigitalInput;
