@@ -128,6 +128,16 @@ const float OperatorConsole::GetLift()
 	return 0.0;
 }
 
+const float OperatorConsole::GetBinPull()
+{
+	if(m_copilotLeft.GetButton(GamePad::BOTTOM_LEFT_SHOULDER))
+		return 0.2;
+	else if(m_copilotLeft.GetButton(GamePad::TOP_LEFT_SHOULDER))
+		return -1.0;
+	else
+		return 0.0;
+}
+
 const bool OperatorConsole::GetGround()
 {
 	return m_copilotLeft.GetButton(GamePad::B2);

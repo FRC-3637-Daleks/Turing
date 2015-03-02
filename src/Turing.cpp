@@ -5,7 +5,9 @@ using namespace std;
 class Turing: public IterativeRobot
 {
 private:
-	enum AutoMode_t {UNDER, HOLDING, DRIVING, PLACING, BACKING, END} mode;
+	enum AutoMode_t {EARLY, UNDER, HOLDING, DRIVING, PLACING, BACKING, END} mode;
+	//enum AutoRoutine_t {PLATFORM, NON_PLATFORM} routine;
+	//enum AutoStart_t {LANDFILL, CONTAINER} position;
 	typedef std::chrono::time_point<std::chrono::system_clock> second_time;
 	second_time timer;
 	static const second_time getNow() {return std::chrono::system_clock::now();};
@@ -21,19 +23,21 @@ private:
 	LiftManager manager;
 	OperatorConsole op;
 	CameraGimbal gimbal;
+	Sweeper sweep;
 
 private:
 	DRR::MosCutieService mqtt;
 	DRR::FileService log;
 
 public:
-	Turing(): mode(UNDER),
+	Turing(): mode(EARLY), //routine(PLATFORM), position(LANDFILL),
 			  drive(DalekDrive::Wheel_t::MECANUM_WHEELS, Robot::FRONT_LEFT, Robot::FRONT_RIGHT, Robot::BACK_LEFT, Robot::BACK_RIGHT, 50.0),
 			  lift(Robot::LIFT_1, Robot::LIFT_2, Lifter::PIDConfig(2.0, 0.000, 0.0, 20), 50.0),
 			  hold(Robot::HOLDER_RETRACT, Robot::HOLDER_EXTEND, Robot::TOTE_SWITCH),
 			  manager(lift, hold),
 			  op(Robot::DRIVER_LEFT, Robot::DRIVER_RIGHT, Robot::COPILOT_LEFT, Robot::COPILOT_RIGHT),
 			  gimbal(Robot::CAMERA_X, Robot::CAMERA_Y, 0.5, 0.8),
+			  sweep(7),
 			  mqtt("state", 100), log("/home/lvuser/log/log.csv", 50)
 	{
 		drive[DalekDrive::LEFT_FRONT].SetFlip(true);
@@ -85,32 +89,53 @@ private:
 
 	void AutonomousInit() override
 	{
-		mode = UNDER;
-
+		mode = EARLY;
+		manager.EnableManual(false);
+		//routine = SmartDashboard::GetBoolean("auto_long", true)? PLATFORM:NON_PLATFORM;
+		//position = SmartDashboard::GetBoolean("auto_landfill", true)? LANDFILL:CONTAINER;
+		//std::cout<<"routine: "<<(routine==PLATFORM? "PLATFORM":"NON_PLATFORM")<<", "<<(position==LANDFILL? "LANDFILL":"CONTAINER")<<std::endl;
 	}
 
 	void AutonomousPeriodic() override
 	{
 		switch(mode)
 		{
+		case EARLY:
+			/*if(position == PLATFORM)
+			{
+				drive.Drive(0.0, -0.14, 0.0);
+				setTimer(std::chrono::seconds(1));
+			}
+			else
+			{*/
+			drive.Drive(0.0, -0.14, 0.0);
+			setTimer(std::chrono::seconds(1));
+			mode = UNDER;
+			break;
 		case UNDER:
+			if(!timeExceeds())
+				break;
+			drive.Drive(0.0,0.0,0.0);
 			manager.SetHeightTarget(Lifter::BinT1);
 			if(manager.GetCurrentHeight() == Lifter::BinT1)
 				mode = HOLDING;
 			break;
 		case HOLDING:
-			setTimer(std::chrono::seconds(3));
+			drive.Drive(0.0, 0.12, 0.0);
+			setTimer(std::chrono::seconds(10));
 			mode = DRIVING;
 			break;
 		case DRIVING:
-			drive.Drive(0.0, 0.23, 0.0);
+			/*if(position == PLATFORM)
+				drive.Drive(0.0, -0.23, 0.0);
+				*/
 			if(timeExceeds())
 				mode = PLACING;
 			break;
 		case PLACING:
 			drive.Drive(0.0, 0.12, 0.0);
-			manager.SetHeightTarget(Lifter::Ground);
-			if(manager.GetCurrentHeight() == Lifter::Ground)
+			/*manager.SetHeightTarget(Lifter::Ground);
+			if(manager.GetCurrentHeight() == Lifter::Ground)*/
 				mode = BACKING;
 			break;
 		case BACKING:
@@ -142,6 +167,7 @@ private:
 		else
 			gimbal.setPosition(op.GetCamX(), op.GetCamY());
 
+		sweep.setSpeed(op.GetBinPull());
 
 		std::cout<<Lifter::GetName(lift.getCurrentState())<<", "<<Holder::GetName(hold.getCurrentPosition())<<std::endl;
 		if(!op.GetManual())
@@ -198,6 +224,11 @@ private:
 		drive.Drive(op.GetDriveX(), op.GetDriveY(), op.GetDriveYaw());
 		gimbal.setPosition(op.GetCamX(), op.GetCamY());
 		ManualMode();
+	}
+
+	void PushInfo()
+	{
+		SmartDashboard::PutBoolean("precision", op.GetPrecisionEnabled());
 	}
 };
 

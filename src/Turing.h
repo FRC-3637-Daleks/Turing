@@ -14,6 +14,7 @@
 #include "Lifter.h"
 #include "DalekDrive.h"
 #include "LiftManager.h"
+#include "Sweeper.h"
 
 #include "OperatorConsole.h"
 #include "CameraGimbal.h"
