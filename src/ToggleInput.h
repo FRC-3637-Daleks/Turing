@@ -17,7 +17,7 @@ private:
 	bool state;
 
 public:
-	BoolInput(): state(false) {};
+	BoolInput(const bool init=false): state(init) {};
 	virtual ~BoolInput() {};
 
 public:
@@ -33,8 +33,8 @@ private:
 	std::function<bool()> callback;
 
 public:
-	explicit FlickInput(const std::function<bool()> &fn): previous(false), callback(fn) {};
-	FlickInput(FlickInput&& other): previous(other.previous), callback(other.callback) {other.callback = nullptr;};
+	explicit FlickInput(const std::function<bool()> &fn, const bool init=false): BoolInput(init), previous(init), callback(fn) {};
+	FlickInput(FlickInput&& other): BoolInput(other), previous(other.previous), callback(other.callback) {other.callback = nullptr;};
 	FlickInput(const FlickInput& other)=delete;
 	virtual ~FlickInput() {};
 
@@ -51,8 +51,8 @@ private:
 	std::function<bool()> callback;
 
 public:
-	explicit ToggleInput(const std::function<bool()> &fn): previous(false), callback(fn) {};
-	ToggleInput(ToggleInput&& other): previous(other.previous), callback(other.callback) {other.callback = nullptr;};
+	explicit ToggleInput(const std::function<bool()> &fn, const bool init=false): BoolInput(init), previous(init), callback(fn) {};
+	ToggleInput(ToggleInput&& other): BoolInput(other), previous(other.previous), callback(other.callback) {other.callback = nullptr;};
 	ToggleInput(const ToggleInput&)=delete;
 	virtual ~ToggleInput() {};
 

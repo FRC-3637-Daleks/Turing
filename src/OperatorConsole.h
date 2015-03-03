@@ -24,7 +24,7 @@ public:
 	enum AutonomousMode_t {FORWARD, TOTE_SET, CONTAINER_SET, TOTE_STACK};
 
 private:
-	static constexpr double deadzone = 0.09;
+	static constexpr double deadzone = 0.13;
 
 private:	/// Hardware
 	Joystick m_driveLeft, m_driveRight;
@@ -48,7 +48,7 @@ private:	/// Dynamic settings
 	Lifter::Height_t targetHeight;
 
 public:
-	OperatorConsole(const short driveLeftID, const short driveRightID, const short copilotLeftID, const short copilotRightID, const float precision=0.3);
+	OperatorConsole(const short driveLeftID, const short driveRightID, const short copilotLeftID, const short copilotRightID, const float precision=0.55);
 	virtual ~OperatorConsole() {};
 
 private:

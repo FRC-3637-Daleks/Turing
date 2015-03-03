@@ -14,6 +14,7 @@
 #include "Lifter.h"
 #include "DalekDrive.h"
 #include "LiftManager.h"
+#include "Sweeper.h"
 
 #include "OperatorConsole.h"
 #include "CameraGimbal.h"
@@ -21,6 +22,8 @@
 #include "Razor.h"
 
 #include "MosCutieService.h"
+#include "PollValue.h"
+#include "FileService.h"
 
 
 #endif

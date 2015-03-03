@@ -77,7 +77,7 @@ const LiftManager::STATE_FUNC LiftManager::funcs[][Holder::NUM_STATES] = {
 
 void LiftManager::EnableManual(const bool mode)
 {
-	if(manual == false)
+	if(manual == false && mode == true)
 		holder.retract();
 	manual = mode;
 }
@@ -179,6 +179,7 @@ const bool LiftManager::GoToGround()
 {
 	CancelRoutine();
 	SetHeightTarget(Lifter::Ground);
+	lifter.setTargetState(Lifter::Ground);
 	return true;
 }
 
@@ -187,8 +188,9 @@ const bool LiftManager::PushToteToStack()
 	if(routineMode == PUSH_TOTE)
 		return true;
 	CancelRoutine();
-	if(currentState.lifterState != Lifter::Ground)
+	/*if(currentState.lifterState != Lifter::Ground)
 		return false;
+	*/
 	currentRoutine = new queue<DuelState>;
 	currentRoutine->push(DuelState(Lifter::ToteUp, -1));
 	currentRoutine->push(DuelState(-1, Holder::HOLDER_OUT));
@@ -224,7 +226,6 @@ const bool LiftManager::ScoreStack()
 	routineMode = SCORE;
 	return true;
 }
-
 
 bool LiftManager::MoveHook()
 {
