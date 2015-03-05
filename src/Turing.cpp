@@ -66,7 +66,6 @@ private:
 
 	void TeleopPeriodic() override
 	{
-		lift.check();	// Temporary location of call of check
 
 		op.UpdateDriveControls();
 		drive.Drive(op.GetDriveX(), op.GetDriveY(), op.GetDriveYaw());

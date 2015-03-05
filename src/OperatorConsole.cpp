@@ -28,6 +28,7 @@ const float OperatorConsole::GetPrecision() const
 
 const float OperatorConsole::convertAxis(const float raw, const bool squared, const bool flip, const double precision)
 {
+//Make the Deadzone a configurable pARAMETER from the driver.conf file
 	if(fabs(raw) < deadzone)
 		return 0.0;
 	float ret = raw;
@@ -133,7 +134,7 @@ const bool OperatorConsole::GetHoldRetract()
 
 const float OperatorConsole::GetLift()
 {
-	return 50.0*convertAxis(m_copilotLeft.GetAxis(GamePad::RIGHT_Y), squaredLift, flips[LIFT], 1.0);
+	return 3.0*convertAxis(m_copilotLeft.GetAxis(GamePad::RIGHT_Y), squaredLift, flips[LIFT], 1.0);
 }
 
 const bool OperatorConsole::GetGround()
