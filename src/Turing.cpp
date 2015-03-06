@@ -26,8 +26,7 @@ private:
 	Sweeper sweep;
 
 private:
-	DRR::MosCutieService mqtt;
-	DRR::FileService log;
+	RobotConf config;
 
 public:
 	Turing(): mode(EARLY), //routine(PLATFORM), position(LANDFILL),
@@ -68,7 +67,7 @@ private:
 
 		mqtt.Add<string>("lifter/height", liftHeight, false);
 
-		auto holderState = log.Add<string>("holder/position", [this](){
+		auto holderState = log.Add<string>("holder/position", [this]() {
 					return Holder::GetName(manager.GetCurrentState().holderState);
 				});
 
