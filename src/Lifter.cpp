@@ -8,14 +8,48 @@ const double Lifter::States[] = {
 		[Lifter::Ground]=3.0,
 		[Lifter::Step]=8.5,
 		[Lifter::StackDown]=9.0,
-		[Lifter::StackUp]=12.0,
+		[Lifter::StackUp]=13.0,
+		[Lifter::ToteScore]=14.5,
 		[Lifter::ToteDown]=20.0,
-		[Lifter::ToteUp]=25.0,
+		[Lifter::ToteUp]=29.0,
 		[Lifter::BinT1]=39.0,
 		[Lifter::BinT2]=51.0,
 		[Lifter::BinT3]=63.0,
 		[Lifter::Top]=75.0
 };
+
+const std::string Lifter::GetName(const Height_t h)
+{
+	switch(h)
+	{
+	case Lifter::TRANSITION:
+		return "TRANSITION;";
+	case Lifter::Ground:
+		return "Ground";
+	case Lifter::Step:
+		return "Step";
+	case Lifter::StackDown:
+		return "StackDown";
+	case Lifter::StackUp:
+		return "StackUp";
+	case Lifter::ToteScore:
+		return "ToteScore";
+	case Lifter::ToteDown:
+		return "ToteDown";
+	case Lifter::ToteUp:
+		return "ToteUp";
+	case Lifter::BinT1:
+		return "BinT1";
+	case Lifter::BinT2:
+		return "BinT2";
+	case Lifter::BinT3:
+		return "BinT3";
+	case Lifter::Top:
+		return "Top";
+	default:
+		return "ERRRRRRR";
+	}
+}
 
 Lifter::Lifter(int talID1, int talID2, PIDConfig iPID, double ramp): m_tal1(talID1), m_tal2(talID2), pid(iPID), rampRate(ramp)
 {
@@ -30,6 +64,7 @@ Lifter::Lifter(int talID1, int talID2, PIDConfig iPID, double ramp): m_tal1(talI
 
 void Lifter::calibrate()
 {
+	// If the Limit Switch is triggered
 	if(!m_tal1.GetReverseLimitOK())
 	{
 		m_tal1.SetFeedbackDevice(CANTalon::QuadEncoder);
@@ -39,17 +74,21 @@ void Lifter::calibrate()
 		m_tal1.ConfigLimitMode(CANSpeedController::kLimitMode_SwitchInputsOnly);
 		m_tal1.SetSensorDirection(true);	// Reverse sensors
 		m_tal1.SetControlMode(CANTalon::ControlMode::kPosition);
+		std::cout<<"Resetting"<<std::endl;
 		m_tal1.SetPosition(0.0);
 		targetPosition = 0.0;
+		targetState = Ground;
 		calibrated = true;
-		std::cout<<"Calibrated"<<std::endl;
+		//std::cout<<"Calibrated"<<std::endl;
 	}
+	// If the Limit Switch hasn't been triggered.
 	else
 	{
-		std::cout<<"Calibrating"<<std::endl;
+		//std::cout<<"Calibrating"<<std::endl;
 		m_tal1.SetControlMode(CANTalon::ControlMode::kPercentVbus);
 		m_tal1.SetVoltageRampRate(rampRate);
 		m_tal1.Set(-0.5);
+		//targetState = TRANSITION;
 		calibrated = false;
 	}
 }
@@ -107,8 +146,7 @@ bool Lifter::setTargetState(Height_t h)
 
 	setTargetPosition(inchesOffGroundToTicks(States[targetState]));
 
-
-	if(Lifter::getCurrentPosition() <= 100 && targetState == Ground)
+	if(Lifter::getCurrentPosition() <= 200 && targetState == Ground)
 	{
 		calibrate();
 		return isCalibrated();
@@ -132,27 +170,26 @@ Lifter::Height_t Lifter::getTargetState()
 Lifter::Height_t Lifter::getCurrentState()
 {
 	if(!m_tal1.GetReverseLimitOK())
-		return previousState = Ground;
+			return Ground;
 
 	for(int i = Ground; i < Top; i++)
 	{
 		if(fabs(getCurrentPosition() - inchesOffGroundToTicks(States[i])) < toleranceTicks) 	// Checks to see if its within the tolerance of the state
 		{
-			return previousState = Height_t(i);
-		}
-		else if(getCurrentPosition() > inchesOffGroundToTicks(States[i]) && getCurrentPosition() < inchesOffGroundToTicks(States[i+1]))
-		{
-			if(previousState > i+1)
-				return previousState = Height_t(i+1);
-			else if(previousState < i)
-				return previousState = Height_t(i);
+			return Height_t(i);
 		}
 	}
-	return previousState;
+
+	if(targetState == TRANSITION)
+		return TRANSITION;
+
+
+	return Top;
 }
 
 void Lifter::offsetTarget(double offset)	// Inches
 {
+	targetState = TRANSITION;
 	setTargetPosition(getCurrentPosition() + inchToTicks(offset));
 }
 
