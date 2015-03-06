@@ -12,13 +12,13 @@
 #include "Hardware.h"
 
 class Sweeper { //Sweeper no sweeping!
+public:
 
 	Sweeper(uint32_t m_talon);
 	Sweeper(CANTalon &m_talon);
 	Sweeper(CANTalon *m_talon);
 
-
-	void  setPosition(float motorSpeed);
+	void  setSpeed(float motorSpeed);
 	void  Stop();
 
 private:

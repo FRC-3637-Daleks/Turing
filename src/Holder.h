@@ -8,17 +8,16 @@
 #ifndef _HOLDER_H_
 #define _HOLDER_H_
 
-#include <ctime>
+#include <chrono>
 
 #include "WPILib.h"
 #include "Hardware.h"
 
 #define PISTON_TRAVEL_TIME 200 // Milliseconds
-#define SENSOR_SWITCH_TIME 75  // Milliseconds
+#define SENSOR_SWITCH_TIME 500  // Milliseconds
 
 class Solenoid; ///invokes the class Solenoid so we can use it
 class DigitalInput;
-
 
 class Holder {  ///gives a model for class Holder
 public:
@@ -26,8 +25,10 @@ public:
 	Holder(Solenoid &ValveIn, Solenoid &ValveOut, DigitalInput &safety); ///3 different inputs just in case we need it
 	Holder(Solenoid *ValveIn, Solenoid *ValveOut, DigitalInput *safety);
 
-	enum holder_t { HOLDER_IN, HOLDER_OUT, HOLDING, NUM_STATES }; ///different states of the holder mechanism
-	enum sensor_t { ON, OFF };
+	enum holder_t {TRANSITION=-1, HOLDER_IN=0, HOLDER_OUT, HOLDING, NUM_STATES };	///different states of the holder mechanism
+	static const std::string GetName(const holder_t h);
+
+	enum sensor_t {SWITCH_TRANSITION=-1, ON, OFF};
 
 	void setTargetPosition(holder_t p); ///tells the holder to go to set position
 	holder_t getCurrentPosition(); ///says what the current position
@@ -37,10 +38,8 @@ public:
 	sensor_t getSensorState();
 
 private:
-	void reset();
-	void resetSensorTimer();
-	bool waitExceeded(double mils=PISTON_TRAVEL_TIME);
-	bool waitExceededSensor(double mils=SENSOR_SWITCH_TIME);
+	void reset(const long mils);
+	bool ready();
 
 private:
 		Solenoid *m_a; ///links the pointer m_a to class Solenoid
@@ -51,7 +50,7 @@ private:
 		holder_t m_currentState; ///says what the state of the holder is
 		holder_t m_targetState; ///says what the state of the holder should be
 		sensor_t m_sensorState;
-		clock_t timer, sensorTimer;
+		std::chrono::time_point<std::chrono::system_clock> timer;
 };
 
 #endif
