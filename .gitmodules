@@ -1,0 +1,4 @@
+[submodule "DiagRoboRIO"]
+	path = DiagRoboRIO
+	url = https://github.com/FRC-3637-Daleks/DiagRoboRIO
+	branch = master

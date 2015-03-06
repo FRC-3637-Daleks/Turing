@@ -11,7 +11,12 @@
 OperatorConsole::OperatorConsole(const short driveLeftID, const short driveRightID, const short copilotLeftID, const short copilotRightID, const float precision):
 	m_driveLeft(driveLeftID), m_driveRight(driveRightID), m_copilotLeft(copilotLeftID), m_copilotRight(copilotRightID),
 	precisionFactor(precision), flips({0}), squaredDrive(true), squaredCam(false), squaredLift(false), squaredBinPull(false),
-	liftUp(false), liftDown(false),
+	manualToggle(std::bind(&GamePad::GetButton, &m_copilotLeft, GamePad::START), true),
+	incrementalToggle(std::bind(&GamePad::GetButton, &m_copilotLeft, GamePad::RIGHT_JOY_BUTTON)),
+	preciseToggle([this]() -> bool {return m_driveLeft.GetRawButton(1) && m_driveRight.GetRawButton(1);}),
+	upFlick([this]() {return m_copilotLeft.GetAxis(GamePad::RIGHT_Y) > 0.5;}),
+	downFlick([this]() {return m_copilotLeft.GetAxis(GamePad::RIGHT_Y) < -0.5;}),
+	inputManagers({&manualToggle, &incrementalToggle, &preciseToggle, &upFlick, &downFlick, NULL}),
 	precisionEnabled(false), relativeDriveEnabled(false), steadyDriveEnabled(true), copilotMode(ROUTINE), autonMode(FORWARD),
 	targetHeight(Lifter::Ground)
 {
@@ -38,12 +43,18 @@ const float OperatorConsole::convertAxis(const float raw, const bool squared, co
 
 void OperatorConsole::UpdateDriveControls()
 {
-	SetPrecisionEnabled(PollPrecisionDriving());	/// Precision Driving
+	for(int i = 0; inputManagers[i] != NULL; i++)
+		inputManagers[i]->Update();
+
+	if(GetGround() || GetPushTote() || GetScore() || GetScoreStep())
+		manualToggle.SetState(false);
+
+	SetPrecisionEnabled(preciseToggle.GetState());	/// Precision Driving
 	if(GetPrecisionEnabled())
 		SetDriveSquared(false);
 	else
 		SetDriveSquared(true);
-	SetRelativeDriveEnabled(PollRelativeDriving());	/// Relative Driving
+	//SetRelativeDriveEnabled(PollRelativeDriving());	/// Relative Driving
 	PollLifterHeight();
 }
 
@@ -62,35 +73,27 @@ void OperatorConsole::SetFlip(const AnalogControls control, const bool flip)
 
 const float OperatorConsole::GetDriveX()
 {
-	return convertAxis(m_driveRight.GetX(), GetDriveSquared(), GetFlip(DRIVE_X), 1.0);
+	return convertAxis(m_driveRight.GetX(), GetDriveSquared(), GetFlip(DRIVE_X), GetPrecision());
 }
 
 const float OperatorConsole::GetDriveY()
 {
-	return convertAxis(m_driveRight.GetY(), GetDriveSquared(), GetFlip(DRIVE_Y), GetPrecision());
+	return convertAxis(m_driveRight.GetY(), GetDriveSquared(), GetFlip(DRIVE_Y), GetPrecision()*GetPrecision());
 }
 
 const float OperatorConsole::GetDriveYaw()
 {
-	return convertAxis(m_driveLeft.GetX(), GetDriveSquared(), GetFlip(DRIVE_YAW), GetPrecision());
+	return convertAxis(m_driveLeft.GetX(), GetDriveSquared(), GetFlip(DRIVE_YAW), GetPrecision()*GetPrecision());
 }
 
 const float OperatorConsole::GetCamX()
 {
-	return convertAxis(m_copilotLeft.GetAxis(GamePad::PadAxisType::LEFT_X))/2.0+0.5;
+	return convertAxis(m_copilotLeft.GetAxis(GamePad::PadAxisType::LEFT_X), GetCamSquared(), GetFlip(CAM_X))/2.0+0.5;
 }
 
 const float OperatorConsole::GetCamY()
 {
-	return convertAxis(m_copilotLeft.GetAxis(GamePad::PadAxisType::LEFT_Y))/2.0+0.5;
-}
-
-const bool OperatorConsole::PollPrecisionDriving()
-{
-	if(m_driveRight.GetRawButton(10) && GetPrecision() == true)
-		return false;
-	else if(m_driveRight.GetRawButton(11) && GetPrecision() == false)
-		return true;
+	return convertAxis(m_copilotLeft.GetAxis(GamePad::PadAxisType::LEFT_Y), GetCamSquared(), GetFlip(CAM_Y))/2.0+0.5;
 }
 
 const bool OperatorConsole::PollRelativeDriving()
@@ -100,40 +103,39 @@ const bool OperatorConsole::PollRelativeDriving()
 
 void OperatorConsole::PollLifterHeight()
 {
-	if(!m_copilotLeft.GetButton(GamePad::TOP_RIGHT_SHOULDER) && !m_copilotLeft.GetButton(GamePad::BOTTOM_RIGHT_SHOULDER))
-		liftUp = liftDown = false;
-
-
-	if(!liftUp && m_copilotLeft.GetButton(GamePad::TOP_RIGHT_SHOULDER))
-	{
-		liftUp = true;
+	if(!incrementalToggle.GetState())
+		return;
+	if(upFlick.GetState() && targetHeight < Lifter::Top)
 		targetHeight = Lifter::Height_t(int(targetHeight)+1);
-		if(targetHeight >= Lifter::Top)
-			targetHeight = Lifter::Top;
-	}
-
-	if(!liftDown && m_copilotLeft.GetButton(GamePad::BOTTOM_RIGHT_SHOULDER))
-	{
-		liftDown = true;
+	if(downFlick.GetState() && targetHeight > Lifter::Ground)
 		targetHeight = Lifter::Height_t(int(targetHeight)-1);
-		if(targetHeight <= Lifter::Ground)
-			targetHeight = Lifter::Ground;
-	}
 }
 
 const bool OperatorConsole::GetHoldExtend()
 {
-	return m_copilotLeft.GetButton(GamePad::B4);
+	return m_copilotLeft.GetButton(GamePad::BOTTOM_RIGHT_SHOULDER);
 }
 
 const bool OperatorConsole::GetHoldRetract()
 {
-	return m_copilotLeft.GetButton(GamePad::B2);
+	return m_copilotLeft.GetButton(GamePad::TOP_RIGHT_SHOULDER);
 }
 
 const float OperatorConsole::GetLift()
 {
-	return 50.0*convertAxis(m_copilotLeft.GetAxis(GamePad::RIGHT_Y));
+	if(manualToggle.GetState() && !incrementalToggle.GetState())
+		return 4.0*convertAxis(m_copilotLeft.GetAxis(GamePad::RIGHT_Y), squaredLift, flips[LIFT], 1.0);
+	return 0.0;
+}
+
+const float OperatorConsole::GetBinPull()
+{
+	if(m_copilotLeft.GetButton(GamePad::BOTTOM_LEFT_SHOULDER))
+		return 0.2;
+	else if(m_copilotLeft.GetButton(GamePad::TOP_LEFT_SHOULDER))
+		return -1.0;
+	else
+		return 0.0;
 }
 
 const bool OperatorConsole::GetGround()
@@ -154,4 +156,9 @@ const bool OperatorConsole::GetScoreStep()
 const bool OperatorConsole::GetScore()
 {
 	return m_copilotLeft.GetButton(GamePad::B1);
+}
+
+const bool OperatorConsole::GetCenterCamera()
+{
+	return !m_copilotLeft.GetButton(GamePad::LEFT_JOY_BUTTON);
 }
