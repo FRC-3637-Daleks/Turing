@@ -3,13 +3,13 @@
 #include "WPILib.h"
 
 const float CameraGimbal::xStates[] = {
-		[CameraGimbal::FRONT] = 0.0,
-		[CameraGimbal::BACK] = 1.0
+		[CameraGimbal::TOTE_VIEW] = 0.0,
+		[CameraGimbal::RC_GRABBER_VIEW] = 1.0
 };
 
 const float CameraGimbal::yStates[] = {
-		[CameraGimbal::DOWN] = 0.0,
-		[CameraGimbal::HORIZONTAL] = 0.5
+		[CameraGimbal::TOTE_VIEW] = 0.0,
+		[CameraGimbal::RC_GRABBER_VIEW] = 0.5
 };
 
 CameraGimbal::CameraGimbal(int servoIDX, int servoIDY,
@@ -41,9 +41,9 @@ void CameraGimbal::setHomePosition()
 	m_servoY.Set(m_homeY);
 }
 
-void CameraGimbal::setState(xPos_t x, yPos_t y)
+void CameraGimbal::setState(cameraState_t targetState)
 {
-	setPosition(xStates[x], yStates[y]);
+		setPosition(xStates[targetState], yStates[targetState]);
 }
 
 void CameraGimbal::setX(xPos_t x)
@@ -54,23 +54,6 @@ void CameraGimbal::setX(xPos_t x)
 void CameraGimbal::setY(yPos_t y)
 {
 	m_servoY.Set(yStates[y]);
-}
-
-void CameraGimbal::setView(cameraState_t a)
-{
-	switch(a) {
-	case TOTE_VIEW:
-	{
-		CameraGimbal::setY(0.5);
-		CameraGimbal::setX(0.5);
-	}
-	case RC_GRABBER_VIEW:
-	{
-		CameraGimbal::setY(0.75);
-		CameraGimbal::setX(0.5);
-	}
-	break;
-}
 }
 
 void CameraGimbal::setX(float xPos)

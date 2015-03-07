@@ -21,10 +21,10 @@ public:
 	float getPositionX();
 	float getPositionY();
 	void setHomePosition();
-	void setState(xPos_t x, yPos_t y);
+	void setState(cameraState_t targetState);
 	void setX(xPos_t x);
 	void setY(yPos_t y);
-	void setView(cameraState_t a);
+
 
 
 	void setX(float xPos);
