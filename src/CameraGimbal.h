@@ -7,8 +7,7 @@
 class CameraGimbal
 {
 public:
-	enum xPos_t{FRONT = 0, BACK};
-	enum yPos_t{DOWN = 0, HORIZONTAL};
+
 	enum cameraState_t {TOTE_VIEW, RC_GRABBER_VIEW};
 	static const float xStates[];
 	static const float yStates[];
