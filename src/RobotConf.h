@@ -30,8 +30,8 @@ public:
 public:
 	const bool HasValue(const string& key) const;
 
-	const string& GetValue(const string &key, const string& defaultVal = string("")) const;
-	template<typename T> const T GetValue(const string &key, const string& defaultVal = string("")) const
+	const string& GetValue(const string &key, const string& defaultVal = string(""));
+	template<typename T> const T GetValue(const string &key, const string& defaultVal = string(""))
 	{
 		stringstream ss(GetValue(key, defaultVal));
 		T ret;

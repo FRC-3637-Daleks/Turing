@@ -38,7 +38,7 @@ const bool RobotConf::HasValue(const string& key) const
 	return config.count(key);
 }
 
-const string& RobotConf::GetValue(const string &key, const string& defaultVal) const
+const string& RobotConf::GetValue(const string &key, const string& defaultVal)
 {
 	if(!HasValue(key))
 		config[key] = defaultVal;

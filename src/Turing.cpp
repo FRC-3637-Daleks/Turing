@@ -36,8 +36,7 @@ public:
 			  manager(lift, hold),
 			  op(Robot::DRIVER_LEFT, Robot::DRIVER_RIGHT, Robot::COPILOT_LEFT, Robot::COPILOT_RIGHT),
 			  gimbal(Robot::CAMERA_X, Robot::CAMERA_Y, 0.5, 0.8),
-			  sweep(7),
-			  mqtt("state", 100), log("/home/lvuser/log/log.csv", 50)
+			  sweep(7)
 	{
 		drive[DalekDrive::LEFT_FRONT].SetFlip(true);
 		drive[DalekDrive::LEFT_REAR].SetFlip(true);
@@ -57,24 +56,6 @@ private:
 		lift.setTargetState(Lifter::Ground);
 		manager.EnableManual(false);
 		compressor.Start();
-
-		auto voltRef = log.Add<double>("pdp/voltage", std::bind(&PowerDistributionPanel::GetVoltage, &PDP));
-		mqtt.Add<double>("pdp/voltage", voltRef, true);
-
-		auto liftHeight = log.Add<string>("lifter/height", [this](){
-			return Lifter::GetName(manager.GetCurrentState().lifterState);
-		});
-
-		mqtt.Add<string>("lifter/height", liftHeight, false);
-
-		auto holderState = log.Add<string>("holder/position", [this]() {
-					return Holder::GetName(manager.GetCurrentState().holderState);
-				});
-
-		mqtt.Add<string>("holder/position", holderState, false);
-
-		DRR::DiagnosticService::Init();
-
 	}
 
 	void DisabledInit() override
