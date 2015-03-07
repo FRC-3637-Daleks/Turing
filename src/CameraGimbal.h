@@ -9,6 +9,7 @@ class CameraGimbal
 public:
 	enum xPos_t{FRONT = 0, BACK};
 	enum yPos_t{DOWN = 0, HORIZONTAL};
+	enum cameraState_t {TOTE_VIEW, RC_GRABBER_VIEW};
 	static const float xStates[];
 	static const float yStates[];
 private:
@@ -23,10 +24,12 @@ public:
 	void setState(xPos_t x, yPos_t y);
 	void setX(xPos_t x);
 	void setY(yPos_t y);
-	/* Not sure which one you wanted
+	void setView(cameraState_t a);
+
+
 	void setX(float xPos);
 	void setY(float yPos);
-	*/
+
 };
 
 

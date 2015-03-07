@@ -55,7 +55,24 @@ void CameraGimbal::setY(yPos_t y)
 {
 	m_servoY.Set(yStates[y]);
 }
-/* Not sure which one you wanted
+
+void CameraGimbal::setView(cameraState_t a)
+{
+	switch(a) {
+	case TOTE_VIEW:
+	{
+		CameraGimbal::setY(0.5);
+		CameraGimbal::setX(0.5);
+	}
+	case RC_GRABBER_VIEW:
+	{
+		CameraGimbal::setY(0.75);
+		CameraGimbal::setX(0.5);
+	}
+	break;
+}
+}
+
 void CameraGimbal::setX(float xPos)
 {
 	m_servoX.Set(xPos);
@@ -65,4 +82,4 @@ void CameraGimbal::setY(float yPos)
 {
 	m_servoY.Set(yPos);
 }
- */
+
