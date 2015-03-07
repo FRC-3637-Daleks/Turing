@@ -12,6 +12,7 @@
 #include "DalekDrive.h"
 #include "LiftManager.h"
 #include "Sweeper.h"
+#include "Aligners.h"
 
 #include "OperatorConsole.h"
 #include "CameraGimbal.h"
