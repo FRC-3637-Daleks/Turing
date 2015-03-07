@@ -22,8 +22,6 @@ public:
 	float getPositionY();
 	void setHomePosition();
 	void setState(cameraState_t targetState);
-	void setX(xPos_t x);
-	void setY(yPos_t y);
 
 
 

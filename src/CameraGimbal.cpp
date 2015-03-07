@@ -46,23 +46,6 @@ void CameraGimbal::setState(cameraState_t targetState)
 		setPosition(xStates[targetState], yStates[targetState]);
 }
 
-void CameraGimbal::setX(xPos_t x)
-{
-	m_servoX.Set(xStates[x]);
-}
 
-void CameraGimbal::setY(yPos_t y)
-{
-	m_servoY.Set(yStates[y]);
-}
 
-void CameraGimbal::setX(float xPos)
-{
-	m_servoX.Set(xPos);
-}
-
-void CameraGimbal::setY(float yPos)
-{
-	m_servoY.Set(yPos);
-}
 
