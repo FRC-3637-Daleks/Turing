@@ -13,9 +13,9 @@ public:
 	static const float yStates[];
 private:
 	Servo m_servoX, m_servoY;
-	float m_homeX, m_homeY;
+
 public:
-	CameraGimbal(int servoIDX, int servoIDY, float homeX, float homeY);
+	CameraGimbal(int servoIDX, int servoIDY, float X, float Y);
 	void setPosition(float xPos, float yPos);
 	float getPositionX();
 	float getPositionY();
