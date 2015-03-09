@@ -18,6 +18,8 @@ const double Lifter::States[] = {
 		[Lifter::Top]=75.0
 };
 
+double Lifter::ticksPerInch = 120.0;
+
 const std::string Lifter::GetName(const Height_t h)
 {
 	switch(h)

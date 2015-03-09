@@ -5,6 +5,7 @@ using namespace std;
 class Turing: public IterativeRobot
 {
 private:
+	enum RobotID {PRIMARY=0, SECONDARY, TEST} id;
 	enum AutoMode_t {EARLY, UNDER, HOLDING, DRIVING, PLACING, BACKING, END} mode;
 	//enum AutoRoutine_t {PLATFORM, NON_PLATFORM} routine;
 	//enum AutoStart_t {LANDFILL, CONTAINER} position;
@@ -15,6 +16,7 @@ private:
 	void setTimer(const std::chrono::seconds s) {timer = getNow() + s;};
 
 private:
+	RobotConf config;
 	PowerDistributionPanel PDP;
 	DalekDrive drive;
 	Compressor compressor;
@@ -26,11 +28,8 @@ private:
 	Sweeper sweep;
 	Aligners align;
 
-private:
-	RobotConf config;
-
 public:
-	Turing(): mode(EARLY), //routine(PLATFORM), position(LANDFILL),
+	Turing(): id(PRIMARY), mode(EARLY), //routine(PLATFORM), position(LANDFILL),
 			  drive(DalekDrive::Wheel_t::MECANUM_WHEELS, Robot::FRONT_LEFT, Robot::FRONT_RIGHT, Robot::BACK_LEFT, Robot::BACK_RIGHT, 50.0),
 			  lift(Robot::LIFT_1, Robot::LIFT_2, Lifter::PIDConfig(2.0, 0.000, 0.0, 20), 50.0),
 			  hold(Robot::HOLDER_RETRACT, Robot::HOLDER_EXTEND, Robot::TOTE_SWITCH),
@@ -39,6 +38,22 @@ public:
 			  gimbal(Robot::CAMERA_X, Robot::CAMERA_Y, 0.5, 0.8),
 			  sweep(Robot::RC_GRABBER), align(Robot::ALIGNER_LEFT, Robot::ALIGNER_RIGHT)
 	{
+		RobotConf idFile("robotID.conf");
+		if(!idFile.HasValue("id"))
+		{
+			idFile.SetValue<int>("id", PRIMARY);
+		}
+		id = RobotID(idFile.GetValue<int>("id"));
+
+		if(!config.HasValue("ticks_per_inch"))
+		{
+			if(id == PRIMARY)
+				config.SetValue<double>("ticks_per_inch", 120.0);
+			else
+				config.SetValue<double>("ticks_per_inch", 180.0);
+		}
+		Lifter::ticksPerInch = config.GetValue<double>("ticks_per_inch");
+
 		DRR::LogService::LogText("Turing")<<"Constructor Complete";
 		drive[DalekDrive::LEFT_FRONT].SetFlip(true);
 		drive[DalekDrive::LEFT_REAR].SetFlip(true);
