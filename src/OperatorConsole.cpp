@@ -130,12 +130,7 @@ const float OperatorConsole::GetLift()
 
 const float OperatorConsole::GetBinPull()
 {
-	if(m_copilotLeft.GetButton(GamePad::BOTTOM_LEFT_SHOULDER))
-		return 0.5;
-	else if(m_copilotLeft.GetButton(GamePad::TOP_LEFT_SHOULDER))
-		return -0.5;
-	else
-		return 0.0;
+	return convertAxis(m_copilotLeft.GetAxis(GamePad::LEFT_Y), GetBinPullSquared(), GetFlip(BIN_PULL));
 }
 
 const bool OperatorConsole::GetGround()

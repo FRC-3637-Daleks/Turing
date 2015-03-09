@@ -39,6 +39,7 @@ public:
 			  gimbal(Robot::CAMERA_X, Robot::CAMERA_Y, 0.5, 0.8),
 			  sweep(Robot::RC_GRABBER), align(Robot::ALIGNER_LEFT, Robot::ALIGNER_RIGHT)
 	{
+		DRR::LogService::LogText("Turing")<<"Constructor Complete";
 		drive[DalekDrive::LEFT_FRONT].SetFlip(true);
 		drive[DalekDrive::LEFT_REAR].SetFlip(true);
 
@@ -53,6 +54,7 @@ public:
 private:
 	void RobotInit() override
 	{
+		DRR::LogService::Start();
 		lift.calibrate();
 		lift.setTargetState(Lifter::Ground);
 		manager.EnableManual(false);
