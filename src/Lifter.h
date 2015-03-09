@@ -2,6 +2,7 @@
 #ifndef SRC_LIFTER_H_
 #define SRC_LIFTER_H_
 
+#include "LogObject.h"
 #include "WPILib.h"
 
 #define MAX_TALON_CURRENT 100

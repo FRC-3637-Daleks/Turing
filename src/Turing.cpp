@@ -24,6 +24,7 @@ private:
 	OperatorConsole op;
 	CameraGimbal gimbal;
 	Sweeper sweep;
+	Aligners align;
 
 private:
 	RobotConf config;
@@ -36,8 +37,9 @@ public:
 			  manager(lift, hold),
 			  op(Robot::DRIVER_LEFT, Robot::DRIVER_RIGHT, Robot::COPILOT_LEFT, Robot::COPILOT_RIGHT),
 			  gimbal(Robot::CAMERA_X, Robot::CAMERA_Y, 0.5, 0.8),
-			  sweep(7)
+			  sweep(Robot::RC_GRABBER), align(Robot::ALIGNER_LEFT, Robot::ALIGNER_RIGHT)
 	{
+		DRR::LogService::LogText("Turing")<<"Constructor Complete";
 		drive[DalekDrive::LEFT_FRONT].SetFlip(true);
 		drive[DalekDrive::LEFT_REAR].SetFlip(true);
 
@@ -52,6 +54,7 @@ public:
 private:
 	void RobotInit() override
 	{
+		DRR::LogService::Start();
 		lift.calibrate();
 		lift.setTargetState(Lifter::Ground);
 		manager.EnableManual(false);
@@ -60,6 +63,7 @@ private:
 
 	void DisabledInit() override
 	{
+		align.Retract();
 	}
 
 	void DisabledPeriodic() override
@@ -146,6 +150,11 @@ private:
 			gimbal.setHomePosition();
 		else
 			gimbal.setPosition(op.GetCamX(), op.GetCamY());
+
+		if(op.GetAlignExtend())
+			align.Extend();
+		else
+			align.Retract();
 
 		sweep.setSpeed(op.GetBinPull());
 

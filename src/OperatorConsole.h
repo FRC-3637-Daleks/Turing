@@ -24,7 +24,7 @@ public:
 	enum AutonomousMode_t {FORWARD, TOTE_SET, CONTAINER_SET, TOTE_STACK};
 
 private:
-	static constexpr double deadzone = 0.13;
+	static constexpr double deadzone = 0.07;
 
 private:	/// Hardware
 	Joystick m_driveLeft, m_driveRight;
@@ -120,6 +120,7 @@ public:		/// Button State Functions
 	const bool GetPushTote();
 	const bool GetScore();
 	const bool GetScoreStep();
+	const bool GetAlignExtend();
 };
 
 

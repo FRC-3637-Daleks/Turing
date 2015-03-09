@@ -130,12 +130,7 @@ const float OperatorConsole::GetLift()
 
 const float OperatorConsole::GetBinPull()
 {
-	if(m_copilotLeft.GetButton(GamePad::BOTTOM_LEFT_SHOULDER))
-		return 0.2;
-	else if(m_copilotLeft.GetButton(GamePad::TOP_LEFT_SHOULDER))
-		return -1.0;
-	else
-		return 0.0;
+	return convertAxis(m_copilotLeft.GetAxis(GamePad::LEFT_Y), GetBinPullSquared(), GetFlip(BIN_PULL));
 }
 
 const bool OperatorConsole::GetGround()
@@ -161,4 +156,9 @@ const bool OperatorConsole::GetScore()
 const bool OperatorConsole::GetCenterCamera()
 {
 	return !m_copilotLeft.GetButton(GamePad::LEFT_JOY_BUTTON);
+}
+
+const bool OperatorConsole::GetAlignExtend()
+{
+	return m_driveRight.GetRawButton(2) && m_driveLeft.GetRawButton(2);
 }
