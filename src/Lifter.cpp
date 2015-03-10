@@ -11,6 +11,7 @@ const double Lifter::States[] = {
 		[Lifter::StackUp]=13.0,
 		[Lifter::ToteScore]=14.5,
 		[Lifter::ToteDown]=20.0,
+		[Lifter::Chute]=22.0,
 		[Lifter::ToteUp]=29.0,
 		[Lifter::BinT1]=39.0,
 		[Lifter::BinT2]=51.0,
