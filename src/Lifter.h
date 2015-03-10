@@ -2,6 +2,7 @@
 #ifndef SRC_LIFTER_H_
 #define SRC_LIFTER_H_
 
+#include "LogObject.h"
 #include "WPILib.h"
 
 #define MAX_TALON_CURRENT 100
@@ -13,7 +14,7 @@ public:
 	enum Height_t {TRANSITION=-1, Ground = 0, Step, StackDown, StackUp, ToteScore, ToteDown, Chute, ToteUp, BinT1, BinT2, BinT3, Top, NUM_STATES};
 	static const double States[];
 	static const std::string GetName(const Height_t h);
-	static constexpr double ticksPerInch = 120.0;
+	static double ticksPerInch;
 	static constexpr double inchesOffGround = 3.0;
 	static constexpr double toleranceTicks = 80.0;
 
