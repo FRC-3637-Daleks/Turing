@@ -32,7 +32,7 @@ public:
 			  lift(Robot::LIFT_1, Robot::LIFT_2, Lifter::PIDConfig(2.0, 0.000, 0.0, 20), 50.0),
 			  op(Robot::DRIVER_LEFT, Robot::DRIVER_RIGHT, Robot::COPILOT_LEFT, Robot::COPILOT_RIGHT),
 			  gimbal(Robot::CAMERA_X, Robot::CAMERA_Y),
-			  sweep(Robot::RC_GRABBER, Lifter::PIDConfig(10.0, 0.0, 0.0, 20.0), 45.0), align(Robot::ALIGNER_LEFT, Robot::ALIGNER_RIGHT)
+			  sweep(Robot::RC_GRABBER, Lifter::PIDConfig(10.0, 1.0, 0.0, 20.0), 45.0), align(Robot::ALIGNER_LEFT, Robot::ALIGNER_RIGHT)
 	{
 		RobotConf idFile("robotID.conf");
 		if(!idFile.HasValue("id"))
@@ -59,6 +59,8 @@ public:
 		op.SetFlip(OperatorConsole::AnalogControls::CAM_X, true);
 		op.SetFlip(OperatorConsole::AnalogControls::CAM_Y, false);
 		op.SetFlip(OperatorConsole::AnalogControls::LIFT, true);
+		op.SetFlip(OperatorConsole::AnalogControls::BIN_PULL, true);
+
 		DRR::LogService::LogText("Turing")<<"Constructor Complete";
 	}
 
@@ -142,6 +144,7 @@ private:
 
 	void TeleopInit() override
 	{
+		sweep.setState(Sweeper::Down);
 	}
 
 	void TeleopPeriodic() override
@@ -154,6 +157,7 @@ private:
 			align.Extend();
 		else
 			align.Retract();
+
 
 		sweep.offset(op.GetBinPull());
 

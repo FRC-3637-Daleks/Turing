@@ -10,9 +10,9 @@
 
 // States are in Inches
 const double Sweeper::States[] = {
-		[Sweeper::Down]=0.0,
-		[Sweeper::Intermediate]=5.0,
-		[Sweeper::Up]=10.0
+		[Sweeper::Down]=500,
+		[Sweeper::Intermediate]=700,
+		[Sweeper::Up]=800.0
 };
 
 
@@ -24,7 +24,6 @@ Sweeper::Sweeper(uint32_t talID1, Lifter::PIDConfig iPID, double ramp): m_tal1(t
 	m_tal1.SetIzone(iPID.iZone);
 	m_tal1.SetCloseLoopRampRate(ramp);
 	m_tal1.ConfigLimitMode(CANSpeedController::kLimitMode_SwitchInputsOnly);
-	m_tal1.SetSensorDirection(true);
 	setState(targetState);
 	return;
 }

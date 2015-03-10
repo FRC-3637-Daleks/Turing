@@ -7,7 +7,7 @@
 
 #define MAX_TALON_CURRENT 100
 
-class Lifter {
+class Lifter: DRR::LogObject<Lifter> {
 public:
 	/// Enumeration of predefined heights the Lifter can be in. Measured in inches.
 
