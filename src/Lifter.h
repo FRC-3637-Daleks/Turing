@@ -11,7 +11,7 @@ class Lifter {
 public:
 	/// Enumeration of predefined heights the Lifter can be in. Measured in inches.
 
-	enum Height_t {TRANSITION=-1, Ground = 0, Step, StackDown, StackUp, ToteScore, ToteDown, ToteUp, BinT1, BinT2, BinT3, Top, NUM_STATES};
+	enum Height_t {TRANSITION=-1, Ground = 0, Step, StackDown, StackUp, ToteScore, ToteDown, Chute, ToteUp, BinT1, BinT2, BinT3, Top, NUM_STATES};
 	static const double States[];
 	static const std::string GetName(const Height_t h);
 	static double ticksPerInch;

@@ -44,6 +44,12 @@ const LiftManager::STATE_FUNC LiftManager::funcs[][Holder::NUM_STATES] = {
 			[Holder::HOLDING] = &LiftManager::MoveHook
 	},
 
+	[Lifter::Chute] = {
+			[Holder::HOLDER_IN] = &LiftManager::MoveHook,
+			[Holder::HOLDER_OUT] = &LiftManager::ResolveHolder,
+			[Holder::HOLDING] = &LiftManager::MoveHook
+	},
+
 	[Lifter::ToteUp] = {
 			[Holder::HOLDER_IN] = &LiftManager::MoveHookOrExtend,
 			[Holder::HOLDER_OUT] = &LiftManager::MoveHookOrRetract,
