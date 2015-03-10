@@ -15,7 +15,7 @@ private:
 	Servo m_servoX, m_servoY;
 
 public:
-	CameraGimbal(int servoIDX, int servoIDY, float X, float Y);
+	CameraGimbal(int servoIDX, int servoIDY): m_servoX(servoIDX), m_servoY(servoIDY) {};
 	void setPosition(float xPos, float yPos);
 	float getPositionX();
 	float getPositionY();
