@@ -56,13 +56,22 @@ const std::string Lifter::GetName(const Height_t h)
 
 Lifter::Lifter(int talID1, int talID2, PIDConfig iPID, double ramp): m_tal1(talID1), m_tal2(talID2), pid(iPID), rampRate(ramp)
 {
+	LogText()<<"Constructed with (talID1: "<<talID1<<", talID2: "<<talID2<<
+			", PID: ("<<pid.P<<", "<<pid.I<<", "<<pid.D<<"), ramp: "<<ramp;
 	targetPosition = 0.0;
 	targetState = Height_t::Ground;
 
 	m_tal2.SetControlMode(CANSpeedController::kFollower);
 	m_tal2.Set(talID1);
 
+	LogText()<<"Configuring Talon "<<talID2<<" to follow Talon"<<talID1;
+
+	//AddLog("target_position", &Lifter::getTargetPosition, 0);
+	//AddLog("current_position", &Lifter::getCurrentPosition, 0);
+	//AddLog<std::string>("target_state", [this]() -> std::string {return Lifter::GetName(getTargetState());});
+
 	calibrate();
+	LogText()<<"Construction Complete";
 }
 
 void Lifter::calibrate()
@@ -77,17 +86,14 @@ void Lifter::calibrate()
 		m_tal1.ConfigLimitMode(CANSpeedController::kLimitMode_SwitchInputsOnly);
 		m_tal1.SetSensorDirection(true);	// Reverse sensors
 		m_tal1.SetControlMode(CANTalon::ControlMode::kPosition);
-		std::cout<<"Resetting"<<std::endl;
 		m_tal1.SetPosition(0.0);
 		targetPosition = 0.0;
 		targetState = Ground;
 		calibrated = true;
-		//std::cout<<"Calibrated"<<std::endl;
 	}
 	// If the Limit Switch hasn't been triggered.
 	else
 	{
-		//std::cout<<"Calibrating"<<std::endl;
 		m_tal1.SetControlMode(CANTalon::ControlMode::kPercentVbus);
 		m_tal1.SetVoltageRampRate(rampRate);
 		m_tal1.Set(-0.5);
@@ -145,6 +151,9 @@ double Lifter::getDistanceToTarget()
 
 bool Lifter::setTargetState(Height_t h)
 {
+	if(targetState != h && targetState != TRANSITION && h != TRANSITION)
+		LogText()<<"Changing Lifter State from "<<GetName(targetState)<<" to "<<GetName(h);
+
 	targetState = h;
 
 	setTargetPosition(inchesOffGroundToTicks(States[targetState]));

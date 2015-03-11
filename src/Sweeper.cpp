@@ -8,42 +8,71 @@
 #include "Sweeper.h"
 #include "WPILib.h"
 
+// States are in Inches
+const double Sweeper::States[] = {
+		[Sweeper::Down]=500,
+		[Sweeper::Intermediate]=700,
+		[Sweeper::Up]=800.0
+};
 
-Sweeper::Sweeper(uint32_t m_talon)
+
+Sweeper::Sweeper(uint32_t talID1, Lifter::PIDConfig iPID, double ramp): m_tal1(talID1), pid(iPID), rampRate(ramp), targetState(Sweeper::Up)
 {
-	m_t = new CANTalon(m_talon);
-	m_needFree = false;
-	m_t->SetControlMode(CANTalon::ControlMode::kPercentVbus);
+	m_tal1.SetControlMode(CANTalon::ControlMode::kPosition);
+	m_tal1.SetFeedbackDevice(CANTalon::AnalogPot);
+	m_tal1.SetPID(iPID.P, iPID.I, iPID.D);
+	m_tal1.SetIzone(iPID.iZone);
+	m_tal1.SetCloseLoopRampRate(ramp);
+	m_tal1.ConfigLimitMode(CANSpeedController::kLimitMode_SwitchInputsOnly);
+	setState(targetState);
 	return;
 }
 
-Sweeper::Sweeper(CANTalon &m_talon)
+void
+Sweeper::setState(State_t state)
 {
-	m_t = &m_talon;
-	m_needFree = false;
-	m_t->SetControlMode(CANTalon::ControlMode::kPercentVbus);
+	targetState = state;
+	setPosition(States[state]);
 	return;
 }
 
-Sweeper::Sweeper(CANTalon *m_talon)
+void
+Sweeper::setPosition(double pos)
 {
-	m_t = m_talon;
-	m_needFree = false;
-	m_t->SetControlMode(CANTalon::ControlMode::kPercentVbus);
+	targetPosition = pos;
+	m_tal1.Set(pos);
 	return;
 }
 
 
 void
-Sweeper::setSpeed(float motorSpeed)
+Sweeper::offset(double off)
 {
-	m_t->Set(motorSpeed);
-return;
+	setPosition(getCurrentPosition()+off);
+	return;
 }
 
 void
 Sweeper::Stop()
 {
-	m_t->Set(0);
-return;
+	m_tal1.StopMotor();
+	return;
+}
+
+double
+Sweeper::getCurrentPosition()
+{
+	return m_tal1.GetPosition();
+}
+
+double
+Sweeper::getTargetPosition()
+{
+	return targetPosition;
+}
+
+Sweeper::State_t
+Sweeper::getTargetState()
+{
+	return targetState;
 }
