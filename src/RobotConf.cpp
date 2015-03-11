@@ -29,7 +29,7 @@ RobotConf::RobotConf(const string& file): filename(file)
 		if(separator < 0)
 			continue;
 
-		config[string(buf, separator)] = string(buf+separator, end);
+		config[string(buf, separator)] = string(buf+separator+1, end);
 	}
 }
 

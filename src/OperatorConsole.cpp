@@ -133,6 +133,12 @@ const float OperatorConsole::GetBinPull()
 	return convertAxis(m_copilotLeft.GetAxis(GamePad::LEFT_Y), GetBinPullSquared(), GetFlip(BIN_PULL));
 }
 
+const bool OperatorConsole::GetReset()
+{
+	return m_copilotLeft.GetButton(GamePad::LEFT_JOY_BUTTON);
+}
+
+
 const bool OperatorConsole::GetGround()
 {
 	return m_copilotLeft.GetButton(GamePad::B2);

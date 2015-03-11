@@ -113,6 +113,7 @@ private:	/// Private Button State Poll Functions
 	void PollLifterHeight();
 
 public:		/// Button State Functions
+	const bool GetReset();
 	const bool GetCenterCamera();
 	const bool GetHoldExtend();
 	const bool GetHoldRetract();

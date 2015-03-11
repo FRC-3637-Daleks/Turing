@@ -32,8 +32,10 @@ public:
 			  lift(Robot::LIFT_1, Robot::LIFT_2, Lifter::PIDConfig(2.0, 0.000, 0.0, 20), 50.0),
 			  op(Robot::DRIVER_LEFT, Robot::DRIVER_RIGHT, Robot::COPILOT_LEFT, Robot::COPILOT_RIGHT),
 			  gimbal(Robot::CAMERA_X, Robot::CAMERA_Y),
-			  sweep(Robot::RC_GRABBER, Lifter::PIDConfig(10.0, 1.0, 0.0, 20.0), 45.0), align(Robot::ALIGNER_LEFT, Robot::ALIGNER_RIGHT)
+			  sweep(Robot::RC_GRABBER, Lifter::PIDConfig(10.0, 2.0, 0.0, 200.0), Lifter::PIDConfig(15.0, 2.0, 0.0, 200.0), 45.0),
+			  align(Robot::ALIGNER_LEFT, Robot::ALIGNER_RIGHT)
 	{
+		DRR::LogService::LogText("Turing")<<"Constructor started";
 		RobotConf idFile("robotID.conf");
 		if(!idFile.HasValue("id"))
 		{
@@ -49,6 +51,9 @@ public:
 				config.SetValue<double>("ticks_per_inch", 180.0);
 		}
 		Lifter::ticksPerInch = config.GetValue<double>("ticks_per_inch");
+
+		idFile.Save();
+		config.Save();
 
 		drive[DalekDrive::LEFT_FRONT].SetFlip(true);
 		drive[DalekDrive::LEFT_REAR].SetFlip(true);
@@ -144,7 +149,7 @@ private:
 
 	void TeleopInit() override
 	{
-		sweep.setState(Sweeper::Down);
+		sweep.setMode(Sweeper::RawVoltage);
 	}
 
 	void TeleopPeriodic() override
@@ -158,8 +163,10 @@ private:
 		else
 			align.Retract();
 
-
-		sweep.offset(op.GetBinPull());
+		if(op.GetReset())
+			sweep.setState(Sweeper::Down);
+		else
+			sweep.setVBus(op.GetBinPull());
 
 		if(op.GetManual())
 			lift.offsetTarget(op.GetLift());

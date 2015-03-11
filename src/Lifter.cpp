@@ -56,22 +56,22 @@ const std::string Lifter::GetName(const Height_t h)
 
 Lifter::Lifter(int talID1, int talID2, PIDConfig iPID, double ramp): m_tal1(talID1), m_tal2(talID2), pid(iPID), rampRate(ramp)
 {
-	LogText()<<"Constructed with (talID1: "<<talID1<<", talID2: "<<talID2<<
-			", PID: ("<<pid.P<<", "<<pid.I<<", "<<pid.D<<"), ramp: "<<ramp;
+	/*LogText()<<"Constructed with (talID1: "<<talID1<<", talID2: "<<talID2<<
+			", PID: ("<<pid.P<<", "<<pid.I<<", "<<pid.D<<"), ramp: "<<ramp;*/
 	targetPosition = 0.0;
 	targetState = Height_t::Ground;
 
 	m_tal2.SetControlMode(CANSpeedController::kFollower);
 	m_tal2.Set(talID1);
 
-	LogText()<<"Configuring Talon "<<talID2<<" to follow Talon"<<talID1;
+	//LogText()<<"Configuring Talon "<<talID2<<" to follow Talon"<<talID1;
 
 	//AddLog("target_position", &Lifter::getTargetPosition, 0);
 	//AddLog("current_position", &Lifter::getCurrentPosition, 0);
 	//AddLog<std::string>("target_state", [this]() -> std::string {return Lifter::GetName(getTargetState());});
 
 	calibrate();
-	LogText()<<"Construction Complete";
+	//LogText()<<"Construction Complete";
 }
 
 void Lifter::calibrate()

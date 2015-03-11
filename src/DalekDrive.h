@@ -8,6 +8,7 @@
 #ifndef SRC_DALEKDRIVE_H_
 #define SRC_DALEKDRIVE_H_
 
+#include "LogObject.h"
 #include "WPILib.h"
 
 
@@ -18,7 +19,7 @@ float leftRearAlg(float x, float y, float theta);
 float rightRearAlg(float x, float y, float theta);
 
 // class to replace RobotDrive
-class DalekDrive
+class DalekDrive: public DRR::LogObject<DalekDrive>
 {
 public:  // static declares/defines
 	enum {LEFT_FRONT=0, RIGHT_FRONT, LEFT_REAR, RIGHT_REAR, N_MOTORS}; // Wheel location defines

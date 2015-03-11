@@ -12,20 +12,49 @@
 const double Sweeper::States[] = {
 		[Sweeper::Down]=500,
 		[Sweeper::Intermediate]=700,
-		[Sweeper::Up]=800.0
+		[Sweeper::Up]=900.0
 };
 
 
-Sweeper::Sweeper(uint32_t talID1, Lifter::PIDConfig iPID, double ramp): m_tal1(talID1), pid(iPID), rampRate(ramp), targetState(Sweeper::Up)
+Sweeper::Sweeper(uint32_t talID1, Lifter::PIDConfig iposPID, Lifter::PIDConfig ivelPID, double ramp): m_tal1(talID1), positionPID(iposPID), velocityPID(ivelPID) ,rampRate(ramp), targetState(Sweeper::Up)
 {
-	m_tal1.SetControlMode(CANTalon::ControlMode::kPosition);
+	LogText()<<"Constructor started for (talID1: "<<talID1<<
+			", iposPID: {"<<iposPID.P<<", "<<iposPID.I<<", "<<iposPID.D<<
+			"}, ivelPID: {"<<ivelPID.P<<", "<<ivelPID.I<<", "<<ivelPID.D<<
+			"}, ramp: "<<ramp;
+	setMode(Position);
 	m_tal1.SetFeedbackDevice(CANTalon::AnalogPot);
-	m_tal1.SetPID(iPID.P, iPID.I, iPID.D);
-	m_tal1.SetIzone(iPID.iZone);
 	m_tal1.SetCloseLoopRampRate(ramp);
-	m_tal1.ConfigLimitMode(CANSpeedController::kLimitMode_SwitchInputsOnly);
+	m_tal1.ConfigLimitMode(CANTalon::LimitMode::kLimitMode_SwitchInputsOnly);
+	//m_tal1.ConfigReverseLimit(States[Sweeper::Up]);
+	//m_tal1.ConfigForwardLimit(States[Sweeper::Down]);
+	//m_tal1.SetSensorDirection(false);
 	setState(targetState);
+	LogText()<<"Constructor Complete";
 	return;
+}
+
+void Sweeper::setMode(Mode_t m)
+{
+	if(mode == m)
+		return;
+	mode = m;
+
+	if(mode == Position)
+	{
+		m_tal1.SetControlMode(CANTalon::ControlMode::kPosition);
+	}
+	else if (mode == Velocity)
+	{
+		m_tal1.SetControlMode(CANTalon::ControlMode::kSpeed);
+	}
+	else
+	{
+		m_tal1.SetControlMode(CANTalon::ControlMode::kPercentVbus);
+		return;
+	}
+
+	Lifter::PIDConfig pid(mode == Position? positionPID:velocityPID);
 }
 
 void
@@ -39,6 +68,7 @@ Sweeper::setState(State_t state)
 void
 Sweeper::setPosition(double pos)
 {
+	setMode(Position);
 	targetPosition = pos;
 	m_tal1.Set(pos);
 	return;
@@ -53,7 +83,29 @@ Sweeper::offset(double off)
 }
 
 void
-Sweeper::Stop()
+Sweeper::setVelocity(double vel)
+{
+	setMode(Velocity);
+	m_tal1.Set(vel);
+	return;
+}
+
+double
+Sweeper::getVelocity()
+{
+	return m_tal1.GetSpeed();
+}
+
+void
+Sweeper::setVBus(double vel)
+{
+	setMode(RawVoltage);
+	m_tal1.Set(vel);
+	return;
+}
+
+void
+Sweeper::stop()
 {
 	m_tal1.StopMotor();
 	return;

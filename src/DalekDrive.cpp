@@ -42,6 +42,7 @@ DalekDrive::Motor::~Motor()
 
 void DalekDrive::init(const Wheel_t wheelConfig, const DalekDrive::Motor m [], const float ramp, const int syncGroup)
 {
+	LogText()<<"Initializing DalekDrive";
 	this->syncGroup = syncGroup;
 	printMotors();
 	wheels = wheelConfig;
