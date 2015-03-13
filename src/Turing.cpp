@@ -6,6 +6,7 @@ class Turing: public IterativeRobot
 {
 private:
 	enum RobotID {PRIMARY=0, SECONDARY, TEST} id;
+	enum AutoMode {NONE, PICKUP_BACKUP};
 	typedef std::chrono::time_point<std::chrono::system_clock> second_time;
 	second_time timer;
 	static const second_time getNow() {return std::chrono::system_clock::now();};
@@ -13,6 +14,7 @@ private:
 	void setTimer(const std::chrono::milliseconds s) {timer = getNow() + s;};
 
 private:
+	AutoMode autoMode;
 	int autoState;
 	double fastDrive, slowDrive;
 
@@ -74,6 +76,7 @@ public:
 private:
 	void RobotInit() override
 	{
+		DRR::MosCutie::Subscribe("roborio/config/#");
 		DRR::LogService::Start();
 		lift.calibrate();
 		lift.setTargetState(Lifter::Ground);
@@ -93,11 +96,29 @@ private:
 	void AutonomousInit() override
 	{
 		autoState = 0;
+		auto modeStr = DRR::MosCutie::Get("roborio/config/auto_mode", false);
+		if(modeStr == "none")
+			autoMode = NONE;
+		else if(modeStr == "pickup_backup")
+			autoMode = PICKUP_BACKUP;
+		else
+			autoMode = NONE;
 	}
 
 	void AutonomousPeriodic() override
 	{
-
+		switch(autoMode)
+		{
+		case NONE:
+			None();
+			break;
+		case PICKUP_BACKUP:
+			PickupBackup();
+			break;
+		default:
+			None();
+			break;
+		}
 	}
 
 	void TeleopInit() override
@@ -163,7 +184,6 @@ private:
 			break;
 		case 3:
 			drive.Drive(0.0, 0.0, 0.0);
-			autoState++;
 			break;
 		}
 	}
