@@ -36,7 +36,7 @@ public:
 			  lift(Robot::LIFT_1, Robot::LIFT_2, Lifter::PIDConfig(2.0, 0.000, 0.0, 20), 50.0),
 			  op(Robot::DRIVER_LEFT, Robot::DRIVER_RIGHT, Robot::COPILOT_LEFT, Robot::COPILOT_RIGHT),
 			  gimbal(Robot::CAMERA_X, Robot::CAMERA_Y),
-			  sweep(Robot::RC_GRABBER, Lifter::PIDConfig(7.0, 0.2, 0.01, 200.0), Lifter::PIDConfig(11.0, 0.0, 0.0, 0.0), 50.0),
+			  sweep(Robot::RC_GRABBER, Lifter::PIDConfig(7.0, 0.0, 0.00, 00.0), Lifter::PIDConfig(11.0, 0.0, 0.0, 0.0), 50.0),
 			  align(Robot::ALIGNER_LEFT, Robot::ALIGNER_RIGHT)
 	{
 		DRR::LogService::LogText("Turing")<<"Constructor started";
@@ -98,16 +98,22 @@ private:
 			LogText()<<"Auto Mode "<<m;
 			autoMode = AutoMode(m);
 			DRR::DatumValue<int> strMode(m);
-			DRR::MosCutie::Publish("roborio/config/auto_mode", strMode.toString());
+			DRR::MosCutie::Publish("config/auto_mode", strMode.toString(), true);
 		}
+
+		sweep.setMode(Sweeper::Position);
 	}
 
 	void AutonomousInit() override
 	{
+		LogText()<<"AutonomousInit started";
+		sweep.setMode(Sweeper::Position);
+		sweep.setState(Sweeper::Up);
 		autoState = 0;
-		if(DRR::MosCutie::Has("roborio/config/auto_mode"))
+		if(DRR::MosCutie::Has("config/auto_mode"))
 		{
-			auto modeStr = DRR::MosCutie::Get("roborio/config/auto_mode", false);
+			auto modeStr = DRR::MosCutie::Get("config/auto_mode", false);
+
 			if(modeStr == "none")
 				autoMode = NONE;
 			else if(modeStr == "pickup_backup")
@@ -204,7 +210,7 @@ private:
 				drive.Drive(0.0, 0.0, 0.0);
 				lift.offsetTarget(10.0);
 				lift.setTargetState(Lifter::BinT1);
-				setTimer(std::chrono::milliseconds(2200));
+				setTimer(std::chrono::milliseconds(1800));
 				autoState++;
 			}
 			break;
@@ -215,7 +221,7 @@ private:
 			}
 			break;
 		case 3:
-			drive.Drive(0.0, slowDrive, 0.0);
+			drive.Drive(0.0, fastDrive, 0.0);
 			setTimer(std::chrono::milliseconds(2000));
 			autoState++;
 			break;

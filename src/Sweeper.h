@@ -52,6 +52,7 @@ public: /// vBus functions
 	void setVBus(double vel);
 
 public:
+	double getHoldPosition();
 	double getCurrentPosition();
 	double getTargetPosition();
 	int getTargetState();

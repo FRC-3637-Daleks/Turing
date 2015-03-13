@@ -10,9 +10,9 @@
 
 // States are in Inches
 const double Sweeper::States[] = {
-		[Sweeper::Down]=450,
+		[Sweeper::Down]=460,
 		[Sweeper::Intermediate]=700,
-		[Sweeper::Up]=900.0
+		[Sweeper::Up]=850.0
 };
 
 
@@ -24,18 +24,21 @@ Sweeper::Sweeper(uint32_t talID1, Lifter::PIDConfig iposPID, Lifter::PIDConfig i
 			"}, ramp: "<<ramp;
 	holdPosition = -1.0;
 	setMode(Position);
+	m_tal1.SetControlMode(CANTalon::ControlMode::kPosition);
 	m_tal1.SetFeedbackDevice(CANTalon::AnalogPot);
 	m_tal1.SelectProfileSlot(0);
-	m_tal1.SetCloseLoopRampRate(ramp);
-	m_tal1.SetVoltageRampRate(ramp);
-	m_tal1.ConfigLimitMode(CANTalon::LimitMode::kLimitMode_SwitchInputsOnly);
-	m_tal1.ConfigReverseLimit(States[Sweeper::Up]);
-	m_tal1.ConfigForwardLimit(States[Sweeper::Down]);
+	m_tal1.SetCloseLoopRampRate(rampRate);
+	m_tal1.SetVoltageRampRate(rampRate);
+	m_tal1.ConfigLimitMode(CANTalon::LimitMode::kLimitMode_SoftPositionLimits);
+	m_tal1.ConfigReverseLimit(States[Sweeper::Down]);
+	m_tal1.ConfigForwardLimit(States[Sweeper::Up]);
 	//m_tal1.SetSensorDirection(false);
 	setState(targetState);
 	AddLog<int>("state", &Sweeper::getTargetState, 0);
 	AddLog<double>("target_position", &Sweeper::getTargetPosition, 0);
 	AddLog<double>("current_position", &Sweeper::getCurrentPosition, 0);
+	AddLog<double>("hold_position", [this]() {return holdPosition;}, 0);
+	setMode(Position);
 	LogText()<<"Constructor Complete";
 	return;
 }
@@ -91,7 +94,7 @@ Sweeper::setPosition(double pos)
 {
 	setMode(Position);
 	targetPosition = pos;
-	m_tal1.Set(pos);
+	m_tal1.Set(targetPosition);
 	return;
 }
 
