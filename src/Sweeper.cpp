@@ -33,6 +33,9 @@ Sweeper::Sweeper(uint32_t talID1, Lifter::PIDConfig iposPID, Lifter::PIDConfig i
 	m_tal1.ConfigForwardLimit(States[Sweeper::Down]);
 	//m_tal1.SetSensorDirection(false);
 	setState(targetState);
+	AddLog<int>("state", &Sweeper::getTargetState, 0);
+	AddLog<double>("target_position", &Sweeper::getTargetPosition, 0);
+	AddLog<double>("current_position", &Sweeper::getCurrentPosition, 0);
 	LogText()<<"Constructor Complete";
 	return;
 }
@@ -144,8 +147,27 @@ Sweeper::getTargetPosition()
 	return targetPosition;
 }
 
-Sweeper::State_t
+int
 Sweeper::getTargetState()
 {
 	return targetState;
+}
+
+int
+Sweeper::getCurrentState()
+{
+	if(targetState == Hold)
+		return Hold;
+	auto pos = getCurrentPosition();
+	State_t state = Transition;
+	for(int i = 0; i < NUM_STATES; i++)
+	{
+		if(fabs(States[i]-pos) < thresh)
+		{
+			state = State_t(i);
+			break;
+		}
+	}
+
+	return state;
 }

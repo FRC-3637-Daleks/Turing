@@ -16,8 +16,9 @@
 class Sweeper: public DRR::LogObject<Sweeper> { //Sweeper no sweeping!
 public:
 	enum State_t {Hold=-2, Transition=-1, Down=0, Intermediate, Up, NUM_STATES};
-	enum Mode_t {Velocity, Position, RawVoltage};
+	enum Mode_t {Velocity=0, Position, RawVoltage};
 	static const double States[NUM_STATES];
+	static constexpr double thresh = 3.0;
 
 private:
 	CANTalon m_tal1;
@@ -53,7 +54,8 @@ public: /// vBus functions
 public:
 	double getCurrentPosition();
 	double getTargetPosition();
-	State_t getTargetState();
+	int getTargetState();
+	int getCurrentState();
 };
 
 #endif

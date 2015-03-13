@@ -22,7 +22,6 @@ class OperatorConsole
 public:
 	enum CopilotMode_t {MANUAL, HEIGHT, ROUTINE};
 	enum AnalogControls {DRIVE_X=0, DRIVE_Y, DRIVE_YAW, CAM_X, CAM_Y, LIFT, BIN_PULL, N_CONTROLS};
-	enum AutonomousMode_t {FORWARD, TOTE_SET, CONTAINER_SET, TOTE_STACK};
 
 private:
 	static constexpr double deadzone = 0.1;
@@ -115,6 +114,10 @@ public:		/// Button State Functions
 	const bool GetCenterCamera();
 	const bool GetGround();
 	const bool GetAlignExtend();
+
+public:	/// Auto Mode
+	const int GetAutoMode();
+
 };
 
 

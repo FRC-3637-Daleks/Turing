@@ -22,6 +22,8 @@
 #include "RobotConf.h"
 
 #include "LogService.h"
+#include "LogObject.h"
+#include "DatumValue.h"
 
 
 #endif

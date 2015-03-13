@@ -39,6 +39,8 @@ const std::string Lifter::GetName(const Height_t h)
 		return "ToteScore";
 	case Lifter::ToteDown:
 		return "ToteDown";
+	case Lifter::Chute:
+		return "Chute";
 	case Lifter::ToteUp:
 		return "ToteUp";
 	case Lifter::BinT1:
@@ -56,8 +58,8 @@ const std::string Lifter::GetName(const Height_t h)
 
 Lifter::Lifter(int talID1, int talID2, PIDConfig iPID, double ramp): LogObject<Lifter>(this), m_tal1(talID1), m_tal2(talID2), pid(iPID), rampRate(ramp)
 {
-	/*LogText()<<"Constructed with (talID1: "<<talID1<<", talID2: "<<talID2<<
-			", PID: ("<<pid.P<<", "<<pid.I<<", "<<pid.D<<"), ramp: "<<ramp;*/
+	LogText()<<"Constructed with (talID1: "<<talID1<<", talID2: "<<talID2<<
+			", PID: ("<<pid.P<<", "<<pid.I<<", "<<pid.D<<"), ramp: "<<ramp;
 	targetPosition = 0.0;
 	targetState = Height_t::Ground;
 

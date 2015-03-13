@@ -156,7 +156,7 @@ const Sweeper::State_t OperatorConsole::GetSweeperState()
 
 const Sweeper::Mode_t OperatorConsole::GetSweeperMode()
 {
-	if(m_copilotLeft.GetButton(GamePad::SELECT) && m_copilotLeft.GetButton(GamePad::START))
+	if(m_copilotLeft.GetButton(GamePad::START))
 	{
 		failsafe = false;
 		return Sweeper::Velocity;
@@ -168,5 +168,17 @@ const Sweeper::Mode_t OperatorConsole::GetSweeperMode()
 	}
 	else
 		return Sweeper::Velocity;
+}
+
+const int OperatorConsole::GetAutoMode()
+{
+	int i;
+	for(i = 1; i < 10; i++)
+	{
+		if(m_copilotLeft.GetRawButton(i))
+			return i;
+	}
+
+	return 0;
 }
 
