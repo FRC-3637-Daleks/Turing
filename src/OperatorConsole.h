@@ -15,6 +15,7 @@
 
 #include "Gamepad.h"
 #include "ToggleInput.h"
+#include "Sweeper.h"
 
 class OperatorConsole
 {
@@ -24,7 +25,7 @@ public:
 	enum AutonomousMode_t {FORWARD, TOTE_SET, CONTAINER_SET, TOTE_STACK};
 
 private:
-	static constexpr double deadzone = 0.07;
+	static constexpr double deadzone = 0.1;
 
 private:	/// Hardware
 	Joystick m_driveLeft, m_driveRight;
@@ -37,14 +38,13 @@ private:	/// Configuration
 	bool squaredDrive, squaredCam, squaredLift, squaredBinPull;		///< Axis squaring
 
 private:	/// Button states
-	ToggleInput manualToggle, incrementalToggle, preciseToggle;
+	ToggleInput manualToggle, preciseToggle;
 	FlickInput upFlick, downFlick;
-	BoolInput *inputManagers[6];
+	BoolInput *inputManagers[5];
+	bool failsafe;
 
 private:	/// Dynamic settings
 	bool precisionEnabled, relativeDriveEnabled, steadyDriveEnabled;
-	CopilotMode_t copilotMode;
-	AutonomousMode_t autonMode;
 	Lifter::Height_t targetHeight;
 
 public:
@@ -66,9 +66,6 @@ public:	/// Class internal status Get and Set functions
 	const float GetPrecision() const;
 	const bool GetFlip(const AnalogControls control) const;
 	void SetFlip(const AnalogControls control, const bool flip);
-
-	const AutonomousMode_t GetAutonomousMode() const {return autonMode;};
-	void SetAutonomousMode(const AutonomousMode_t mode) {autonMode = mode;};
 
 	const bool GetDriveSquared() const {return squaredDrive;};
 	const bool GetCamSquared() const {return squaredCam;};
@@ -95,9 +92,8 @@ public:	/// Class internal status Get and Set functions
 	void DisableSteadyDrive() {SetSteadyDriveEnabled(false);};
 
 	const bool GetManual() const {return manualToggle.GetState();};
-	const bool GetIncrementManual() const {return incrementalToggle.GetState();};
 
-	const Lifter::Height_t GetLiftTarget() const {if(incrementalToggle.GetState()) return targetHeight; else return Lifter::TRANSITION;};
+	const Lifter::Height_t GetLiftTarget() const {return targetHeight;};
 
 public: /// Analog Get Functions
 	const float GetDriveX();
@@ -113,14 +109,11 @@ private:	/// Private Button State Poll Functions
 	void PollLifterHeight();
 
 public:		/// Button State Functions
+	const Sweeper::State_t GetSweeperState();
+	const Sweeper::Mode_t GetSweeperMode();
 	const bool GetReset();
 	const bool GetCenterCamera();
-	const bool GetHoldExtend();
-	const bool GetHoldRetract();
 	const bool GetGround();
-	const bool GetPushTote();
-	const bool GetScore();
-	const bool GetScoreStep();
 	const bool GetAlignExtend();
 };
 

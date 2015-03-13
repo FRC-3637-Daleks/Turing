@@ -54,7 +54,7 @@ void DalekDrive::init(const Wheel_t wheelConfig, const DalekDrive::Motor m [], c
 	printMotors();
 }
 
-DalekDrive::DalekDrive(const Wheel_t wheelConfig, const DalekDrive::Motor m[],const float ramp, const int syncGroup)
+DalekDrive::DalekDrive(const Wheel_t wheelConfig, const DalekDrive::Motor m[],const float ramp, const int syncGroup): LogObject<DalekDrive>(this)
 {
 	init(wheelConfig, m, ramp, syncGroup);
 }
@@ -65,7 +65,7 @@ DalekDrive::DalekDrive(const Wheel_t wheelConfig,
 		const Motor & leftRear,
 		const Motor & rightRear,
 		const float ramp,
-		const int syncGroup)
+		const int syncGroup): LogObject<DalekDrive>(this)
 {
 	printMotors();
 	Motor ms[] = {leftFront, rightFront, leftRear, rightRear};
@@ -74,7 +74,7 @@ DalekDrive::DalekDrive(const Wheel_t wheelConfig,
 	// calls alternate constructor with parameters rearranged
 }
 
-DalekDrive::DalekDrive(const Wheel_t wheelConfig, const short leftFront, const short rightFront, const short leftRear, const short rightRear, const float ramp, const int syncGroup)
+DalekDrive::DalekDrive(const Wheel_t wheelConfig, const short leftFront, const short rightFront, const short leftRear, const short rightRear, const float ramp, const int syncGroup): LogObject<DalekDrive>(this)
 {
 	Motor ms[] = {Motor(leftFront, LEFT_FRONT, syncGroup), Motor(rightFront, RIGHT_FRONT, syncGroup), Motor(leftRear, LEFT_REAR, syncGroup), Motor(rightRear, RIGHT_REAR, syncGroup)};
 	init(wheelConfig, ms, ramp, syncGroup);

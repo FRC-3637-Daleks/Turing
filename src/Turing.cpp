@@ -6,14 +6,15 @@ class Turing: public IterativeRobot
 {
 private:
 	enum RobotID {PRIMARY=0, SECONDARY, TEST} id;
-	enum AutoMode_t {EARLY, UNDER, HOLDING, DRIVING, PLACING, BACKING, END} mode;
-	//enum AutoRoutine_t {PLATFORM, NON_PLATFORM} routine;
-	//enum AutoStart_t {LANDFILL, CONTAINER} position;
 	typedef std::chrono::time_point<std::chrono::system_clock> second_time;
 	second_time timer;
 	static const second_time getNow() {return std::chrono::system_clock::now();};
 	const bool timeExceeds() {return getNow() > timer;};
-	void setTimer(const std::chrono::seconds s) {timer = getNow() + s;};
+	void setTimer(const std::chrono::milliseconds s) {timer = getNow() + s;};
+
+private:
+	int autoState;
+	double fastDrive, slowDrive;
 
 private:
 	RobotConf config;
@@ -27,16 +28,16 @@ private:
 	Aligners align;
 
 public:
-	Turing(): id(PRIMARY), mode(EARLY), //routine(PLATFORM), position(LANDFILL),
+	Turing(): id(PRIMARY), autoState(0), fastDrive(0.5), slowDrive(0.2),//routine(PLATFORM), position(LANDFILL),
 			  drive(DalekDrive::Wheel_t::MECANUM_WHEELS, Robot::FRONT_LEFT, Robot::FRONT_RIGHT, Robot::BACK_LEFT, Robot::BACK_RIGHT, 50.0),
 			  lift(Robot::LIFT_1, Robot::LIFT_2, Lifter::PIDConfig(2.0, 0.000, 0.0, 20), 50.0),
 			  op(Robot::DRIVER_LEFT, Robot::DRIVER_RIGHT, Robot::COPILOT_LEFT, Robot::COPILOT_RIGHT),
 			  gimbal(Robot::CAMERA_X, Robot::CAMERA_Y),
-			  sweep(Robot::RC_GRABBER, Lifter::PIDConfig(10.0, 2.0, 0.0, 200.0), Lifter::PIDConfig(15.0, 2.0, 0.0, 200.0), 45.0),
+			  sweep(Robot::RC_GRABBER, Lifter::PIDConfig(8.0, 0.0, 0.2, 00.0), Lifter::PIDConfig(10.0, 0.0, 0.0, 0.0), 50.0),
 			  align(Robot::ALIGNER_LEFT, Robot::ALIGNER_RIGHT)
 	{
 		DRR::LogService::LogText("Turing")<<"Constructor started";
-		RobotConf idFile("robotID.conf");
+		/*RobotConf idFile("robotID.conf");
 		if(!idFile.HasValue("id"))
 		{
 			idFile.SetValue<int>("id", PRIMARY);
@@ -54,6 +55,7 @@ public:
 
 		idFile.Save();
 		config.Save();
+		*/
 
 		drive[DalekDrive::LEFT_FRONT].SetFlip(true);
 		drive[DalekDrive::LEFT_REAR].SetFlip(true);
@@ -90,61 +92,12 @@ private:
 
 	void AutonomousInit() override
 	{
-		mode = EARLY;
-		//routine = SmartDashboard::GetBoolean("auto_long", true)? PLATFORM:NON_PLATFORM;
-		//position = SmartDashboard::GetBoolean("auto_landfill", true)? LANDFILL:CONTAINER;
-		//std::cout<<"routine: "<<(routine==PLATFORM? "PLATFORM":"NON_PLATFORM")<<", "<<(position==LANDFILL? "LANDFILL":"CONTAINER")<<std::endl;
+		autoState = 0;
 	}
 
 	void AutonomousPeriodic() override
 	{
-		switch(mode)
-		{
-		case EARLY:
-			/*if(position == PLATFORM)
-			{
-				drive.Drive(0.0, -0.14, 0.0);
-				setTimer(std::chrono::seconds(1));
-			}
-			else
-			{*/
-			drive.Drive(0.0, -0.14, 0.0);
-			setTimer(std::chrono::seconds(1));
-			mode = UNDER;
-			break;
-		case UNDER:
-			if(!timeExceeds())
-				break;
-			drive.Drive(0.0,0.0,0.0);
-			break;
-		case HOLDING:
-			drive.Drive(0.0, 0.12, 0.0);
-			setTimer(std::chrono::seconds(10));
-			mode = DRIVING;
-			break;
-		case DRIVING:
-			/*if(position == PLATFORM)
-				drive.Drive(0.0, -0.23, 0.0);
-				*/
-			if(timeExceeds())
-				mode = PLACING;
-			break;
-		case PLACING:
-			drive.Drive(0.0, 0.12, 0.0);
-			/*manager.SetHeightTarget(Lifter::Ground);
-			if(manager.GetCurrentHeight() == Lifter::Ground)*/
-				mode = BACKING;
-			break;
-		case BACKING:
-			drive.Drive(0.0, 0.0, 0.0);
-			setTimer(std::chrono::seconds(1));
-			mode = END;
-			break;
-		case END:
-			if(timeExceeds())
-				drive.Drive(0.0, 0.0, 0.0);
-			break;
-		}
+
 	}
 
 	void TeleopInit() override
@@ -158,18 +111,20 @@ private:
 
 		drive.Drive(op.GetDriveX(), op.GetDriveY(), op.GetDriveYaw());
 
-		if(op.GetAlignExtend())
-			align.Extend();
-		else
-			align.Retract();
-
-		if(op.GetReset())
-			sweep.setState(Sweeper::Down);
-		else
+		if(op.GetSweeperMode() == Sweeper::RawVoltage)
+		{
 			sweep.setVBus(op.GetBinPull());
+		}
+		else if(op.GetSweeperState() != Sweeper::Transition)
+		{
+			sweep.setState(op.GetSweeperState());
+		}
+		else
+		{
+			sweep.setVelocity(op.GetBinPull());
+		}
 
-		if(op.GetManual())
-			lift.offsetTarget(op.GetLift());
+		lift.offsetTarget(op.GetLift());
 	}
 
 	void TestInit() override
@@ -179,6 +134,38 @@ private:
 	void TestPeriodic() override
 	{
 
+	}
+
+	void None()
+	{
+		return;
+	}
+
+	void PickupBackup()
+	{
+		switch(autoState)
+		{
+		case 0:	// Drive forward slightly
+			drive.Drive(0.0, -slowDrive, 0.0);
+			setTimer(std::chrono::milliseconds(500));
+			autoState++;
+			break;
+		case 1:
+			if(timeExceeds())
+				lift.setTargetState(Lifter::Chute);
+			if(lift.getCurrentState() == Lifter::Chute)
+				autoState++;
+			break;
+		case 2:
+			drive.Drive(0.0, fastDrive, 0.0);
+			setTimer(std::chrono::milliseconds(2000));
+			autoState++;
+			break;
+		case 3:
+			drive.Drive(0.0, 0.0, 0.0);
+			autoState++;
+			break;
+		}
 	}
 
 };

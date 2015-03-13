@@ -15,7 +15,7 @@
 
 class Sweeper: public DRR::LogObject<Sweeper> { //Sweeper no sweeping!
 public:
-	enum State_t {Down, Intermediate, Up, NUM_STATES};
+	enum State_t {Hold=-2, Transition=-1, Down=0, Intermediate, Up, NUM_STATES};
 	enum Mode_t {Velocity, Position, RawVoltage};
 	static const double States[NUM_STATES];
 
@@ -24,6 +24,7 @@ private:
 	Lifter::PIDConfig positionPID, velocityPID;
 	double rampRate;
 	double targetPosition;
+	double holdPosition;
 	State_t targetState;
 	Mode_t mode;
 

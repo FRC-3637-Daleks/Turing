@@ -10,24 +10,27 @@
 
 // States are in Inches
 const double Sweeper::States[] = {
-		[Sweeper::Down]=500,
+		[Sweeper::Down]=450,
 		[Sweeper::Intermediate]=700,
 		[Sweeper::Up]=900.0
 };
 
 
-Sweeper::Sweeper(uint32_t talID1, Lifter::PIDConfig iposPID, Lifter::PIDConfig ivelPID, double ramp): m_tal1(talID1), positionPID(iposPID), velocityPID(ivelPID) ,rampRate(ramp), targetState(Sweeper::Up)
+Sweeper::Sweeper(uint32_t talID1, Lifter::PIDConfig iposPID, Lifter::PIDConfig ivelPID, double ramp): LogObject<Sweeper>(this), m_tal1(talID1), positionPID(iposPID), velocityPID(ivelPID) ,rampRate(ramp), targetState(Sweeper::Up)
 {
 	LogText()<<"Constructor started for (talID1: "<<talID1<<
 			", iposPID: {"<<iposPID.P<<", "<<iposPID.I<<", "<<iposPID.D<<
 			"}, ivelPID: {"<<ivelPID.P<<", "<<ivelPID.I<<", "<<ivelPID.D<<
 			"}, ramp: "<<ramp;
+	holdPosition = -1.0;
 	setMode(Position);
 	m_tal1.SetFeedbackDevice(CANTalon::AnalogPot);
+	m_tal1.SelectProfileSlot(0);
 	m_tal1.SetCloseLoopRampRate(ramp);
+	m_tal1.SetVoltageRampRate(ramp);
 	m_tal1.ConfigLimitMode(CANTalon::LimitMode::kLimitMode_SwitchInputsOnly);
-	//m_tal1.ConfigReverseLimit(States[Sweeper::Up]);
-	//m_tal1.ConfigForwardLimit(States[Sweeper::Down]);
+	m_tal1.ConfigReverseLimit(States[Sweeper::Up]);
+	m_tal1.ConfigForwardLimit(States[Sweeper::Down]);
 	//m_tal1.SetSensorDirection(false);
 	setState(targetState);
 	LogText()<<"Constructor Complete";
@@ -55,13 +58,28 @@ void Sweeper::setMode(Mode_t m)
 	}
 
 	Lifter::PIDConfig pid(mode == Position? positionPID:velocityPID);
+	m_tal1.SetPID(pid.P, pid.I, pid.D);
 }
 
 void
 Sweeper::setState(State_t state)
 {
+	if(state == Hold && targetState != Hold)
+	{
+		holdPosition = getCurrentPosition();
+	}
+	else if(state != Hold)
+	{
+		holdPosition = -1.0;
+	}
+
 	targetState = state;
-	setPosition(States[state]);
+	if(targetState == Transition)
+		return;
+	else if(targetState == Hold)
+		setPosition(holdPosition);
+	else
+		setPosition(States[targetState]);
 	return;
 }
 
@@ -78,6 +96,7 @@ Sweeper::setPosition(double pos)
 void
 Sweeper::offset(double off)
 {
+	targetState = Transition;
 	setPosition(getCurrentPosition()+off);
 	return;
 }
@@ -85,8 +104,9 @@ Sweeper::offset(double off)
 void
 Sweeper::setVelocity(double vel)
 {
+	targetState = Transition;
 	setMode(Velocity);
-	m_tal1.Set(vel);
+	m_tal1.Set(50.0*vel);
 	return;
 }
 
@@ -99,6 +119,7 @@ Sweeper::getVelocity()
 void
 Sweeper::setVBus(double vel)
 {
+	targetState = Transition;
 	setMode(RawVoltage);
 	m_tal1.Set(vel);
 	return;
@@ -107,7 +128,7 @@ Sweeper::setVBus(double vel)
 void
 Sweeper::stop()
 {
-	m_tal1.StopMotor();
+	setState(Hold);
 	return;
 }
 

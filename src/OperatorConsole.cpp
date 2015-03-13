@@ -12,12 +12,11 @@ OperatorConsole::OperatorConsole(const short driveLeftID, const short driveRight
 	m_driveLeft(driveLeftID), m_driveRight(driveRightID), m_copilotLeft(copilotLeftID), m_copilotRight(copilotRightID),
 	precisionFactor(precision), flips({0}), squaredDrive(true), squaredCam(false), squaredLift(false), squaredBinPull(false),
 	manualToggle(std::bind(&GamePad::GetButton, &m_copilotLeft, GamePad::START), true),
-	incrementalToggle(std::bind(&GamePad::GetButton, &m_copilotLeft, GamePad::RIGHT_JOY_BUTTON)),
 	preciseToggle([this]() -> bool {return m_driveLeft.GetRawButton(1) && m_driveRight.GetRawButton(1);}),
 	upFlick([this]() {return m_copilotLeft.GetAxis(GamePad::RIGHT_Y) > 0.5;}),
 	downFlick([this]() {return m_copilotLeft.GetAxis(GamePad::RIGHT_Y) < -0.5;}),
-	inputManagers({&manualToggle, &incrementalToggle, &preciseToggle, &upFlick, &downFlick, NULL}),
-	precisionEnabled(false), relativeDriveEnabled(false), steadyDriveEnabled(true), copilotMode(ROUTINE), autonMode(FORWARD),
+	inputManagers({&manualToggle, &preciseToggle, &upFlick, &downFlick, NULL}),
+	failsafe(false), precisionEnabled(false), relativeDriveEnabled(false), steadyDriveEnabled(true),
 	targetHeight(Lifter::Ground)
 {
 
@@ -46,7 +45,7 @@ void OperatorConsole::UpdateDriveControls()
 	for(int i = 0; inputManagers[i] != NULL; i++)
 		inputManagers[i]->Update();
 
-	if(GetGround() || GetPushTote() || GetScore() || GetScoreStep())
+	if(GetGround())
 		manualToggle.SetState(false);
 
 	SetPrecisionEnabled(preciseToggle.GetState());	/// Precision Driving
@@ -103,27 +102,16 @@ const bool OperatorConsole::PollRelativeDriving()
 
 void OperatorConsole::PollLifterHeight()
 {
-	if(!incrementalToggle.GetState())
-		return;
 	if(upFlick.GetState() && targetHeight < Lifter::Top)
 		targetHeight = Lifter::Height_t(int(targetHeight)+1);
 	if(downFlick.GetState() && targetHeight > Lifter::Ground)
 		targetHeight = Lifter::Height_t(int(targetHeight)-1);
 }
 
-const bool OperatorConsole::GetHoldExtend()
-{
-	return m_copilotLeft.GetButton(GamePad::BOTTOM_RIGHT_SHOULDER);
-}
-
-const bool OperatorConsole::GetHoldRetract()
-{
-	return m_copilotLeft.GetButton(GamePad::TOP_RIGHT_SHOULDER);
-}
 
 const float OperatorConsole::GetLift()
 {
-	if(manualToggle.GetState() && !incrementalToggle.GetState())
+	if(manualToggle.GetState())
 		return 4.0*convertAxis(m_copilotLeft.GetAxis(GamePad::RIGHT_Y), squaredLift, flips[LIFT], 1.0);
 	return 0.0;
 }
@@ -144,27 +132,41 @@ const bool OperatorConsole::GetGround()
 	return m_copilotLeft.GetButton(GamePad::B2);
 }
 
-const bool OperatorConsole::GetPushTote()
-{
-	return m_copilotLeft.GetButton(GamePad::B3);
-}
-
-const bool OperatorConsole::GetScoreStep()
-{
-	return m_copilotLeft.GetButton(GamePad::B4);
-}
-
-const bool OperatorConsole::GetScore()
-{
-	return m_copilotLeft.GetButton(GamePad::B1);
-}
 
 const bool OperatorConsole::GetCenterCamera()
 {
-	return !m_copilotLeft.GetButton(GamePad::LEFT_JOY_BUTTON);
+	return false;
 }
 
 const bool OperatorConsole::GetAlignExtend()
 {
 	return m_driveRight.GetRawButton(2) && m_driveLeft.GetRawButton(2);
 }
+
+const Sweeper::State_t OperatorConsole::GetSweeperState()
+{
+	if(m_copilotLeft.GetButton(GamePad::TOP_LEFT_SHOULDER))
+		return Sweeper::Up;
+	else if(m_copilotLeft.GetButton(GamePad::BOTTOM_LEFT_SHOULDER))
+		return Sweeper::Down;
+	else if(fabs(GetBinPull()) < deadzone)
+		return Sweeper::Hold;
+	return Sweeper::Transition;
+}
+
+const Sweeper::Mode_t OperatorConsole::GetSweeperMode()
+{
+	if(m_copilotLeft.GetButton(GamePad::SELECT) && m_copilotLeft.GetButton(GamePad::START))
+	{
+		failsafe = false;
+		return Sweeper::Velocity;
+	}
+	else if(failsafe || m_copilotLeft.GetButton(GamePad::SELECT))
+	{
+		failsafe = true;
+		return Sweeper::RawVoltage;
+	}
+	else
+		return Sweeper::Velocity;
+}
+
