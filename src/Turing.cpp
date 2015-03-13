@@ -36,7 +36,7 @@ public:
 			  lift(Robot::LIFT_1, Robot::LIFT_2, Lifter::PIDConfig(2.0, 0.000, 0.0, 20), 50.0),
 			  op(Robot::DRIVER_LEFT, Robot::DRIVER_RIGHT, Robot::COPILOT_LEFT, Robot::COPILOT_RIGHT),
 			  gimbal(Robot::CAMERA_X, Robot::CAMERA_Y),
-			  sweep(Robot::RC_GRABBER, Lifter::PIDConfig(8.0, 0.0, 0.0, 00.0), Lifter::PIDConfig(11.0, 0.0, 0.0, 0.0), 50.0),
+			  sweep(Robot::RC_GRABBER, Lifter::PIDConfig(7.0, 0.2, 0.01, 200.0), Lifter::PIDConfig(11.0, 0.0, 0.0, 0.0), 50.0),
 			  align(Robot::ALIGNER_LEFT, Robot::ALIGNER_RIGHT)
 	{
 		DRR::LogService::LogText("Turing")<<"Constructor started";
@@ -204,7 +204,7 @@ private:
 				drive.Drive(0.0, 0.0, 0.0);
 				lift.offsetTarget(10.0);
 				lift.setTargetState(Lifter::BinT1);
-				setTimer(std::chrono::milliseconds(2000));
+				setTimer(std::chrono::milliseconds(2200));
 				autoState++;
 			}
 			break;
@@ -269,6 +269,49 @@ private:
 		{
 		case 0:
 			sweep.setState(Sweeper::Up);
+			setTimer(std::chrono::milliseconds(5000));
+			autoState++;
+			break;
+		case 1:
+			if(timeExceeds())
+			{
+				drive.Drive(0.0, slowDrive, 0.0);
+				setTimer(std::chrono::milliseconds(500));
+				autoState++;
+			}
+			break;
+		case 2:
+			if(timeExceeds())
+			{
+				drive.Drive(0.0, 0.0, 0.0);
+				setTimer(std::chrono::milliseconds(500));
+				autoState++;
+			}
+			break;
+		case 3:
+			if(timeExceeds())
+			{
+				sweep.setState(Sweeper::Intermediate);
+				setTimer(std::chrono::milliseconds(2000));
+				autoState++;
+			}
+			break;
+		case 4:
+			if(timeExceeds())
+			{
+				drive.Drive(0.0, -fastDrive, 0.0);
+				setTimer(std::chrono::milliseconds(2000));
+				autoState++;
+			}
+			break;
+		case 5:
+			if(timeExceeds())
+			{
+				drive.Drive(0.0, 0.0, 0.0);
+				break;
+			}
+		default:
+			drive.Drive(0.0, 0.0, 0.0);
 			break;
 		}
 	}
