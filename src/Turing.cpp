@@ -275,12 +275,12 @@ private:
 		switch(autoState)
 		{
 		case 0:
-			sweep.setState(Sweeper::Up);
-			setTimer(std::chrono::milliseconds(5000));
+			sweep.setState(Sweeper::Down);
+			setTimer(std::chrono::milliseconds(2500));
 			autoState++;
 			break;
 		case 1:
-			if(timeExceeds())
+			if(timeExceeds() || sweep.getCurrentState() == Sweeper::Down)
 			{
 				drive.Drive(0.0, slowDrive, 0.0);
 				setTimer(std::chrono::milliseconds(500));
@@ -298,13 +298,13 @@ private:
 		case 3:
 			if(timeExceeds())
 			{
-				sweep.setState(Sweeper::Intermediate);
-				setTimer(std::chrono::milliseconds(2000));
+				sweep.setState(Sweeper::Up);
+				setTimer(std::chrono::milliseconds(5000));
 				autoState++;
 			}
 			break;
 		case 4:
-			if(timeExceeds())
+			if(timeExceeds() || sweep.getCurrentState() == Sweeper::Up)
 			{
 				drive.Drive(0.0, -fastDrive, 0.0);
 				setTimer(std::chrono::milliseconds(2000));

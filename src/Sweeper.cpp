@@ -15,6 +15,20 @@ const double Sweeper::States[] = {
 		[Sweeper::Up]=850.0
 };
 
+std::string Sweeper::GetStateName(const State_t state)
+{
+	switch(state)
+	{
+	case Sweeper::Down:
+		return "Down";
+	case Sweeper::Intermediate:
+		return "Intermediate";
+	case Sweeper::Up:
+		return "Up";
+	default:
+		return "Err";
+	}
+}
 
 Sweeper::Sweeper(uint32_t talID1, Lifter::PIDConfig iposPID, Lifter::PIDConfig ivelPID, double ramp): LogObject<Sweeper>(this), m_tal1(talID1), positionPID(iposPID), velocityPID(ivelPID) ,rampRate(ramp), targetState(Sweeper::Up)
 {
@@ -23,7 +37,7 @@ Sweeper::Sweeper(uint32_t talID1, Lifter::PIDConfig iposPID, Lifter::PIDConfig i
 			"}, ivelPID: {"<<ivelPID.P<<", "<<ivelPID.I<<", "<<ivelPID.D<<
 			"}, ramp: "<<ramp;
 	holdPosition = -1.0;
-	setMode(Position);
+	setMode(Position);	// Do Not Remove!
 	m_tal1.SetControlMode(CANTalon::ControlMode::kPosition);
 	m_tal1.SetFeedbackDevice(CANTalon::AnalogPot);
 	m_tal1.SelectProfileSlot(0);
@@ -34,7 +48,8 @@ Sweeper::Sweeper(uint32_t talID1, Lifter::PIDConfig iposPID, Lifter::PIDConfig i
 	m_tal1.ConfigForwardLimit(States[Sweeper::Up]);
 	//m_tal1.SetSensorDirection(false);
 	setState(targetState);
-	AddLog<int>("state", &Sweeper::getTargetState, 0);
+	AddLog<std::string>("target_state", [this]() {return GetStateName(State_t(getTargetState()));}, 0);
+	AddLog<std::string>("current_state", [this]() {return GetStateName(State_t(getTargetState()));}, 0);
 	AddLog<double>("target_position", &Sweeper::getTargetPosition, 0);
 	AddLog<double>("current_position", &Sweeper::getCurrentPosition, 0);
 	AddLog<double>("hold_position", [this]() {return holdPosition;}, 0);
@@ -52,14 +67,17 @@ void Sweeper::setMode(Mode_t m)
 	if(mode == Position)
 	{
 		m_tal1.SetControlMode(CANTalon::ControlMode::kPosition);
+		LogText()<<"Switching to Positional mode";
 	}
 	else if (mode == Velocity)
 	{
 		m_tal1.SetControlMode(CANTalon::ControlMode::kSpeed);
+		LogText()<<"Switching to Velocity mode";
 	}
 	else
 	{
 		m_tal1.SetControlMode(CANTalon::ControlMode::kPercentVbus);
+		LogText(DRR::LEVEL_t::ALERT)<<"Switching to Raw Voltage mode";
 		return;
 	}
 

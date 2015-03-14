@@ -18,7 +18,10 @@ public:
 	enum State_t {Hold=-2, Transition=-1, Down=0, Intermediate, Up, NUM_STATES};
 	enum Mode_t {Velocity=0, Position, RawVoltage};
 	static const double States[NUM_STATES];
-	static constexpr double thresh = 3.0;
+	static constexpr double thresh = 5.0;
+
+public:
+	static std::string GetStateName(const State_t state);
 
 private:
 	CANTalon m_tal1;
