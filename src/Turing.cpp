@@ -217,6 +217,7 @@ private:
 		case 2:
 			if(lift.getCurrentState() == Lifter::BinT1 || timeExceeds())
 			{
+				lift.setTargetState(Lifter::BinT1);
 				autoState++;
 			}
 			break;
