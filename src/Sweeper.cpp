@@ -30,7 +30,7 @@ std::string Sweeper::GetStateName(const State_t state)
 	}
 }
 
-Sweeper::Sweeper(uint32_t talID1, Lifter::PIDConfig iposPID, Lifter::PIDConfig ivelPID, double ramp): LogObject<Sweeper>(this), m_tal1(talID1), positionPID(iposPID), velocityPID(ivelPID) ,rampRate(ramp), targetState(Sweeper::Up)
+Sweeper::Sweeper(uint32_t talID1, Lifter::PIDConfig iposPID, Lifter::PIDConfig ivelPID, double ramp): LogObject<Sweeper>(this), m_tal1(talID1), positionPID(iposPID), velocityPID(ivelPID) ,rampRate(ramp), targetState(Sweeper::Up), mode(Velocity)
 {
 	LogText()<<"Constructor started for (talID1: "<<talID1<<
 			", iposPID: {"<<iposPID.P<<", "<<iposPID.I<<", "<<iposPID.D<<

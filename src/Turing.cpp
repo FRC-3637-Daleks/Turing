@@ -6,7 +6,7 @@ class Turing: public IterativeRobot, public DRR::LogObject<Turing>
 {
 private:
 	enum RobotID {PRIMARY=0, SECONDARY, TEST} id;
-	enum AutoMode {NONE=1, PICKUP_BACKUP, FORWARD_PICKUP_BACKUP, PICKUP_TURN_FORWARD};
+	enum AutoMode {NONE=1, PICKUP_BACKUP, FORWARD_PICKUP_BACKUP, PICKUP_TURN_FORWARD, RC_GRAB};
 	typedef std::chrono::time_point<std::chrono::system_clock> second_time;
 	second_time timer;
 	static const second_time getNow() {return std::chrono::system_clock::now();};
@@ -120,6 +120,8 @@ private:
 				autoMode = PICKUP_BACKUP;
 			else if(modeStr == "forward_pickup_backup")
 				autoMode = FORWARD_PICKUP_BACKUP;
+			else if(modeStr == "grab_rc")
+				autoMode = RC_GRAB;
 			else
 				autoMode = NONE;
 		}
@@ -140,6 +142,9 @@ private:
 			break;
 		case PICKUP_TURN_FORWARD:
 			PickupTurnForward();
+			break;
+		case RC_GRAB:
+			GrabRC();
 			break;
 		default:
 			None();
