@@ -10,7 +10,7 @@
 
 // States are in Inches
 const double Sweeper::States[] = {
-		[Sweeper::Down]=460,
+		[Sweeper::Down]=430,
 		[Sweeper::Intermediate]=700,
 		[Sweeper::Up]=850.0
 };
