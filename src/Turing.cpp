@@ -26,7 +26,7 @@ private:
 	Lifter lift;
 	OperatorConsole op;
 	CameraGimbal gimbal;
-	Sweeper sweep;
+	Cobra sweep;
 	Aligners align;
 
 public:
@@ -101,14 +101,14 @@ private:
 			DRR::MosCutie::Publish("config/auto_mode", strMode.toString(), true);
 		}
 
-		sweep.setMode(Sweeper::Position);
+		sweep.setMode(Cobra::Position);
 	}
 
 	void AutonomousInit() override
 	{
 		LogText()<<"AutonomousInit started";
-		sweep.setMode(Sweeper::Position);
-		sweep.setState(Sweeper::Up);
+		sweep.setMode(Cobra::Position);
+		sweep.setState(Cobra::Up);
 		autoState = 0;
 		if(DRR::MosCutie::Has("config/auto_mode"))
 		{
@@ -154,8 +154,8 @@ private:
 
 	void TeleopInit() override
 	{
-		sweep.setMode(Sweeper::Velocity);
-		sweep.setState(Sweeper::Hold);
+		sweep.setMode(Cobra::Velocity);
+		sweep.setState(Cobra::Hold);
 	}
 
 	void TeleopPeriodic() override
@@ -164,11 +164,11 @@ private:
 
 		drive.Drive(op.GetDriveX(), op.GetDriveY(), op.GetDriveYaw());
 
-		if(op.GetSweeperMode() == Sweeper::RawVoltage)
+		if(op.GetSweeperMode() == Cobra::RawVoltage)
 		{
 			sweep.setVBus(op.GetBinPull());
 		}
-		else if(op.GetSweeperState() != Sweeper::Transition)
+		else if(op.GetSweeperState() != Cobra::Transition)
 		{
 			sweep.setState(op.GetSweeperState());
 		}
@@ -280,13 +280,13 @@ private:
 		switch(autoState)
 		{
 		case 0:
-			sweep.setState(Sweeper::Down);
+			sweep.setState(Cobra::Down);
 			setTimer(std::chrono::milliseconds(2500));
 			LogText()<<"RC Down";
 			autoState++;
 			break;
 		case 1:
-			if(timeExceeds() || sweep.getCurrentState() == Sweeper::Down)
+			if(timeExceeds() || sweep.getCurrentState() == Cobra::Down)
 			{
 				drive.Drive(0.0, slowDrive, 0.0);
 				setTimer(std::chrono::milliseconds(500));
@@ -304,7 +304,7 @@ private:
 		case 3:
 			if(timeExceeds())
 			{
-				sweep.setState(Sweeper::Up);
+				sweep.setState(Cobra::Up);
 				setTimer(std::chrono::milliseconds(5000));
 				autoState++;
 			}

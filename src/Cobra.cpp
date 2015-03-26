@@ -1,36 +1,36 @@
 /*
- * Sweeper.cpp
+ * Cobra.cpp
  *
  *  Created on: Feb 14, 2015
  *      Author: elija_000
  */
 
-#include "Sweeper.h"
+#include "Cobra.h"
 #include "WPILib.h"
 
 // States are in Inches
-const double Sweeper::States[] = {
-		[Sweeper::Down]=430,
-		[Sweeper::Intermediate]=700,
-		[Sweeper::Up]=850.0
+const double Cobra::States[] = {
+		[Cobra::Down]=430,
+		[Cobra::Intermediate]=700,
+		[Cobra::Up]=850.0
 };
 
-std::string Sweeper::GetStateName(const State_t state)
+std::string Cobra::GetStateName(const State_t state)
 {
 	switch(state)
 	{
-	case Sweeper::Down:
+	case Cobra::Down:
 		return "Down";
-	case Sweeper::Intermediate:
+	case Cobra::Intermediate:
 		return "Intermediate";
-	case Sweeper::Up:
+	case Cobra::Up:
 		return "Up";
 	default:
 		return "Err";
 	}
 }
 
-Sweeper::Sweeper(uint32_t talID1, Lifter::PIDConfig iposPID, Lifter::PIDConfig ivelPID, double ramp): LogObject<Sweeper>(this), m_tal1(talID1), positionPID(iposPID), velocityPID(ivelPID) ,rampRate(ramp), targetState(Sweeper::Up), mode(Velocity)
+Cobra::Cobra(uint32_t talID1, Lifter::PIDConfig iposPID, Lifter::PIDConfig ivelPID, double ramp): LogObject<Cobra>(this), m_tal1(talID1), positionPID(iposPID), velocityPID(ivelPID) ,rampRate(ramp), targetState(Cobra::Up), mode(Velocity)
 {
 	LogText()<<"Constructor started for (talID1: "<<talID1<<
 			", iposPID: {"<<iposPID.P<<", "<<iposPID.I<<", "<<iposPID.D<<
@@ -44,21 +44,21 @@ Sweeper::Sweeper(uint32_t talID1, Lifter::PIDConfig iposPID, Lifter::PIDConfig i
 	m_tal1.SetCloseLoopRampRate(rampRate);
 	m_tal1.SetVoltageRampRate(rampRate);
 	m_tal1.ConfigLimitMode(CANTalon::LimitMode::kLimitMode_SoftPositionLimits);
-	m_tal1.ConfigReverseLimit(States[Sweeper::Down]);
-	m_tal1.ConfigForwardLimit(States[Sweeper::Up]);
+	m_tal1.ConfigReverseLimit(States[Cobra::Down]);
+	m_tal1.ConfigForwardLimit(States[Cobra::Up]);
 	//m_tal1.SetSensorDirection(false);
 	setState(targetState);
 	AddLog<std::string>("target_state", [this]() {return GetStateName(State_t(getTargetState()));}, 0);
 	AddLog<std::string>("current_state", [this]() {return GetStateName(State_t(getTargetState()));}, 0);
-	AddLog<double>("target_position", &Sweeper::getTargetPosition, 0);
-	AddLog<double>("current_position", &Sweeper::getCurrentPosition, 0);
+	AddLog<double>("target_position", &Cobra::getTargetPosition, 0);
+	AddLog<double>("current_position", &Cobra::getCurrentPosition, 0);
 	AddLog<double>("hold_position", [this]() {return holdPosition;}, 0);
 	setMode(Position);
 	LogText()<<"Constructor Complete";
 	return;
 }
 
-void Sweeper::setMode(Mode_t m)
+void Cobra::setMode(Mode_t m)
 {
 	if(mode == m)
 		return;
@@ -86,7 +86,7 @@ void Sweeper::setMode(Mode_t m)
 }
 
 void
-Sweeper::setState(State_t state)
+Cobra::setState(State_t state)
 {
 	if(state == Hold && targetState != Hold)
 	{
@@ -108,7 +108,7 @@ Sweeper::setState(State_t state)
 }
 
 void
-Sweeper::setPosition(double pos)
+Cobra::setPosition(double pos)
 {
 	setMode(Position);
 	targetPosition = pos;
@@ -118,7 +118,7 @@ Sweeper::setPosition(double pos)
 
 
 void
-Sweeper::offset(double off)
+Cobra::offset(double off)
 {
 	targetState = Transition;
 	setPosition(getCurrentPosition()+off);
@@ -126,7 +126,7 @@ Sweeper::offset(double off)
 }
 
 void
-Sweeper::setVelocity(double vel)
+Cobra::setVelocity(double vel)
 {
 	targetState = Transition;
 	setMode(Velocity);
@@ -135,13 +135,13 @@ Sweeper::setVelocity(double vel)
 }
 
 double
-Sweeper::getVelocity()
+Cobra::getVelocity()
 {
 	return m_tal1.GetSpeed();
 }
 
 void
-Sweeper::setVBus(double vel)
+Cobra::setVBus(double vel)
 {
 	targetState = Transition;
 	setMode(RawVoltage);
@@ -150,32 +150,32 @@ Sweeper::setVBus(double vel)
 }
 
 void
-Sweeper::stop()
+Cobra::stop()
 {
 	setState(Hold);
 	return;
 }
 
 double
-Sweeper::getCurrentPosition()
+Cobra::getCurrentPosition()
 {
 	return m_tal1.GetPosition();
 }
 
 double
-Sweeper::getTargetPosition()
+Cobra::getTargetPosition()
 {
 	return targetPosition;
 }
 
 int
-Sweeper::getTargetState()
+Cobra::getTargetState()
 {
 	return targetState;
 }
 
 int
-Sweeper::getCurrentState()
+Cobra::getCurrentState()
 {
 	if(targetState == Hold)
 		return Hold;
