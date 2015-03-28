@@ -1,19 +1,19 @@
 /*
- * Sweeper.h
+ * Cobra.h
  *
  *  Created on: Feb 14, 2015
  *      Author: elija_000
  */
 
-#ifndef SRC_SWEEPER_H_
-#define SRC_SWEEPER_H_
+#ifndef SRC_COBRA_H_
+#define SRC_COBRA_H_
 
 #include "WPILib.h"
 #include "Hardware.h"
 #include "Lifter.h"
 #include "LogObject.h"
 
-class Sweeper: public DRR::LogObject<Sweeper> { //Sweeper no sweeping!
+class Cobra: public DRR::LogObject<Cobra> { //Sweeper no sweeping!
 public:
 	enum State_t {Hold=-2, Transition=-1, Down=0, Intermediate, Up, NUM_STATES};
 	enum Mode_t {Velocity=0, Position, RawVoltage};
@@ -35,7 +35,7 @@ private:
 public:
 	/// Constructor accepts talon ID, PID values, and a Ramp Rate.  and Sweeper is calibrated.
 
-	Sweeper(uint32_t talID1, Lifter::PIDConfig iposPID, Lifter::PIDConfig ivelPID, double ramp);
+	Cobra(uint32_t talID1, Lifter::PIDConfig iposPID, Lifter::PIDConfig ivelPID, double ramp);
 
 public:
 	void  setMode(Mode_t mode);
