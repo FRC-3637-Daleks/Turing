@@ -9,6 +9,10 @@
 
 Razor::Razor(): razor(NULL), current(), roll(0.0), pitch(0.0), yaw(0.0)
 {
+	LogText()<<"Constructing";
+	AddLog<float>("roll", [this]() -> float {return roll;}, 0);
+	AddLog<float>("pitch", [this]() -> float {return pitch;}, 0);
+	AddLog<float>("yaw", [this]() -> float {return yaw;}, 0);
 }
 
 const bool Razor::Init()

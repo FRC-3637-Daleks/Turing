@@ -9,9 +9,10 @@
 #define SRC_RAZOR_H_
 
 #include "WPILib.h"
+#include "LogObject.h"
 #include "Cartesian.h"
 
-class Razor
+class Razor: private DRR::LogObject<Razor>
 {
 private:
 	SerialPort *razor;
