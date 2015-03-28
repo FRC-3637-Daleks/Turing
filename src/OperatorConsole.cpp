@@ -143,31 +143,31 @@ const bool OperatorConsole::GetAlignExtend()
 	return m_driveRight.GetRawButton(2) && m_driveLeft.GetRawButton(2);
 }
 
-const Sweeper::State_t OperatorConsole::GetSweeperState()
+const Cobra::State_t OperatorConsole::GetSweeperState()
 {
 	if(m_copilotLeft.GetButton(GamePad::TOP_LEFT_SHOULDER))
-		return Sweeper::Up;
+		return Cobra::Up;
 	else if(m_copilotLeft.GetButton(GamePad::BOTTOM_LEFT_SHOULDER))
-		return Sweeper::Down;
+		return Cobra::Down;
 	else if(fabs(GetBinPull()) < deadzone)
-		return Sweeper::Hold;
-	return Sweeper::Transition;
+		return Cobra::Hold;
+	return Cobra::Transition;
 }
 
-const Sweeper::Mode_t OperatorConsole::GetSweeperMode()
+const Cobra::Mode_t OperatorConsole::GetSweeperMode()
 {
 	if(m_copilotLeft.GetButton(GamePad::START))
 	{
 		failsafe = false;
-		return Sweeper::Velocity;
+		return Cobra::Velocity;
 	}
 	else if(failsafe || m_copilotLeft.GetButton(GamePad::SELECT))
 	{
 		failsafe = true;
-		return Sweeper::RawVoltage;
+		return Cobra::RawVoltage;
 	}
 	else
-		return Sweeper::Velocity;
+		return Cobra::Velocity;
 }
 
 const int OperatorConsole::GetAutoMode()

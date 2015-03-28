@@ -26,12 +26,12 @@ private:
 	Lifter lift;
 	OperatorConsole op;
 	CameraGimbal gimbal;
-	Sweeper sweep;
+	Cobra sweep;
 	Aligners align;
+	Razor razor;
 
 public:
-	Turing(): LogObject<Turing>(this),
-			id(PRIMARY), autoMode(NONE), autoState(0), fastDrive(0.4), slowDrive(0.2),//routine(PLATFORM), position(LANDFILL),
+	Turing(): id(PRIMARY), autoMode(NONE), autoState(0), fastDrive(0.4), slowDrive(0.2),//routine(PLATFORM), position(LANDFILL),
 			  drive(DalekDrive::Wheel_t::MECANUM_WHEELS, Robot::FRONT_LEFT, Robot::FRONT_RIGHT, Robot::BACK_LEFT, Robot::BACK_RIGHT, 50.0),
 			  lift(Robot::LIFT_1, Robot::LIFT_2, Lifter::PIDConfig(2.0, 0.000, 0.0, 20), 50.0),
 			  op(Robot::DRIVER_LEFT, Robot::DRIVER_RIGHT, Robot::COPILOT_LEFT, Robot::COPILOT_RIGHT),
@@ -39,7 +39,7 @@ public:
 			  sweep(Robot::RC_GRABBER, Lifter::PIDConfig(7.0, 0.0, 2.0, 00.0), Lifter::PIDConfig(11.0, 0.0, 0.0, 0.0), 50.0),
 			  align(Robot::ALIGNER_LEFT, Robot::ALIGNER_RIGHT)
 	{
-		DRR::LogService::LogText("Turing")<<"Constructor started";
+		DRR::LogService::LogText("Turing", "main")<<"Constructor started";
 		/*RobotConf idFile("robotID.conf");
 		if(!idFile.HasValue("id"))
 		{
@@ -71,7 +71,7 @@ public:
 		op.SetFlip(OperatorConsole::AnalogControls::LIFT, true);
 		op.SetFlip(OperatorConsole::AnalogControls::BIN_PULL, true);
 
-		DRR::LogService::LogText("Turing")<<"Constructor Complete";
+		DRR::LogService::LogText("Turing", "main")<<"Constructor Complete";
 	}
 
 private:
@@ -79,6 +79,7 @@ private:
 	{
 		DRR::MosCutie::Subscribe("roborio/config/#");
 		DRR::LogService::Start();
+		razor.Init();
 		lift.calibrate();
 		lift.setTargetState(Lifter::Ground);
 		gimbal.setState(CameraGimbal::TOTE_VIEW);
@@ -101,14 +102,15 @@ private:
 			DRR::MosCutie::Publish("config/auto_mode", strMode.toString(), true);
 		}
 
-		sweep.setMode(Sweeper::Position);
+		razor.Update();
+		sweep.setMode(Cobra::Position);
 	}
 
 	void AutonomousInit() override
 	{
 		LogText()<<"AutonomousInit started";
-		sweep.setMode(Sweeper::Position);
-		sweep.setState(Sweeper::Up);
+		sweep.setMode(Cobra::Position);
+		sweep.setState(Cobra::Up);
 		autoState = 0;
 		if(DRR::MosCutie::Has("config/auto_mode"))
 		{
@@ -154,8 +156,8 @@ private:
 
 	void TeleopInit() override
 	{
-		sweep.setMode(Sweeper::Velocity);
-		sweep.setState(Sweeper::Hold);
+		sweep.setMode(Cobra::Velocity);
+		sweep.setState(Cobra::Hold);
 	}
 
 	void TeleopPeriodic() override
@@ -164,11 +166,11 @@ private:
 
 		drive.Drive(op.GetDriveX(), op.GetDriveY(), op.GetDriveYaw());
 
-		if(op.GetSweeperMode() == Sweeper::RawVoltage)
+		if(op.GetSweeperMode() == Cobra::RawVoltage)
 		{
 			sweep.setVBus(op.GetBinPull());
 		}
-		else if(op.GetSweeperState() != Sweeper::Transition)
+		else if(op.GetSweeperState() != Cobra::Transition)
 		{
 			sweep.setState(op.GetSweeperState());
 		}
@@ -178,6 +180,7 @@ private:
 		}
 
 		lift.offsetTarget(op.GetLift());
+		razor.Update();
 	}
 
 	void TestInit() override
@@ -280,13 +283,13 @@ private:
 		switch(autoState)
 		{
 		case 0:
-			sweep.setState(Sweeper::Down);
+			sweep.setState(Cobra::Down);
 			setTimer(std::chrono::milliseconds(2500));
 			LogText()<<"RC Down";
 			autoState++;
 			break;
 		case 1:
-			if(timeExceeds() || sweep.getCurrentState() == Sweeper::Down)
+			if(timeExceeds() || sweep.getCurrentState() == Cobra::Down)
 			{
 				drive.Drive(0.0, slowDrive, 0.0);
 				setTimer(std::chrono::milliseconds(500));
@@ -304,7 +307,7 @@ private:
 		case 3:
 			if(timeExceeds())
 			{
-				sweep.setState(Sweeper::Up);
+				sweep.setState(Cobra::Up);
 				setTimer(std::chrono::milliseconds(5000));
 				autoState++;
 			}

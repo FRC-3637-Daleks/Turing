@@ -9,13 +9,12 @@
 #define SRC_OPERATORCONSOLE_H_
 
 #include "Hardware.h"
-#include "Holder.h"
 #include "Lifter.h"
 #include "DalekDrive.h"
 
 #include "Gamepad.h"
 #include "ToggleInput.h"
-#include "Sweeper.h"
+#include "Cobra.h"
 
 class OperatorConsole
 {
@@ -108,8 +107,8 @@ private:	/// Private Button State Poll Functions
 	void PollLifterHeight();
 
 public:		/// Button State Functions
-	const Sweeper::State_t GetSweeperState();
-	const Sweeper::Mode_t GetSweeperMode();
+	const Cobra::State_t GetSweeperState();
+	const Cobra::Mode_t GetSweeperMode();
 	const bool GetReset();
 	const bool GetCenterCamera();
 	const bool GetGround();

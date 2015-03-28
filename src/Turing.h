@@ -7,11 +7,9 @@
 
 #include "Hardware.h"
 
-#include "Holder.h"
 #include "Lifter.h"
 #include "DalekDrive.h"
-#include "LiftManager.h"
-#include "Sweeper.h"
+#include "Cobra.h"
 #include "Aligners.h"
 
 #include "OperatorConsole.h"
