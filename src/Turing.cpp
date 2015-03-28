@@ -28,10 +28,10 @@ private:
 	CameraGimbal gimbal;
 	Sweeper sweep;
 	Aligners align;
+	Razor razor;
 
 public:
-	Turing(): LogObject<Turing>(this),
-			id(PRIMARY), autoMode(NONE), autoState(0), fastDrive(0.4), slowDrive(0.2),//routine(PLATFORM), position(LANDFILL),
+	Turing(): id(PRIMARY), autoMode(NONE), autoState(0), fastDrive(0.4), slowDrive(0.2),//routine(PLATFORM), position(LANDFILL),
 			  drive(DalekDrive::Wheel_t::MECANUM_WHEELS, Robot::FRONT_LEFT, Robot::FRONT_RIGHT, Robot::BACK_LEFT, Robot::BACK_RIGHT, 50.0),
 			  lift(Robot::LIFT_1, Robot::LIFT_2, Lifter::PIDConfig(2.0, 0.000, 0.0, 20), 50.0),
 			  op(Robot::DRIVER_LEFT, Robot::DRIVER_RIGHT, Robot::COPILOT_LEFT, Robot::COPILOT_RIGHT),
@@ -39,7 +39,7 @@ public:
 			  sweep(Robot::RC_GRABBER, Lifter::PIDConfig(7.0, 0.0, 2.0, 00.0), Lifter::PIDConfig(11.0, 0.0, 0.0, 0.0), 50.0),
 			  align(Robot::ALIGNER_LEFT, Robot::ALIGNER_RIGHT)
 	{
-		DRR::LogService::LogText("Turing")<<"Constructor started";
+		DRR::LogService::LogText("Turing", "main")<<"Constructor started";
 		/*RobotConf idFile("robotID.conf");
 		if(!idFile.HasValue("id"))
 		{
@@ -71,7 +71,7 @@ public:
 		op.SetFlip(OperatorConsole::AnalogControls::LIFT, true);
 		op.SetFlip(OperatorConsole::AnalogControls::BIN_PULL, true);
 
-		DRR::LogService::LogText("Turing")<<"Constructor Complete";
+		DRR::LogService::LogText("Turing", "main")<<"Constructor Complete";
 	}
 
 private:
@@ -79,6 +79,7 @@ private:
 	{
 		DRR::MosCutie::Subscribe("roborio/config/#");
 		DRR::LogService::Start();
+		razor.Init();
 		lift.calibrate();
 		lift.setTargetState(Lifter::Ground);
 		gimbal.setState(CameraGimbal::TOTE_VIEW);
@@ -101,6 +102,7 @@ private:
 			DRR::MosCutie::Publish("config/auto_mode", strMode.toString(), true);
 		}
 
+		razor.Update();
 		sweep.setMode(Sweeper::Position);
 	}
 
@@ -178,6 +180,7 @@ private:
 		}
 
 		lift.offsetTarget(op.GetLift());
+		razor.Update();
 	}
 
 	void TestInit() override

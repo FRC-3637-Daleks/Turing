@@ -27,9 +27,7 @@ void Razor::Update()
 	while(razor->GetBytesReceived())
 		razor->Read(buf, 255); // Gets most recent line
 	//printf(buf);
-	int x, y, z;
-	sscanf(buf, "!ANG:%f,%f,%f,ACC:%d,%d,%d\n", &roll, &pitch, &yaw, &y, &x, &z);
-	current(double(x), double(y), double(z));
+	sscanf(buf, "!ANG:%f,%f,%f\n", &yaw, &pitch, &roll);
 	razor->Reset();
 }
 
