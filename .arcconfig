@@ -1,3 +1,4 @@
 {
-  "phabricator.uri" : "http://phabricator.team3637.com"
+  "phabricator.uri" : "http://phabricator.team3637.com",
+  "project.name" : "robot_2015"
 }
