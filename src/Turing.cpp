@@ -36,29 +36,10 @@ public:
 			  lift(Robot::LIFT_1, Robot::LIFT_2, Lifter::PIDConfig(2.0, 0.000, 0.0, 20), 50.0),
 			  op(Robot::DRIVER_LEFT, Robot::DRIVER_RIGHT, Robot::COPILOT_LEFT, Robot::COPILOT_RIGHT),
 			  gimbal(Robot::CAMERA_X, Robot::CAMERA_Y),
-			  sweep(Robot::RC_GRABBER, Lifter::PIDConfig(7.0, 0.0, 2.0, 00.0), Lifter::PIDConfig(11.0, 0.0, 0.0, 0.0), 50.0),
+			  sweep(Robot::RC_GRABBER, Lifter::PIDConfig(3.0, 0.005, 0.5, 3000.0), Lifter::PIDConfig(11.0, 0.0, 0.0, 0.0), 50.0),
 			  align(Robot::ALIGNER_LEFT, Robot::ALIGNER_RIGHT)
 	{
 		DRR::LogService::LogText("Turing", "main")<<"Constructor started";
-		/*RobotConf idFile("robotID.conf");
-		if(!idFile.HasValue("id"))
-		{
-			idFile.SetValue<int>("id", PRIMARY);
-		}
-		id = RobotID(idFile.GetValue<int>("id"));
-
-		if(!config.HasValue("ticks_per_inch"))
-		{
-			if(id == PRIMARY)
-				config.SetValue<double>("ticks_per_inch", 120.0);
-			else
-				config.SetValue<double>("ticks_per_inch", 180.0);
-		}
-		Lifter::ticksPerInch = config.GetValue<double>("ticks_per_inch");
-
-		idFile.Save();
-		config.Save();
-		*/
 
 		drive[DalekDrive::LEFT_FRONT].SetFlip(true);
 		drive[DalekDrive::LEFT_REAR].SetFlip(true);
@@ -77,9 +58,8 @@ public:
 private:
 	void RobotInit() override
 	{
-		DRR::MosCutie::Subscribe("roborio/config/#");
 		DRR::LogService::Start();
-		razor.Init();
+		//razor.Init();
 		lift.calibrate();
 		lift.setTargetState(Lifter::Ground);
 		gimbal.setState(CameraGimbal::TOTE_VIEW);
@@ -102,7 +82,7 @@ private:
 			DRR::MosCutie::Publish("config/auto_mode", strMode.toString(), true);
 		}
 
-		razor.Update();
+		//razor.Update();
 		sweep.setMode(Cobra::Position);
 	}
 
@@ -180,7 +160,7 @@ private:
 		}
 
 		lift.offsetTarget(op.GetLift());
-		razor.Update();
+		//razor.Update();
 	}
 
 	void TestInit() override
