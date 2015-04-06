@@ -53,6 +53,8 @@ Cobra::Cobra(uint32_t talID1, Lifter::PIDConfig iposPID, Lifter::PIDConfig ivelP
 	AddLog<double>("target_position", &Cobra::getTargetPosition, 0);
 	AddLog<double>("current_position", &Cobra::getCurrentPosition, 0);
 	AddLog<double>("hold_position", [this]() {return holdPosition;}, 0);
+	AddLog<double>("talon/voltage", std::bind(&CANTalon::GetOutputVoltage, &m_tal1));
+	AddLog<double>("talon/current", std::bind(&CANTalon::GetOutputCurrent, &m_tal1));
 	setMode(Position);
 	LogText()<<"Constructor Complete";
 	return;

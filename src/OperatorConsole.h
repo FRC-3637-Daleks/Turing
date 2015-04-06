@@ -8,6 +8,8 @@
 #ifndef SRC_OPERATORCONSOLE_H_
 #define SRC_OPERATORCONSOLE_H_
 
+#include "LogObject.h"
+
 #include "Hardware.h"
 #include "Lifter.h"
 #include "DalekDrive.h"
@@ -16,7 +18,7 @@
 #include "ToggleInput.h"
 #include "Cobra.h"
 
-class OperatorConsole
+class OperatorConsole: public DRR::LogObject<OperatorConsole>
 {
 public:
 	enum CopilotMode_t {MANUAL, HEIGHT, ROUTINE};

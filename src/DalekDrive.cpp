@@ -50,6 +50,9 @@ void DalekDrive::init(const Wheel_t wheelConfig, const DalekDrive::Motor m [], c
 	{
 		motors[i] = m[i];
 		motors[i]->SetVoltageRampRate(ramp);
+		const std::string motorName(DRR::LogService::AddID("motor", motors[i].GetLocation()));
+		AddLog<double>(motorName+"/"+"current", std::bind(&CANTalon::GetOutputCurrent, motors[i].GetCan()));
+		AddLog<double>(motorName+"/"+"voltage", std::bind(&CANTalon::GetOutputCurrent, motors[i].GetCan()));
 	}
 	printMotors();
 }
