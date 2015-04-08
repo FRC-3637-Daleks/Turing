@@ -66,14 +66,20 @@ Lifter::Lifter(int talID1, int talID2, PIDConfig iPID, double ramp): LogObject<L
 	m_tal2.SetControlMode(CANSpeedController::kFollower);
 	m_tal2.Set(talID1);
 
-	//LogText()<<"Configuring Talon "<<talID2<<" to follow Talon"<<talID1;
+	LogText()<<"Configuring Talon "<<talID2<<" to follow Talon"<<talID1;
 
-	//AddLog("target_position", &Lifter::getTargetPosition, 0);
-	//AddLog("current_position", &Lifter::getCurrentPosition, 0);
-	//AddLog<std::string>("target_state", [this]() -> std::string {return Lifter::GetName(getTargetState());});
+	AddLog("target_position", &Lifter::getTargetPosition, 0);
+	AddLog("current_position", &Lifter::getCurrentPosition, 0);
+	AddLog<std::string>("target_state", [this]() -> std::string {return Lifter::GetName(getTargetState());}, 0);
+	AddLog<std::string>("current_state", [this]() -> std::string {return Lifter::GetName(getCurrentState());}, 0);
+
+	AddLog<double>("talons/master/voltage", std::bind(&CANTalon::GetOutputVoltage, &m_tal1), 0);
+	AddLog<double>("talons/master/current", std::bind(&CANTalon::GetOutputCurrent, &m_tal1), 0);
+	AddLog<double>("talons/slave/voltage", std::bind(&CANTalon::GetOutputVoltage, &m_tal2), 0);
+	AddLog<double>("talons/slave/current", std::bind(&CANTalon::GetOutputCurrent, &m_tal2), 0);
 
 	calibrate();
-	//LogText()<<"Construction Complete";
+	LogText()<<"Constructor Complete";
 }
 
 void Lifter::calibrate()
@@ -91,6 +97,8 @@ void Lifter::calibrate()
 		m_tal1.SetPosition(0.0);
 		targetPosition = 0.0;
 		targetState = Ground;
+		if(calibrated == false)
+			LogText()<<"Calibrated";
 		calibrated = true;
 	}
 	// If the Limit Switch hasn't been triggered.
@@ -100,6 +108,8 @@ void Lifter::calibrate()
 		m_tal1.SetVoltageRampRate(rampRate);
 		m_tal1.Set(-0.5);
 		//targetState = TRANSITION;
+		if(calibrated == true)
+			LogText()<<"Calibrating";
 		calibrated = false;
 	}
 }

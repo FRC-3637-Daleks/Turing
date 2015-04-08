@@ -6,7 +6,7 @@ class Turing: public IterativeRobot, public DRR::LogObject<Turing>
 {
 private:
 	enum RobotID {PRIMARY=0, SECONDARY, TEST} id;
-	enum AutoMode {NONE=1, PICKUP_BACKUP, FORWARD_PICKUP_BACKUP, PICKUP_TURN_FORWARD, RC_GRAB};
+	enum AutoMode {NONE=1, PICKUP_BACKUP, FORWARD_PICKUP_BACKUP, PICKUP_TURN_FORWARD, RC_GRAB_BACK, RC_GRAB};
 	typedef std::chrono::time_point<std::chrono::system_clock> second_time;
 	second_time timer;
 	static const second_time getNow() {return std::chrono::system_clock::now();};
@@ -51,6 +51,17 @@ public:
 		op.SetFlip(OperatorConsole::AnalogControls::CAM_Y, false);
 		op.SetFlip(OperatorConsole::AnalogControls::LIFT, true);
 		op.SetFlip(OperatorConsole::AnalogControls::BIN_PULL, true);
+
+		LogObject<PowerDistributionPanel> pdpLog(&PDP);
+		pdpLog.AddLog("total_voltage", &PowerDistributionPanel::GetVoltage, 0);
+		pdpLog.AddLog("total_current", &PowerDistributionPanel::GetTotalCurrent, 0);
+		pdpLog.AddLog("total_power", &PowerDistributionPanel::GetTotalPower, 0);
+		pdpLog.AddLog("total_energy", &PowerDistributionPanel::GetTotalEnergy, 0);
+
+		for(int i = 0; i < 16; i++)
+		{
+			pdpLog.AddLog<double>(DRR::LogService::AddID("current", i), std::bind(&PowerDistributionPanel::GetCurrent, &PDP, i), 0);
+		}
 
 		DRR::LogService::LogText("Turing", "main")<<"Constructor Complete";
 	}
@@ -102,6 +113,8 @@ private:
 				autoMode = PICKUP_BACKUP;
 			else if(modeStr == "forward_pickup_backup")
 				autoMode = FORWARD_PICKUP_BACKUP;
+			else if(modeStr == "grab_rc_drive")
+				autoMode = RC_GRAB_BACK;
 			else if(modeStr == "grab_rc")
 				autoMode = RC_GRAB;
 			else
@@ -124,6 +137,9 @@ private:
 			break;
 		case PICKUP_TURN_FORWARD:
 			PickupTurnForward();
+			break;
+		case RC_GRAB_BACK:
+			GrabRCBack();
 			break;
 		case RC_GRAB:
 			GrabRC();
@@ -257,6 +273,53 @@ private:
 			break;
 		}
 	}
+
+	void GrabRCBack()
+	{
+		switch(autoState)
+		{
+		case 0:
+			sweep.setState(Cobra::Down);
+			setTimer(std::chrono::milliseconds(2500));
+			LogText()<<"RC Down";
+			autoState++;
+			break;
+		case 1:
+			if(timeExceeds() || sweep.getCurrentState() == Cobra::Down)
+			{
+				drive.Drive(0.0, 0.0, 0.0);
+				setTimer(std::chrono::milliseconds(500));
+				autoState++;
+			}
+			break;
+		case 2:
+			if(timeExceeds())
+			{
+				sweep.setState(Cobra::Up);
+				setTimer(std::chrono::milliseconds(5000));
+				autoState++;
+			}
+			break;
+		case 3:
+			if(timeExceeds())
+			{
+				drive.Drive(0.0, -fastDrive, 0.0);
+				setTimer(std::chrono::milliseconds(1500));
+				autoState++;
+			}
+			break;
+		case 4:
+			if(timeExceeds())
+			{
+				drive.Drive(0.0, 0.0, 0.0);
+			}
+			break;
+		default:
+			drive.Drive(0.0, 0.0, 0.0);
+			break;
+		}
+}
+
 
 	void GrabRC()
 	{
