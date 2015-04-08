@@ -17,7 +17,7 @@
 
 #include "Razor.h"
 
-#include "RobotConf.h"
+#include "MessageConfig.h"
 
 #include "LogService.h"
 #include "LogObject.h"

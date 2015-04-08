@@ -19,7 +19,7 @@ private:
 	double fastDrive, slowDrive;
 
 private:
-	RobotConf config;
+	DRR::MessageConfig config;
 	PowerDistributionPanel PDP;
 	DalekDrive drive;
 	Compressor compressor;
@@ -79,6 +79,7 @@ private:
 	void DisabledInit() override
 	{
 		align.Retract();
+		autoMode = config.GetValue<int>("auto_mode", autoMode);
 	}
 
 	void DisabledPeriodic() override
@@ -88,9 +89,7 @@ private:
 		if(m = op.GetAutoMode())
 		{
 			LogText()<<"Auto Mode "<<m;
-			autoMode = AutoMode(m);
-			DRR::DatumValue<int> strMode(m);
-			DRR::MosCutie::Publish("config/auto_mode", strMode.toString(), true);
+			config.SetValue<int>("auto_mode", m);
 		}
 
 		//razor.Update();
@@ -103,23 +102,7 @@ private:
 		sweep.setMode(Cobra::Position);
 		sweep.setState(Cobra::Up);
 		autoState = 0;
-		if(DRR::MosCutie::Has("config/auto_mode"))
-		{
-			auto modeStr = DRR::MosCutie::Get("config/auto_mode", false);
-
-			if(modeStr == "none")
-				autoMode = NONE;
-			else if(modeStr == "pickup_backup")
-				autoMode = PICKUP_BACKUP;
-			else if(modeStr == "forward_pickup_backup")
-				autoMode = FORWARD_PICKUP_BACKUP;
-			else if(modeStr == "grab_rc_drive")
-				autoMode = RC_GRAB_BACK;
-			else if(modeStr == "grab_rc")
-				autoMode = RC_GRAB;
-			else
-				autoMode = NONE;
-		}
+		autoMode = config.GetValue<int>("auto_mode", autoMode);
 	}
 
 	void AutonomousPeriodic() override
