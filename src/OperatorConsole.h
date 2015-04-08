@@ -114,6 +114,7 @@ public:		/// Button State Functions
 	const bool GetReset();
 	const bool GetCenterCamera();
 	const bool GetGround();
+	const bool GetChute();
 	const bool GetAlignExtend();
 
 public:	/// Auto Mode

@@ -146,6 +146,10 @@ const bool OperatorConsole::GetGround()
 	return m_copilotLeft.GetButton(GamePad::B2);
 }
 
+const bool OperatorConsole::GetChute()
+{
+	return m_copilotLeft.GetButton(GamePad::B1);
+}
 
 const bool OperatorConsole::GetCenterCamera()
 {

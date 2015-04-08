@@ -175,7 +175,18 @@ private:
 			sweep.setVelocity(op.GetBinPull());
 		}
 
-		lift.offsetTarget(op.GetLift());
+		if(fabs(op.GetLift()) > 0.01)
+		{
+			lift.offsetTarget(op.GetLift());
+		}
+		else if(op.GetGround())
+		{
+			lift.setTargetState(Lifter::Ground);
+		}
+		else if(op.GetChute())
+		{
+			lift.setTargetState(Lifter::Chute);
+		}
 		//razor.Update();
 	}
 
