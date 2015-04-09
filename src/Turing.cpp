@@ -22,7 +22,6 @@ private:
 	DRR::MessageConfig config;
 	PowerDistributionPanel PDP;
 	DalekDrive drive;
-	Compressor compressor;
 	Lifter lift;
 	OperatorConsole op;
 	CameraGimbal gimbal;
@@ -32,6 +31,7 @@ private:
 
 public:
 	Turing(): id(PRIMARY), autoMode(NONE), autoState(0), fastDrive(0.4), slowDrive(0.2),//routine(PLATFORM), position(LANDFILL),
+			  config("robot.conf"),
 			  drive(DalekDrive::Wheel_t::MECANUM_WHEELS, Robot::FRONT_LEFT, Robot::FRONT_RIGHT, Robot::BACK_LEFT, Robot::BACK_RIGHT, 50.0),
 			  lift(Robot::LIFT_1, Robot::LIFT_2, Lifter::PIDConfig(2.0, 0.000, 0.0, 20), 50.0),
 			  op(Robot::DRIVER_LEFT, Robot::DRIVER_RIGHT, Robot::COPILOT_LEFT, Robot::COPILOT_RIGHT),
@@ -40,6 +40,8 @@ public:
 			  align(Robot::ALIGNER_LEFT, Robot::ALIGNER_RIGHT)
 	{
 		DRR::LogService::LogText("Turing", "main")<<"Constructor started";
+
+		DRR::LogService::Preferences().poll_period = 500;
 
 		drive[DalekDrive::LEFT_FRONT].SetFlip(true);
 		drive[DalekDrive::LEFT_REAR].SetFlip(true);
@@ -79,7 +81,7 @@ private:
 	void DisabledInit() override
 	{
 		align.Retract();
-		autoMode = config.GetValue<int>("auto_mode", autoMode);
+		autoMode = AutoMode(config.GetValue<int>("auto_mode", int(autoMode)));
 	}
 
 	void DisabledPeriodic() override
@@ -92,7 +94,6 @@ private:
 			config.SetValue<int>("auto_mode", m);
 		}
 
-		//razor.Update();
 		sweep.setMode(Cobra::Position);
 	}
 
@@ -102,7 +103,8 @@ private:
 		sweep.setMode(Cobra::Position);
 		sweep.setState(Cobra::Up);
 		autoState = 0;
-		autoMode = config.GetValue<int>("auto_mode", autoMode);
+		autoMode = AutoMode(config.GetValue<int>("auto_mode", int(autoMode)));
+		config.Save();
 	}
 
 	void AutonomousPeriodic() override
@@ -170,7 +172,6 @@ private:
 		{
 			lift.setTargetState(Lifter::Chute);
 		}
-		//razor.Update();
 	}
 
 	void TestInit() override

@@ -59,9 +59,6 @@ void OperatorConsole::UpdateDriveControls()
 	for(int i = 0; inputManagers[i] != NULL; i++)
 		inputManagers[i]->Update();
 
-	if(GetGround())
-		manualToggle.SetState(false);
-
 	SetPrecisionEnabled(preciseToggle.GetState());	/// Precision Driving
 	if(GetPrecisionEnabled())
 		SetDriveSquared(false);
@@ -125,9 +122,7 @@ void OperatorConsole::PollLifterHeight()
 
 const float OperatorConsole::GetLift()
 {
-	if(manualToggle.GetState())
-		return 4.0*convertAxis(m_copilotLeft.GetAxis(GamePad::RIGHT_Y), squaredLift, flips[LIFT], 1.0);
-	return 0.0;
+	return 4.0*convertAxis(m_copilotLeft.GetAxis(GamePad::RIGHT_Y), squaredLift, flips[LIFT], 1.0);
 }
 
 const float OperatorConsole::GetBinPull()
