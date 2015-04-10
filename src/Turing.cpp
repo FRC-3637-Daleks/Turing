@@ -2,7 +2,18 @@
 
 using namespace std;
 
-class Turing: public IterativeRobot, public DRR::LogObject<Turing>
+class LogInitializer
+{
+public:
+	LogInitializer()
+	{
+		DRR::LogService::Preferences().dashboard_root = "roborio";
+		DRR::LogService::Preferences().text_dashboard_feed = "roborio/console";
+		DRR::LogService::Preferences().poll_period = 200;
+	}
+};
+
+class Turing: public LogInitializer, public IterativeRobot, public DRR::LogObject<Turing>
 {
 private:
 	enum RobotID {PRIMARY=0, SECONDARY, TEST} id;
@@ -19,7 +30,7 @@ private:
 	double fastDrive, slowDrive;
 
 private:
-	DRR::MessageConfig config;
+	DRR::MessageConfig config, autonConf;
 	PowerDistributionPanel PDP;
 	DalekDrive drive;
 	Lifter lift;
@@ -31,17 +42,15 @@ private:
 
 public:
 	Turing(): id(PRIMARY), autoMode(NONE), autoState(0), fastDrive(0.4), slowDrive(0.2),//routine(PLATFORM), position(LANDFILL),
-			  config("robot.conf"),
+			  config("robot.conf"), autonConf("auton.conf"),
 			  drive(DalekDrive::Wheel_t::MECANUM_WHEELS, Robot::FRONT_LEFT, Robot::FRONT_RIGHT, Robot::BACK_LEFT, Robot::BACK_RIGHT, 50.0),
 			  lift(Robot::LIFT_1, Robot::LIFT_2, Lifter::PIDConfig(2.0, 0.000, 0.0, 20), 50.0),
 			  op(Robot::DRIVER_LEFT, Robot::DRIVER_RIGHT, Robot::COPILOT_LEFT, Robot::COPILOT_RIGHT),
 			  gimbal(Robot::CAMERA_X, Robot::CAMERA_Y),
-			  sweep(Robot::RC_GRABBER, Lifter::PIDConfig(3.0, 0.005, 0.5, 3000.0), Lifter::PIDConfig(11.0, 0.0, 0.0, 0.0), 50.0),
+			  sweep(Robot::RC_GRABBER, Lifter::PIDConfig(2.5, 0.001, 0.5, 700.0), Lifter::PIDConfig(11.0, 0.002, 0.0, 1000.0), 50.0),
 			  align(Robot::ALIGNER_LEFT, Robot::ALIGNER_RIGHT)
 	{
 		DRR::LogService::LogText("Turing", "main")<<"Constructor started";
-
-		DRR::LogService::Preferences().poll_period = 500;
 
 		drive[DalekDrive::LEFT_FRONT].SetFlip(true);
 		drive[DalekDrive::LEFT_REAR].SetFlip(true);
@@ -60,10 +69,12 @@ public:
 		pdpLog.AddLog("total_power", &PowerDistributionPanel::GetTotalPower, 0);
 		pdpLog.AddLog("total_energy", &PowerDistributionPanel::GetTotalEnergy, 0);
 
+		/*
 		for(int i = 0; i < 16; i++)
 		{
 			pdpLog.AddLog<double>(DRR::LogService::AddID("current", i), std::bind(&PowerDistributionPanel::GetCurrent, &PDP, i), 0);
 		}
+		*/
 
 		DRR::LogService::LogText("Turing", "main")<<"Constructor Complete";
 	}
@@ -269,7 +280,7 @@ private:
 		}
 	}
 
-	void GrabRCBack()
+	void GrabRC()
 	{
 		switch(autoState)
 		{
@@ -316,7 +327,7 @@ private:
 }
 
 
-	void GrabRC()
+	void GrabRCBack()
 	{
 		switch(autoState)
 		{
@@ -366,6 +377,35 @@ private:
 			break;
 		default:
 			drive.Drive(0.0, 0.0, 0.0);
+			break;
+		}
+	}
+
+	void GrabRCTurn()
+	{
+		switch(autoState)
+		{
+		case 0:
+			sweep.setState(Cobra::Down);
+			setTimer(std::chrono::milliseconds(2500));
+			LogText()<<"RC Down";
+			autoState++;
+			break;
+		case 1:
+			if(timeExceeds() || sweep.getCurrentState() == Cobra::Down)
+			{
+				drive.Drive(0.0, 0.0, 0.0);
+				setTimer(std::chrono::milliseconds(500));
+				autoState++;
+			}
+			break;
+		case 2:
+			if(timeExceeds())
+			{
+				sweep.setState(Cobra::Up);
+				setTimer(std::chrono::milliseconds(5000));
+				autoState++;
+			}
 			break;
 		}
 	}
