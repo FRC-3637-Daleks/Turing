@@ -10,9 +10,9 @@
 
 // States are in Inches
 const double Cobra::States[] = {
-		[Cobra::Down]=430,
+		[Cobra::Down]=480,
 		[Cobra::Intermediate]=700,
-		[Cobra::Up]=850.0
+		[Cobra::Up]=830.0
 };
 
 std::string Cobra::GetStateName(const State_t state)
@@ -132,7 +132,7 @@ Cobra::setVelocity(double vel)
 {
 	targetState = Transition;
 	setMode(Velocity);
-	m_tal1.Set(50.0*vel);
+	m_tal1.Set(70.0*vel);
 	return;
 }
 
