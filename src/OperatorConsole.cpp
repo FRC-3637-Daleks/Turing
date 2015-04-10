@@ -20,11 +20,11 @@ OperatorConsole::OperatorConsole(const short driveLeftID, const short driveRight
 	targetHeight(Lifter::Ground)
 {
 	LogText()<<"Initialized a lot of stuff";
-	Joystick *joys[4] = {&m_driveLeft, &m_driveRight, &m_copilotLeft, &m_copilotRight};
-	for(int i = 0; i < 4; i++)
+	Joystick *joys[3] = {&m_driveLeft, &m_driveRight, &m_copilotLeft};
+	for(int i = 0; i < 3; i++)
 	{
 		const std::string joy = DRR::LogService::AddID("joystick", i);
-		for(int a = 0; a < 6; a++)
+		for(int a = 0; a < joys[i]->GetAxisCount(); a++)
 		{
 			AddLog<float>(DRR::LogService::MakeKey(joy, DRR::LogService::AddID("axis", a)), std::bind(&Joystick::GetRawAxis, joys[i], a));
 		}
