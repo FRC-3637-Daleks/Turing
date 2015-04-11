@@ -8,6 +8,8 @@
 #ifndef SRC_RAZOR_H_
 #define SRC_RAZOR_H_
 
+#include <thread>
+
 #include "WPILib.h"
 #include "LogObject.h"
 #include "Cartesian.h"
@@ -17,6 +19,7 @@ class Razor: private DRR::LogObject<Razor>
 private:
 	SerialPort *razor;
 	Cartesian current;
+	std::thread pollThread;
 	float roll, pitch, yaw;
 
 public:
@@ -29,6 +32,7 @@ public:
 	const float GetPitch() const {return roll;};
 	const float GetYaw() const {return yaw;};
 	void Update();
+	void Loop();
 	const bool Init();
 };
 

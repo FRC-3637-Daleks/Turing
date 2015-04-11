@@ -19,19 +19,30 @@ const bool Razor::Init()
 {
 	if(razor == NULL)
 	{
-		razor = new SerialPort(19200, SerialPort::kUSB);
+		razor = new SerialPort(57600, SerialPort::kUSB);
 		razor->EnableTermination();
+		pollThread = std::thread(&Razor::Loop, this);
 	}
 	return true;
 }
 
 void Razor::Update()
 {
-	static char buf[255];
+	char buf[255] = {};
 	while(razor->GetBytesReceived())
 		razor->Read(buf, 255); // Gets most recent line
 	//printf(buf);
-	sscanf(buf, "!ANG:%f,%f,%f\n", &yaw, &pitch, &roll);
+	LogText(DRR::LEVEL_t::DEBUG2)<<buf;
+	sscanf(buf, "#YPR:%f,%f,%f\n", &yaw, &pitch, &roll);
 	razor->Reset();
+}
+
+void Razor::Loop()
+{
+	while(true)
+	{
+		Update();
+		std::this_thread::sleep_for(std::chrono::milliseconds(1));
+	}
 }
 
