@@ -17,7 +17,7 @@ class Turing: public LogInitializer, public IterativeRobot, public DRR::LogObjec
 {
 private:
 	enum RobotID {PRIMARY=0, SECONDARY, TEST} id;
-	enum AutoMode {NONE=1, PICKUP_BACKUP, FORWARD_PICKUP_BACKUP, PICKUP_TURN_FORWARD, RC_GRAB_BACK, RC_GRAB};
+	enum AutoMode {NONE=1, PICKUP_BACKUP, FORWARD_PICKUP_BACKUP, PICKUP_TURN_FORWARD, RC_GRAB_BACK, RC_GRAB, RACE};
 	typedef std::chrono::time_point<std::chrono::system_clock> second_time;
 	second_time timer;
 	static const second_time getNow() {return std::chrono::system_clock::now();};
@@ -30,25 +30,25 @@ private:
 	double fastDrive, slowDrive;
 
 private:
-	DRR::MessageConfig config, autonConf;
+	DRR::MessageConfig config;
 	PowerDistributionPanel PDP;
 	DalekDrive drive;
 	Lifter lift;
 	OperatorConsole op;
-	CameraGimbal gimbal;
+	//CameraGimbal gimbal;
 	Cobra sweep;
-	Aligners align;
 	Razor razor;
+	LightController lights;
 
 public:
 	Turing(): id(PRIMARY), autoMode(NONE), autoState(0), fastDrive(0.4), slowDrive(0.2),//routine(PLATFORM), position(LANDFILL),
-			  config("robot.conf"), autonConf("auton.conf"),
+			  config("robot.conf"),
 			  drive(DalekDrive::Wheel_t::MECANUM_WHEELS, Robot::FRONT_LEFT, Robot::FRONT_RIGHT, Robot::BACK_LEFT, Robot::BACK_RIGHT, 50.0),
 			  lift(Robot::LIFT_1, Robot::LIFT_2, Lifter::PIDConfig(2.0, 0.000, 0.0, 20), 50.0),
 			  op(Robot::DRIVER_LEFT, Robot::DRIVER_RIGHT, Robot::COPILOT_LEFT, Robot::COPILOT_RIGHT),
-			  gimbal(Robot::CAMERA_X, Robot::CAMERA_Y),
+			  //gimbal(Robot::CAMERA_X, Robot::CAMERA_Y),
 			  sweep(Robot::RC_GRABBER, Lifter::PIDConfig(2.5, 0.001, 0.5, 700.0), Lifter::PIDConfig(11.0, 0.002, 0.0, 1000.0), 50.0),
-			  align(Robot::ALIGNER_LEFT, Robot::ALIGNER_RIGHT)
+			  lights(10, 11, 12)
 	{
 		DRR::LogService::LogText("Turing", "main")<<"Constructor started";
 
@@ -83,15 +83,13 @@ private:
 	void RobotInit() override
 	{
 		DRR::LogService::Start();
-		//razor.Init();
 		lift.calibrate();
 		lift.setTargetState(Lifter::Ground);
-		gimbal.setState(CameraGimbal::TOTE_VIEW);
+		//gimbal.setState(CameraGimbal::TOTE_VIEW);
 	}
 
 	void DisabledInit() override
 	{
-		align.Retract();
 		autoMode = AutoMode(config.GetValue<int>("auto_mode", int(autoMode)));
 	}
 
@@ -104,6 +102,10 @@ private:
 			LogText()<<"Auto Mode "<<m;
 			config.SetValue<int>("auto_mode", m);
 		}
+
+		lights.SetR(255);
+		lights.SetG(255);
+		lights.SetB(255);
 
 		sweep.setMode(Cobra::Position);
 	}
@@ -140,10 +142,17 @@ private:
 		case RC_GRAB:
 			GrabRC();
 			break;
+		case RACE:
+			Race();
+			break;
 		default:
 			None();
 			break;
 		}
+
+		lights.SetR(autoState*89 % 255);
+		lights.SetG(autoState*34 % 255);
+		lights.SetB(autoState*101 % 255);
 	}
 
 	void TeleopInit() override
@@ -191,7 +200,9 @@ private:
 
 	void TestPeriodic() override
 	{
-
+		lights.SetR(0);
+		lights.SetG(0);
+		lights.SetB(0);
 	}
 
 	void None()
@@ -294,7 +305,7 @@ private:
 			if(timeExceeds() || sweep.getCurrentState() == Cobra::Down)
 			{
 				drive.Drive(0.0, 0.0, 0.0);
-				setTimer(std::chrono::milliseconds(500));
+				setTimer(std::chrono::milliseconds(00));
 				autoState++;
 			}
 			break;
@@ -334,7 +345,7 @@ private:
 		case 0:
 			sweep.setState(Cobra::Down);
 			setTimer(std::chrono::milliseconds(2500));
-			LogText()<<"RC Down";
+			LogText()<<"Cobra Down";
 			autoState++;
 			break;
 		case 1:
@@ -342,6 +353,7 @@ private:
 			{
 				drive.Drive(0.0, slowDrive, 0.0);
 				setTimer(std::chrono::milliseconds(500));
+				LogText()<<"Driving towards RC";
 				autoState++;
 			}
 			break;
@@ -349,7 +361,8 @@ private:
 			if(timeExceeds())
 			{
 				drive.Drive(0.0, 0.0, 0.0);
-				setTimer(std::chrono::milliseconds(500));
+				setTimer(std::chrono::milliseconds(300));
+				LogText()<<"Pausing...";
 				autoState++;
 			}
 			break;
@@ -358,6 +371,7 @@ private:
 			{
 				sweep.setState(Cobra::Up);
 				setTimer(std::chrono::milliseconds(5000));
+				LogText()<<"Lifting Cobra";
 				autoState++;
 			}
 			break;
@@ -366,6 +380,7 @@ private:
 			{
 				drive.Drive(0.0, -fastDrive, 0.0);
 				setTimer(std::chrono::milliseconds(1500));
+				LogText()<<"Moving to auto zone";
 				autoState++;
 			}
 			break;
@@ -373,6 +388,7 @@ private:
 			if(timeExceeds())
 			{
 				drive.Drive(0.0, 0.0, 0.0);
+				LogText()<<"Auto routine complete";
 			}
 			break;
 		default:
@@ -388,7 +404,7 @@ private:
 		case 0:
 			sweep.setState(Cobra::Down);
 			setTimer(std::chrono::milliseconds(2500));
-			LogText()<<"RC Down";
+			LogText()<<"Cobra Down";
 			autoState++;
 			break;
 		case 1:
@@ -406,6 +422,56 @@ private:
 				setTimer(std::chrono::milliseconds(5000));
 				autoState++;
 			}
+			break;
+		}
+	}
+
+	void Race()
+	{
+		switch(autoState)
+		{
+		case 0:
+			sweep.setState(Cobra::Down);
+			setTimer(std::chrono::milliseconds(2500));
+			LogText()<<"Cobra Down";
+			autoState++;
+			break;
+		case 1:
+			if(timeExceeds() || sweep.getCurrentState() == Cobra::Down)
+			{
+				sweep.setState(Cobra::Intermediate);
+				setTimer(std::chrono::milliseconds(800));
+				LogText()<<"Lifting Cobra";
+				autoState++;
+			}
+			break;
+		case 2:
+			if(timeExceeds())
+			{
+				drive.Drive(0.0, -fastDrive, 0.0);
+				setTimer(std::chrono::milliseconds(1500));
+				LogText()<<"Dragging this bitch into the autozone";
+				autoState++;
+			}
+			break;
+		case 3:
+			if(timeExceeds())
+			{
+				sweep.setState(Cobra::Up);
+				setTimer(std::chrono::milliseconds(5000));
+				drive.Drive(0.0, 0.0, 0.0);
+				LogText()<<"Lifting Cobra";
+				autoState++;
+			}
+			break;
+		case 4:
+			if(timeExceeds() || sweep.getCurrentState() == Cobra::Up)
+			{
+				LogText()<<"Auto Routine complete";
+			}
+			break;
+		default:
+			drive.Drive(0.0, 0.0, 0.0);
 			break;
 		}
 	}
