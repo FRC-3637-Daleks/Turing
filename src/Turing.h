@@ -23,5 +23,7 @@
 #include "LogObject.h"
 #include "DatumValue.h"
 
+#include "RGB.h"
+
 
 #endif
